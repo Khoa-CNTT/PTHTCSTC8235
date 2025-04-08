@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('so_sao');
             $table->date('ngay_tao');
             $table->integer('tinh_trang');
-
+            
             $table->timestamps();
         });
     }
