@@ -41,7 +41,7 @@ class NhaCungCapController extends Controller
         }
         return response()->json([
             "status" =>'1',
-            "message" =>"Đổi trạng tháithành công"
+            "message" =>"Đổi trạng thái thành công"
         ]);
     }
     public function delete(Request $request){
