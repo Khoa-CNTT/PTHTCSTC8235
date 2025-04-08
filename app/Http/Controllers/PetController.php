@@ -42,7 +42,7 @@ class PetController extends Controller
         pet::find($request->id)->update($request->all());
         return response()->json([
             'status' => 1,
-            'message' => 'Sửa thông tin pet thành công'
+            'message' => 'Sửa thông tin pet thành công :3'
         ]);
     }
 }
