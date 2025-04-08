@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BacSi extends Model
+class Kho extends Model
 {
     protected $table = 'bac_sis';
     protected $fillable = [
