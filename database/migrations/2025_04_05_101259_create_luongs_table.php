@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('luongs', function (Blueprint $table) {
             $table->id();
-            $table->string('ten_kho');
-            $table->string('dia_chi');
-            $table->integer('trang_thai');
-            $table->integer('so_luong_ton_khokho');
+            $table->string('id_bs');
+            $table->integer('tien_luong');
+            $table->integer('ngay_thanh_toan');
+            $table->integer('tien_thuong');
 
             $table->timestamps();
         });
