@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\LoaiDichVuController;
+use App\Http\Controllers\NhaCungCapController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +20,9 @@ Route::get("dich-vu/load",[DichVuController::class,'load']);
 Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
+
+Route::post("nha-cung-cap/them",[NhaCungCapController::class,'them']);
+Route::get("nha-cung-cap/load",[NhaCungCapController::class,'load']);
+Route::post("nha-cung-cap/doi-TT",[NhaCungCapController::class,'doi']);
+Route::post("nha-cung-cap/update",[NhaCungCapController::class,'update']);
+Route::post("nha-cung-cap/xoa",[NhaCungCapController::class,'delete']);
