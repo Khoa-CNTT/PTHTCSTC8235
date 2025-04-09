@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\NhaCungCapController;
 use Illuminate\Http\Request;
@@ -26,3 +27,8 @@ Route::get("nha-cung-cap/load",[NhaCungCapController::class,'load']);
 Route::post("nha-cung-cap/doi-TT",[NhaCungCapController::class,'doi']);
 Route::post("nha-cung-cap/update",[NhaCungCapController::class,'update']);
 Route::post("nha-cung-cap/xoa",[NhaCungCapController::class,'delete']);
+Route::post('/nha-cung-cap/tim-kiem',[NhaCungCapController::class,'timkiem']);
+
+
+Route::get("khach-hang/load",[KhachHangController::class,'load']);
+Route::post('/khach-hang/tim-kiem',[KhachHangController::class,'timkiem']);

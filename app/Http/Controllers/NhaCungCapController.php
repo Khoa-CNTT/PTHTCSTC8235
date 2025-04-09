@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class NhaCungCapController extends Controller
 {
+    public function timkiem(Request $request){
+        $noi_dung='%'.$request->noi_dung.'%';
+        $data= NhaCungCap::where('ten_ncc','like',$noi_dung)
+                        ->orwhere('email','like',$noi_dung)
+                        ->get();
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
     public function them(Request $request){
         $data = $request->all();
         NhaCungCap::create($data);
