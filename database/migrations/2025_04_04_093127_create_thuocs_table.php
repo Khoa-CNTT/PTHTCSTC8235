@@ -17,9 +17,7 @@ return new class extends Migration
             $table->string('don_vi');
             $table->integer('don_gia');
             $table->string('mo_ta');
-            $table->date('han_su_dung');
-            $table->integer('tinh_trang');
-            $table->string('id_kho');
+            $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });
     }

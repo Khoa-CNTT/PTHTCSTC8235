@@ -6,17 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kho extends Model
 {
-    protected $table = 'bac_sis';
+    protected $table = 'khos';
     protected $fillable = [
-        'ten_bs',
-        'gioi_tinh',
-        'email',
-        'password',
-        'mo_ta',
-        'hinh_anh',
-        'tinh_trang',
-        'id_chucvu',
-        'chuyen_khoa',
-        'tien_kham',
+        'ten_kho',
+        'dia_chi',
+        'tinh_trang'
     ];
 }

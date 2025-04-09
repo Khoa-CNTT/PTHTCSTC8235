@@ -18,8 +18,8 @@ return new class extends Migration
             $table->  string('mo_ta');
             $table->  integer('gia');
             $table->  string('hinh_anh');
-            $table->  integer('can_nang_min');
-            $table->  integer('can_nang_max');
+            $table->  float('can_nang_min')->nullable();
+            $table->  float('can_nang_max')->nullable();
             $table->  integer('phan_loai_kg')->default(0);
             $table->  integer('tinh_trang')->default(0);
             $table->timestamps();
