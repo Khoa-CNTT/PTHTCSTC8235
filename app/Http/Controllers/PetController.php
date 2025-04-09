@@ -45,4 +45,11 @@ class PetController extends Controller
             'message' => 'Sửa thông tin pet thành công :3'
         ]);
     }
+    public function Them(Request $request){
+        pet::create($request->all());
+        return response()->json([
+            'status' => 1,
+            'message' => 'Thêm mới pet thành công'
+        ]);
+    }
 }
