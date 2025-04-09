@@ -17,4 +17,15 @@ class pet extends Model
         'can_nang',
         'tinh_trang',
     ];
+    protected $table = 'pets';
+    protected $fillable = [
+        'id_kh',
+        'ten_pet',
+        'chung_loai',
+        'gioi_tinh',
+        'tuoi',
+        'hinh_anh',
+        'can_nang',
+        'tinh_trang',
+    ];
 }
