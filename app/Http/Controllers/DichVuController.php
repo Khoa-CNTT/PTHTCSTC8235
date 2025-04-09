@@ -16,7 +16,9 @@ class DichVuController extends Controller
         ]);
     }
     public function load(){
-        $data=DichVu::get();
+        $data=DichVu::join('loai_dich_vus','loai_dich_vus.id','dich_vus.id_loaidv')
+                    ->select('dich_vus.*','loai_dich_vus.ten_loaidv')
+                    ->get();
         return response()->json([
             "data"=> $data
         ]);

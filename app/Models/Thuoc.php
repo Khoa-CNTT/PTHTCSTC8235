@@ -13,7 +13,6 @@ class Thuoc extends Model
         'don_gia',
         'mo_ta',
         'han_su_dung',
-        'tinh_trang',
-        'id_kho',
+        'tinh_trang'
     ];
 }
