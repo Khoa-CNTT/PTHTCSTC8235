@@ -32,3 +32,5 @@ Route::post('/nha-cung-cap/tim-kiem',[NhaCungCapController::class,'timkiem']);
 
 Route::get("khach-hang/load",[KhachHangController::class,'load']);
 Route::post('/khach-hang/tim-kiem',[KhachHangController::class,'timkiem']);
+
+
