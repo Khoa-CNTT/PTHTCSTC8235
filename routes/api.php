@@ -4,6 +4,7 @@ use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\NhaCungCapController;
+use App\Http\Controllers\NhanVienController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,4 +34,9 @@ Route::post('/nha-cung-cap/tim-kiem',[NhaCungCapController::class,'timkiem']);
 Route::get("khach-hang/load",[KhachHangController::class,'load']);
 Route::post('/khach-hang/tim-kiem',[KhachHangController::class,'timkiem']);
 
-
+Route::post("nhan-vien/them",[NhanVienController::class,'them']);
+Route::get("nhan-vien/load",[NhanVienController::class,'load']);
+Route::post("nhan-vien/doi-TT",[NhanVienController::class,'doi']);
+Route::post("nhan-vien/update",[NhanVienController::class,'update']);
+Route::post("nhan-vien/xoa",[NhanVienController::class,'delete']);
+Route::post('/nhan-vien/tim-kiem',[NhanVienController::class,'timkiem']);
