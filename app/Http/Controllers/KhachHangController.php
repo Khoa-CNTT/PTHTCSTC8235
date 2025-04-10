@@ -23,4 +23,20 @@ class KhachHangController extends Controller
             'data' => $data
         ]);
     }
+    public function them(Request $request)
+    {
+        $hash_active = Str::uuid();
+        $a = $request->all();
+        $a['password'] = bcrypt($request->password);
+        $khach_hang=KhachHang::create($a);
+        $khach_hang['hash_active']=$hash_active;
+        $khach_hang->save();
+        $data['ho_va_ten'] = $khach_hang->ho_va_ten;
+        $data['link'] = "http://localhost:5173/khach-hang/" . $khach_hang->hash_active;
+        Mail::to($request->email)->send(new \App\Mail\MuaMail('Kich Hoat Tai khoan', 'ViewMail', $data));
+        return response()->json([
+            "status" => "1",
+            "message" => "them thanh cong"
+        ]);
+    }
 }
