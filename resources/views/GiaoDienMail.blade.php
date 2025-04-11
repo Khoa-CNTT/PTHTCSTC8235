@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,6 +28,9 @@
         .header h1 {
             margin: 0;
             font-size: 24px;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            transition: background-color 0.3s ease;
         }
         .content {
             padding: 20px;
@@ -44,9 +47,10 @@
             padding: 10px 20px;
             background-color: #ff6f61;
             color: #ffffff;
-            text-decoration: none;
             border-radius: 5px;
             font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
         .btn:hover {
             background-color: #e65a50;
@@ -66,13 +70,13 @@
             <h1>Chào mừng đến với PetCare!</h1>
         </div>
         <div class="content">
-            <p>Xin chào,</p>
+            <p>Xin chào, {{$data ["ho_va_ten"]}}</p>
             <p>Cảm ơn bạn đã đăng ký tài khoản tại PetCare. Hãy nhấp vào nút bên dưới để kích hoạt tài khoản của bạn:</p>
-            <a href="{{ $activationLink }}" class="btn">Kích Hoạt Tài Khoản</a>
+            <a href="{{ $data['link'] }}" class="btn">Kích Hoạt Tài Khoản</a>
             <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
         </div>
         <div class="footer">
-            <p>&copy; 2025 PetCare. Tất cả các quyền được bảo lưu.</p>
+            <p>&copy; 2025 PetCare.</p>
         </div>
     </div>
 </body>

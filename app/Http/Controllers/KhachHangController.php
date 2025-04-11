@@ -34,7 +34,7 @@ class KhachHangController extends Controller
         $khach_hang['hash_active']=$hash_active;
         $khach_hang->save();
         $data['ho_va_ten'] = $khach_hang->ho_va_ten;
-        $data['link'] = "http://localhost:5173/khach-hang/" . $khach_hang->hash_active;
+        $data['link'] = "http://localhost:3000/khach-hang/" . $khach_hang->hash_active;
         Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Kich Hoat Tai khoan', 'GiaoDienMail', $data));
         return response()->json([
             "status" => "1",
@@ -47,7 +47,7 @@ class KhachHangController extends Controller
         $khach_hang['hash_active']=$hash_active;
         $khach_hang->save();
         $data['ho_va_ten'] = $khach_hang->ho_va_ten;
-        $data['link'] = "http://localhost:5173/doi-mat-khau/" . $khach_hang->hash_active;
+        $data['link'] = "http://localhost:3000/doi-mat-khau/" . $khach_hang->hash_active;
         Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Kich Hoat Tai khoan', 'DoiMatKhauMail', $data));
         return response()->json([
             "message" => "Kiểm tra email của bạn"
