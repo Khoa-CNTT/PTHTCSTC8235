@@ -43,8 +43,8 @@ Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
 Route::get('/load-pet', [PetController::class, 'Load']);
 
 Route::post('/them-luong', [LuongController::class, 'Them']);
-Route::post('/thay-doi-tt-luong', [LuongController::class, 'Doitt']);
-Route::get('/load-luong', [LuongController::class, 'Load']);
+Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
+Route::get('/load-luong', [LuongController::class, 'LoadLuong']);
 Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
 
 Route::post("nhan-vien/them",[NhanVienController::class,'them']);

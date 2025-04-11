@@ -14,6 +14,15 @@ class LuongController extends Controller
             'data' => $data
         ]);
     }
+    public function LoadLuong() {
+        $data = Luong::join('nhan_viens', 'luongs.id_nv', '=', 'nhan_viens.id')
+                    ->select('luongs.*', 'nhan_viens.ten_nv')
+                    ->get();
+    
+        return response()->json([
+            'data' => $data
+        ]);
+    }
     public function Doitt(Request $request)
     {
         $data = Luong::find($request->id);
