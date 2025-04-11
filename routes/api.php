@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LoaiDichVuController;
@@ -32,3 +33,9 @@ Route::post('/nha-cung-cap/tim-kiem',[NhaCungCapController::class,'timkiem']);
 
 Route::get("khach-hang/load",[KhachHangController::class,'load']);
 Route::post('/khach-hang/tim-kiem',[KhachHangController::class,'timkiem']);
+
+
+Route::get("danh-gia/load",[DanhGiaController::class,'load']);
+Route::post("danh-gia/doi-TT",[DanhGiaController::class,'doi']);
+Route::post("danh-gia/xoa",[DanhGiaController::class,'delete']);
+Route::post('/danh-gia/tim-kiem',[DanhGiaController::class,'timkiem']);
