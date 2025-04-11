@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hoa_don_nhap_chi_tiets', function (Blueprint $table) {
+        Schema::create('phieu_nhap_chi_tiets', function (Blueprint $table) {
             $table->id();
-            $table->string('id_hdnhap');
-            $table->string('id_ncc');
-            $table->integer('so_luong_nhap');
-            $table->integer('gia_nhap');
-
             $table->timestamps();
         });
     }
@@ -27,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hoa_don_nhap_chi_tiets');
+        Schema::dropIfExists('phieu_nhap_chi_tiets');
     }
 };

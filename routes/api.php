@@ -3,8 +3,10 @@
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\KhachHangController;
+use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\NhaCungCapController;
+use App\Http\Controllers\ThuocController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
