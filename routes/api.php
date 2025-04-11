@@ -39,3 +39,7 @@ Route::get("danh-gia/load",[DanhGiaController::class,'load']);
 Route::post("danh-gia/doi-TT",[DanhGiaController::class,'doi']);
 Route::post("danh-gia/xoa",[DanhGiaController::class,'delete']);
 Route::post('/danh-gia/tim-kiem',[DanhGiaController::class,'timkiem']);
+Route::post("khach-hang/dang-ky",[KhachHangController::class,'them']);
+Route::post("khach-hang/doi-mat-khau",[KhachHangController::class,'doimk']);
+Route::Post("khach-hang/quen-mat-khau",[KhachHangController::class,'sendMail']);
+Route::post("khach-hang/kich-hoat",[KhachHangController::class,'kichHoat']);
