@@ -6,6 +6,7 @@ use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\NhaCungCapController;
+use App\Http\Controllers\NhanVienController;
 use App\Http\Controllers\ThuocController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,7 @@ Route::get("dich-vu/load",[DichVuController::class,'load']);
 Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
+Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
 
 Route::post("nha-cung-cap/them",[NhaCungCapController::class,'them']);
 Route::get("nha-cung-cap/load",[NhaCungCapController::class,'load']);
@@ -35,6 +37,13 @@ Route::post('/nha-cung-cap/tim-kiem',[NhaCungCapController::class,'timkiem']);
 
 Route::get("khach-hang/load",[KhachHangController::class,'load']);
 Route::post('/khach-hang/tim-kiem',[KhachHangController::class,'timkiem']);
+
+Route::post("nhan-vien/them",[NhanVienController::class,'them']);
+Route::get("nhan-vien/load",[NhanVienController::class,'load']);
+Route::post("nhan-vien/doi-TT",[NhanVienController::class,'doi']);
+Route::post("nhan-vien/update",[NhanVienController::class,'update']);
+Route::post("nhan-vien/xoa",[NhanVienController::class,'delete']);
+Route::post('/nhan-vien/tim-kiem',[NhanVienController::class,'timkiem']);
 
 
 Route::get("danh-gia/load",[DanhGiaController::class,'load']);
