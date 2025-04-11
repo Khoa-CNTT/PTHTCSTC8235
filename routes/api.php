@@ -4,6 +4,7 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LoaiDichVuController;
+use App\Http\Controllers\LuongController;
 use App\Http\Controllers\NhaCungCapController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,3 +40,8 @@ Route::post('/xoa-pet', [PetController::class, 'Xoa']);
 Route::post('/sua-pet', [PetController::class, 'Sua']);
 Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
 Route::get('/load-pet', [PetController::class, 'Load']);
+
+Route::post('/them-luong', [LuongController::class, 'Them']);
+Route::post('/thay-doi-tt-luong', [LuongController::class, 'Doitt']);
+Route::get('/load-luong', [LuongController::class, 'Load']);
+Route::get('/tim-kiem-luong', [LuongController::class, 'TimKiem']);

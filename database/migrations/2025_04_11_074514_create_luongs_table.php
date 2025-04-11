@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('luongs', function (Blueprint $table) {
             
             $table->id();
-            $table->string('id_bs');
+            $table->string('id_luong');
+            $table->string('id_nv');
             $table->integer('tien_luong');
             $table->integer('ngay_thanh_toan');
+            $table->integer('tinh_trang')->default(0);
             $table->integer('tien_thuong');
-
             $table->timestamps();
         });
     }
