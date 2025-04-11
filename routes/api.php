@@ -6,6 +6,7 @@ use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\NhaCungCapController;
+use App\Http\Controllers\NhanVienController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,4 +45,11 @@ Route::get('/load-pet', [PetController::class, 'Load']);
 Route::post('/them-luong', [LuongController::class, 'Them']);
 Route::post('/thay-doi-tt-luong', [LuongController::class, 'Doitt']);
 Route::get('/load-luong', [LuongController::class, 'Load']);
-Route::get('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
+Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
+
+Route::post("nhan-vien/them",[NhanVienController::class,'them']);
+Route::get("nhan-vien/load",[NhanVienController::class,'load']);
+Route::post("nhan-vien/doi-TT",[NhanVienController::class,'doi']);
+Route::post("nhan-vien/update",[NhanVienController::class,'update']);
+Route::post("nhan-vien/xoa",[NhanVienController::class,'delete']);
+Route::post('/nhan-vien/tim-kiem',[NhanVienController::class,'timkiem']);
