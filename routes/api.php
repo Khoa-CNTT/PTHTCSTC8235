@@ -38,6 +38,13 @@ Route::post('/nha-cung-cap/tim-kiem',[NhaCungCapController::class,'timkiem']);
 
 Route::get("khach-hang/load",[KhachHangController::class,'load']);
 Route::post('/khach-hang/tim-kiem',[KhachHangController::class,'timkiem']);
+Route::post("khach-hang/dang-ky",[KhachHangController::class,'them']);
+Route::post("khach-hang/doi-mat-khau",[KhachHangController::class,'doimk']);
+Route::Post("khach-hang/quen-mat-khau",[KhachHangController::class,'sendMail']);
+Route::post("khach-hang/kich-hoat",[KhachHangController::class,'kichHoat']);
+Route::post("khach-hang/dang-nhap",[KhachHangController::class,'dangNhap']);
+Route::post("khach-hang/Kiem-tra-dang-nhap",[KhachHangController::class,'KiemTraDN']);
+
 
 Route::post("nhan-vien/them",[NhanVienController::class,'them']);
 Route::get("nhan-vien/load",[NhanVienController::class,'load']);
@@ -63,3 +70,8 @@ Route::post("chuc-vu/doi-TT",[ChucVuController::class,'doi']);
 Route::post("chuc-vu/update",[ChucVuController::class,'update']);
 Route::post("chuc-vu/xoa",[ChucVuController::class,'delete']);
 Route::post('/chuc-vu/tim-kiem',[ChucVuController::class,'timkiem']);
+Route::get("danh-gia/load",[DanhGiaController::class,'load']);
+Route::post("danh-gia/doi-TT",[DanhGiaController::class,'doi']);
+Route::post("danh-gia/xoa",[DanhGiaController::class,'delete']);
+Route::post('/danh-gia/tim-kiem',[DanhGiaController::class,'timkiem']);
+

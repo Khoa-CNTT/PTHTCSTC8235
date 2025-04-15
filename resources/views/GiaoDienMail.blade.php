@@ -36,7 +36,7 @@
         }
 
         .header {
-            background:#3498db ;
+            background: #3498db ;
             background-size: cover;
             color: #ffffff;
             text-align: center;
