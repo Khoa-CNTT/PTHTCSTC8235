@@ -26,6 +26,9 @@ Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
 Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
+Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
+Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
+
 
 Route::post("nha-cung-cap/them",[NhaCungCapController::class,'them']);
 Route::get("nha-cung-cap/load",[NhaCungCapController::class,'load']);
@@ -50,6 +53,8 @@ Route::get("danh-gia/load",[DanhGiaController::class,'load']);
 Route::post("danh-gia/doi-TT",[DanhGiaController::class,'doi']);
 Route::post("danh-gia/xoa",[DanhGiaController::class,'delete']);
 Route::post('/danh-gia/tim-kiem',[DanhGiaController::class,'timkiem']);
+
+
 Route::post("khach-hang/dang-ky",[KhachHangController::class,'them']);
 Route::post("khach-hang/doi-mat-khau",[KhachHangController::class,'doimk']);
 Route::Post("khach-hang/quen-mat-khau",[KhachHangController::class,'sendMail']);
