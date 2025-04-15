@@ -7,7 +7,9 @@ use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\NhaCungCapController;
 use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\PhieuNhapController;
 use App\Http\Controllers\ThuocController;
+use App\Http\Controllers\ThuocKhoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,14 @@ Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
 Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
+
+Route::post("thuoc/them",[ThuocController::class,'them']);
+Route::get("thuoc/load",[ThuocController::class,'load']);
+Route::post("thuoc/doi",[ThuocController::class,'doi']);
+Route::post("thuoc/update",[ThuocController::class,'update']);
+Route::post("thuoc/del",[ThuocController::class,'delete']);
+Route::post('thuoc/tim-kiem',[ThuocController::class,'timkiem']);
+
 
 Route::post("nha-cung-cap/them",[NhaCungCapController::class,'them']);
 Route::get("nha-cung-cap/load",[NhaCungCapController::class,'load']);
@@ -54,3 +64,18 @@ Route::post("khach-hang/dang-ky",[KhachHangController::class,'them']);
 Route::post("khach-hang/doi-mat-khau",[KhachHangController::class,'doimk']);
 Route::Post("khach-hang/quen-mat-khau",[KhachHangController::class,'sendMail']);
 Route::post("khach-hang/kich-hoat",[KhachHangController::class,'kichHoat']);
+
+Route::get("phieu-nhap/load-kho-ncc-thuoc",[PhieuNhapController::class,'loadKhovaNCCvaThuoc']);
+Route::get("/phieu-nhap",[PhieuNhapController::class,'load']);
+Route::post("phieu-nhap/tao",[PhieuNhapController::class,'tao']);
+Route::post("phieu-nhap/xoa",[PhieuNhapController::class,'delete']);
+Route::post('phieu-nhap/tim-kiem',[PhieuNhapController::class,'timkiem']);
+Route::post('phieu-nhap/loc-theo-ngay',[PhieuNhapController::class,'loc']);
+
+
+Route::post("kho/them",[KhoController::class,'them']);
+Route::get("kho/load",[KhoController::class,'load']);
+Route::post("kho/doi",[KhoController::class,'doi']);
+Route::post("kho/update",[KhoController::class,'update']);
+Route::post("kho/del",[KhoController::class,'delete']);
+Route::post('kho/tim-kiem',[KhoController::class,'timkiem']);

@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('phieu_nhap_chi_tiets', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('id_phieu_nhap');
+            $table->integer('id_thuoc');
+            $table->integer('so_luong');
+            $table->integer('gia_nhap');
+            $table->date('han_su_dung');
             $table->timestamps();
         });
     }

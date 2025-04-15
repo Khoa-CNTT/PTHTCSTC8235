@@ -16,7 +16,10 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         $this->call([
             DichVuSeeder::class,
-            LoaiDichVuSeeder::class
+            LoaiDichVuSeeder::class,
+            KhoSeeder::class,
+            NhaCungCapSeeder::class,
+            ThuocSeeder::class,
         ]);
     }
 }
