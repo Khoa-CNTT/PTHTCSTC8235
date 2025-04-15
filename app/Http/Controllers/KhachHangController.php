@@ -38,7 +38,7 @@ class KhachHangController extends Controller
         Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Kich Hoat Tai khoan', 'GiaoDienMail', $data));
         return response()->json([
             "status" => "1",
-            "message" => "them thanh cong"
+            "message" => "Mail đã được gửi, vui lòng xác nhận email"
         ]);
     }
     public function sendMail(Request $request){
@@ -80,12 +80,12 @@ class KhachHangController extends Controller
                 $check->save();
                 return response()->json([
                     "status" => 1,
-                    "message" => "kich hoat thanh cong"
+                    "message" => "kích hoạt thành công"
                 ]);
             }else {
                 return response()->json([
                     "status" => 2,
-                    "message" => "tai khoan da dc kich hoat truoc do"
+                    "message" => "Tài khoản đã được kích hoạt trước đó "
                 ]);
             }
         }else{
