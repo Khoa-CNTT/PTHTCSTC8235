@@ -29,6 +29,9 @@ Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
 Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
+Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
+Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
+
 
 Route::post("thuoc/them",[ThuocController::class,'them']);
 Route::get("thuoc/load",[ThuocController::class,'load']);
@@ -62,7 +65,6 @@ Route::post("nhan-vien/doi-TT",[NhanVienController::class,'doi']);
 Route::post("nhan-vien/update",[NhanVienController::class,'update']);
 Route::post("nhan-vien/xoa",[NhanVienController::class,'delete']);
 Route::post('/nhan-vien/tim-kiem',[NhanVienController::class,'timkiem']);
-
 
 Route::get("danh-gia/load",[DanhGiaController::class,'load']);
 Route::post("danh-gia/doi-TT",[DanhGiaController::class,'doi']);
