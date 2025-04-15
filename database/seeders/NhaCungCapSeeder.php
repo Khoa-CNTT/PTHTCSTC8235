@@ -14,25 +14,64 @@ class NhaCungCapSeeder extends Seeder
     public function run(): void
     {
         DB::table('nha_cung_caps')->delete();
+
         DB::table('nha_cung_caps')->insert([
             [
-                'ten_ncc' => 'Công ty TNHH ABC',
-                'email' => 'abc@example.com',
-                'sdt' => '0909123456',
-                'dia_chi' => '123 Lê Lợi, TP.HCM',
+                'id'=>1,
+                'ten_ncc' => 'Công ty Dược An Khang',
+                'email' => 'ankhang@duoc.vn',
+                'sdt' => '0901234567',
+                'dia_chi' => '12 Nguyễn Văn Cừ, Hà Nội',
                 'tinh_trang' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'ten_ncc' => 'Công ty XYZ',
-                'email' => 'xyz@example.com',
-                'sdt' => '0911222333',
-                'dia_chi' => '456 Trần Hưng Đạo, Hà Nội',
+                'id'=>2,
+                'ten_ncc' => 'Công ty TNHH Dược Hoà Bình',
+                'email' => 'hoabinhpharma@gmail.com',
+                'sdt' => '0934567890',
+                'dia_chi' => '45 Trần Hưng Đạo, TP.HCM',
                 'tinh_trang' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
+            ],
+            [
+                'id'=>3,
+                'ten_ncc' => 'Công ty Dược Minh Tâm',
+                'email' => 'minhtam@duoc.vn',
+                'sdt' => '0978899001',
+                'dia_chi' => '99 Lê Lợi, Đà Nẵng',
+                'tinh_trang' => 1,
+            ],
+            [
+                'id'=>4,
+                'ten_ncc' => 'Pharma Đỉnh Cao',
+                'email' => 'support@pharmadinhcao.vn',
+                'sdt' => '0912345678',
+                'dia_chi' => '25 Nguyễn Trãi, Hải Phòng',
+                'tinh_trang' => 0,
+            ],
+            [
+                'id'=>5,
+                'ten_ncc' => 'Công ty Dược Phúc An',
+                'email' => 'phucan@duocpharma.vn',
+                'sdt' => '0909988776',
+                'dia_chi' => '18 Nguyễn Thị Minh Khai, Cần Thơ',
+                'tinh_trang' => 1,
+            ],
+            [
+                'id'=>6,
+                'ten_ncc' => 'Nhà Thuốc Hữu Nghị',
+                'email' => 'nhathuochuunghi@gmail.com',
+                'sdt' => '0911223344',
+                'dia_chi' => '5 Phạm Văn Đồng, Nha Trang',
+                'tinh_trang' => 1,
+            ],
+            [
+                'id'=>7,
+                'ten_ncc' => 'Dược Sĩ Mạnh',
+                'email' => 'manhduoc@duocsimanh.vn',
+                'sdt' => '0922334455',
+                'dia_chi' => '210 Hai Bà Trưng, Vũng Tàu',
+                'tinh_trang' => 0,
+            ],
         ]);
     }
 }

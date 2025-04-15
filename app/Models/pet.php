@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class pet extends Model
 {
-    protected $table = 'pets';
-    protected $fillable = [
+    protected $table='pets';
+    protected $fillable=[
+        'id_pet',
         'id_kh',
         'ten_pet',
         'chung_loai',
