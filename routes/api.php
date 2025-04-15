@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\PetController;
 use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;
+use App\Http\Controllers\LuongController;
 use App\Http\Controllers\NhaCungCapController;
 use App\Http\Controllers\NhanVienController;
 use App\Http\Controllers\PhieuNhapController;
@@ -29,6 +31,7 @@ Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
 Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
+Route::get('/dich-vu/load-chi-tiet/{id_khoa_hoc}', [DichVuController::class, 'LoadDataChiTiet']);
 Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
 Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
 
@@ -58,6 +61,18 @@ Route::post("khach-hang/kich-hoat",[KhachHangController::class,'kichHoat']);
 Route::post("khach-hang/dang-nhap",[KhachHangController::class,'dangNhap']);
 Route::post("khach-hang/Kiem-tra-dang-nhap",[KhachHangController::class,'KiemTraDN']);
 
+
+Route::post('/them-pet', [PetController::class, 'Them']);
+Route::post('/xoa-pet', [PetController::class, 'Xoa']);
+Route::post('/sua-pet', [PetController::class, 'Sua']);
+Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
+Route::get('/load-pet', [PetController::class, 'Load']);
+
+
+Route::post('/them-luong', [LuongController::class, 'Them']);
+Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
+Route::get('/load-luong', [LuongController::class, 'LoadLuong']);
+Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
 
 Route::post("nhan-vien/them",[NhanVienController::class,'them']);
 Route::get("nhan-vien/load",[NhanVienController::class,'load']);
