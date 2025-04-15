@@ -8,7 +8,9 @@ use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\NhaCungCapController;
 use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\PhieuNhapController;
 use App\Http\Controllers\ThuocController;
+use App\Http\Controllers\ThuocKhoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +29,14 @@ Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
 Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
+
+Route::post("thuoc/them",[ThuocController::class,'them']);
+Route::get("thuoc/load",[ThuocController::class,'load']);
+Route::post("thuoc/doi",[ThuocController::class,'doi']);
+Route::post("thuoc/update",[ThuocController::class,'update']);
+Route::post("thuoc/del",[ThuocController::class,'delete']);
+Route::post('thuoc/tim-kiem',[ThuocController::class,'timkiem']);
+
 
 Route::post("nha-cung-cap/them",[NhaCungCapController::class,'them']);
 Route::get("nha-cung-cap/load",[NhaCungCapController::class,'load']);
