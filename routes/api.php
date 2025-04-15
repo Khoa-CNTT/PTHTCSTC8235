@@ -28,6 +28,7 @@ Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
 Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
+Route::get('/dich-vu/load-chi-tiet/{id_khoa_hoc}', [DichVuController::class, 'LoadDataChiTiet']);
 
 Route::post("nha-cung-cap/them",[NhaCungCapController::class,'them']);
 Route::get("nha-cung-cap/load",[NhaCungCapController::class,'load']);
