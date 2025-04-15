@@ -36,9 +36,9 @@
         }
 
         .header {
-            background: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3Jhd3F5M3lmbDZyeGJhMzAwY3h4b2t6MjRraTF1cWZtZWV0OHVoeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l41m03ruDKdnMbT8I/giphy.gif') no-repeat center center;
+            background:#3498db ;
             background-size: cover;
-            color: #3498db;
+            color: #ffffff;
             text-align: center;
             padding: 40px 20px;
             animation: slideDown 1s ease-out both;

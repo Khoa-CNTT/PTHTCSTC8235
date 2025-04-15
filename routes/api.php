@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\KhachHangController;
@@ -46,11 +47,19 @@ Route::post("nhan-vien/xoa",[NhanVienController::class,'delete']);
 Route::post('/nhan-vien/tim-kiem',[NhanVienController::class,'timkiem']);
 
 
-Route::get("danh-gia/load",[DanhGiaController::class,'load']);
-Route::post("danh-gia/doi-TT",[DanhGiaController::class,'doi']);
-Route::post("danh-gia/xoa",[DanhGiaController::class,'delete']);
-Route::post('/danh-gia/tim-kiem',[DanhGiaController::class,'timkiem']);
+Route::get("danh-gia/load", [DanhGiaController::class, 'load']);
+Route::post("danh-gia/doi-TT", [DanhGiaController::class, 'doi']);
+Route::post("danh-gia/xoa", [DanhGiaController::class, 'delete']);
+Route::post("danh-gia/tim-kiem", [DanhGiaController::class, 'timkiem']);
+
 Route::post("khach-hang/dang-ky",[KhachHangController::class,'them']);
 Route::post("khach-hang/doi-mat-khau",[KhachHangController::class,'doimk']);
 Route::Post("khach-hang/quen-mat-khau",[KhachHangController::class,'sendMail']);
 Route::post("khach-hang/kich-hoat",[KhachHangController::class,'kichHoat']);
+
+Route::post("chuc-vu/them",[ChucVuController::class,'them']);
+Route::get("chuc-vu/load",[ChucVuController::class,'load']);
+Route::post("chuc-vu/doi-TT",[ChucVuController::class,'doi']);
+Route::post("chuc-vu/update",[ChucVuController::class,'update']);
+Route::post("chuc-vu/xoa",[ChucVuController::class,'delete']);
+Route::post('/chuc-vu/tim-kiem',[ChucVuController::class,'timkiem']);
