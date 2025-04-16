@@ -6,6 +6,7 @@ use App\Models\KhachHang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -33,13 +34,13 @@ class KhachHangController extends Controller
     {
         $hash_active = Str::uuid();
         $a = $request->all();
-        $a['password'] = bcrypt($request->password);
+        $a['password'] = Hash::make($request->password);
         $khach_hang = KhachHang::create($a);
         $khach_hang['hash_active'] = $hash_active;
         $khach_hang->save();
         $data['ho_va_ten'] = $khach_hang->ho_va_ten;
         $data['link'] = "http://localhost:3000/client/" . $khach_hang->hash_active;
-        Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Kich Hoat Tai khoan', 'GiaoDienMail', $data));
+        Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Kích hoạt tài khoản', 'GiaoDienMail', $data));
         return response()->json([
             "status" => "1",
             "message" => "Mail đã được gửi, vui lòng xác nhận email"
@@ -53,7 +54,7 @@ class KhachHangController extends Controller
         $khach_hang->save();
         $data['ho_va_ten'] = $khach_hang->ho_va_ten;
         $data['link'] = "http://localhost:3000/doi-mat-khau/" . $khach_hang->hash_active;
-        Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Kich Hoat Tai khoan', 'DoiMatKhauMail', $data));
+        Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Xác nhận đổi mật khẩu', 'DoiMatKhauMail', $data));
         return response()->json([
             "message" => "Kiểm tra email của bạn"
         ]);
@@ -95,44 +96,59 @@ class KhachHangController extends Controller
     }
     public function dangNhap(Request $request)
     {
-        $credentials = [
-            'email' => $request->email,
-            'password' => $request->pass,
-        ];
-
-        // Thử đăng nhập với guard 'khach_hang'
-        $check = Auth::guard('khach_hang')->attempt($credentials);
+        $check = Auth::guard('khach_hang')->attempt(['email' => $request->email, 'password' => $request->pass]);
 
         if ($check) {
             $user = Auth::guard('khach_hang')->user();
-
+            $token = $user->createToken('token')->plainTextToken;
             return response()->json([
                 'status' => 1,
-                'token' => $user->createToken('token')->plainTextToken,
-                'message' => 'Đăng nhập thành công',
+                'token' => $token,
+                'message' => 'Đăng nhập thành công ',
+
             ]);
         } else {
             return response()->json([
                 'status' => 0,
-                'message' => 'Đăng nhập không thành công',
+                'message' => 'Đăng nhập không thành công'
             ]);
         }
-        // $check = Auth::guard('khach_hang')
-        //              ->attempt(['email' => $request->email, 'password' => $request->pass]);
-        // if ($check) {
-        //     $user = Auth::guard('khach_hang')->user();
-        //     return response()->json([
-        //         'status' => 1,
-        //         'token' => $user->createToken('token')->plainTextToken,
-        //         'message' => 'dang nhap thanh cong',
+    }
 
-        //     ]);
-        // } else {
-        //     return response()->json([
-        //         'status' => 0,
-        //         'message' => 'dang nhap ko thanh cong'
-        //     ]);
-        // }
+    public function dangXuat(){
+        $user = Auth::guard('sanctum')->user();
+        if ($user && $user instanceof \App\Models\KhachHang) {
+            DB::table('personal_access_tokens')
+                ->where('id', $user->currentAccessToken()->id)
+                ->delete();
+            return response()->json([
+                'status' => 1,
+                'message' => 'Đăng xuất thành công'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Đăng xuất không thành công'
+            ]);
+        }
+    }
+
+    public function dangXuatAll(){
+        $user = Auth::guard('sanctum')->user();
+        if ($user && $user instanceof \App\Models\KhachHang) {
+            DB::table('personal_access_tokens')
+                ->where('id', $user->id)
+                ->delete();
+            return response()->json([
+                'status' => 1,
+                'message' => 'Đăng xuất thành công'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Đăng xuất không thành công'
+            ]);
+        }
     }
     public function check()
     {

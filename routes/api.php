@@ -42,6 +42,8 @@ Route::post("khach-hang/doi-mat-khau",[KhachHangController::class,'doimk']);
 Route::Post("khach-hang/quen-mat-khau",[KhachHangController::class,'sendMail']);
 Route::post("khach-hang/kich-hoat",[KhachHangController::class,'kichHoat']);
 Route::post("khach-hang/dang-nhap",[KhachHangController::class,'dangNhap']);
+Route::get("khach-hang/dang-xuat",[KhachHangController::class,'dangXuat']);
+Route::get("khach-hang/dang-xuat-all",[KhachHangController::class,'dangXuatAll']);
 Route::post("khach-hang/Kiem-tra-dang-nhap",[KhachHangController::class,'KiemTraDN']);
 
 

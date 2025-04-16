@@ -68,8 +68,7 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
-
-    'khach_hang' => [
+        'khach_hang' => [
             'driver' => 'eloquent',
             'model' =>  App\Models\KhachHang::class,
         ],
