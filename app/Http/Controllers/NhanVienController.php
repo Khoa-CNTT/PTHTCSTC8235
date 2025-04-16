@@ -7,58 +7,69 @@ use Illuminate\Http\Request;
 
 class NhanVienController extends Controller
 {
-    public function timkiem(Request $request){
-        $noi_dung='%'.$request->noi_dung.'%';
-        $data= NhanVien::where('ten_nv','like',$noi_dung)
-                        ->orwhere('email','like',$noi_dung)
-                        ->get();
+    public function timkiem(Request $request)
+    {
+        $noi_dung = '%' . $request->noi_dung . '%';
+        $data = NhanVien::where('ten_nv', 'like', $noi_dung)
+            ->orwhere('email', 'like', $noi_dung)
+            ->get();
 
         return response()->json([
             'data' => $data
         ]);
     }
-    public function them(Request $request){
+    public function them(Request $request)
+    {
         $data = $request->all();
         NhanVien::create($data);
         return response()->json([
-            'status'=>'1',
-            "message"=>"Thêm mới thành công",
+            'status' => '1',
+            "message" => "Thêm mới thành công",
         ]);
     }
-    public function load(){
-        $data=NhanVien::get();
+
+    public function load()
+    {
+        $data = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')
+        ->select('nhan_viens.*', 'chuc_vus.ten_chuc_vu')
+        ->get();
         return response()->json([
-            "data"=> $data
+            "data" => $data
         ]);
+
     }
-    public function update(Request $request){
+
+    public function update(Request $request)
+    {
         $data = $request->all();
-        NhanVien ::find($request->id)->update($data);
+        NhanVien::find($request->id)->update($data);
 
         return response()->json([
-            "status" =>'1',
-            "message" =>"Cập nhật nhân viên thành công"
+            "status" => '1',
+            "message" => "Cập nhật nhân viên thành công"
         ]);
     }
-    public function doi(Request $request){
-        $data = NhanVien ::find($request->id);
-        if($data->tinh_trang==1){
-            $data->tinh_trang=0;
+    public function doi(Request $request)
+    {
+        $data = NhanVien::find($request->id);
+        if ($data->tinh_trang == 1) {
+            $data->tinh_trang = 0;
             $data->save();
-        }else{
-            $data->tinh_trang=1;
+        } else {
+            $data->tinh_trang = 1;
             $data->save();
         }
         return response()->json([
-            "status" =>'1',
-            "message" =>"Đổi trạng thái thành công"
+            "status" => '1',
+            "message" => "Đổi trạng thái thành công"
         ]);
     }
-    public function delete(Request $request){
-        NhanVien::where('id',$request->id)->delete();
+    public function delete(Request $request)
+    {
+        NhanVien::where('id', $request->id)->delete();
         return response()->json([
-            "status" =>'1',
-            "message" =>"Xóa thành công"
+            "status" => '1',
+            "message" => "Xóa thành công"
         ]);
     }
 }
