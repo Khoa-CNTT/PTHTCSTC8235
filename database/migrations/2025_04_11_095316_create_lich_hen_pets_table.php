@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('id_lich');
             $table->string('id_pet');
-            $table->datetimes('ngay_gio_hen');
+            $table->datetime('ngay_gio_hen');
             $table->string('id_nv');
             $table->string('tinh_trang');
             $table->string('tien_coc');
