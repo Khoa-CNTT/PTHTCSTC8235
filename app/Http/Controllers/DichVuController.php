@@ -52,7 +52,7 @@ class DichVuController extends Controller
         ]);
     }
     public function LoadDataChiTiet($id){
-        $data = DichVu::where('id', $id)
+        $data = DichVu::where('id', $id)    
                     -> first();
         return response()->json([
             'data' => $data
