@@ -31,7 +31,7 @@ Route::post("dich-vu/doi",[DichVuController::class,'doi']);
 Route::post("dich-vu/update",[DichVuController::class,'update']);
 Route::post("dich-vu/del",[DichVuController::class,'delete']);
 Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
-Route::get('/dich-vu/load-chi-tiet/{id_khoa_hoc}', [DichVuController::class, 'LoadDataChiTiet']);
+Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
 Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
 Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
 
@@ -81,6 +81,7 @@ Route::post("nhan-vien/update",[NhanVienController::class,'update']);
 Route::post("nhan-vien/xoa",[NhanVienController::class,'delete']);
 Route::post('/nhan-vien/tim-kiem',[NhanVienController::class,'timkiem']);
 
+Route::post("danh-gia/them",[DanhGiaController::class,'them']);
 Route::get("danh-gia/load",[DanhGiaController::class,'load']);
 Route::post("danh-gia/doi-TT",[DanhGiaController::class,'doi']);
 Route::post("danh-gia/xoa",[DanhGiaController::class,'delete']);

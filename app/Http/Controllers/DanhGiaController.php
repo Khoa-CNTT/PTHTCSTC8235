@@ -63,4 +63,13 @@ class DanhGiaController extends Controller
 
         return response()->json(["status" => false, "message" => "Không tìm thấy đánh giá"]);
     }
+    public function them(Request $request)
+    {
+        $data = $request->all();
+        DanhGia::create($data);
+        return response()->json([
+            'status' => '1',
+            "message" => "Thêm mới đánh giá thành công",
+        ]);
+    }
 }

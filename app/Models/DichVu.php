@@ -17,6 +17,5 @@ class DichVu extends Model
         'can_nang_max',
         'phan_loai_kg',
         'tinh_trang',
-
     ];
 }
