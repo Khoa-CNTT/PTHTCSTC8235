@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             KhachHangSeeder::class,
             NhaCungCapSeeder::class,
             ChucNangSeeder::class,
+            QLTonKhoSeeder::class,
         ]);
     }
 }
