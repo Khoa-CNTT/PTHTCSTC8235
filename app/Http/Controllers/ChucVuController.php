@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class ChucVuController extends Controller
 {
+    public function load_chuc_vu(){
+        $data = ChucVu::where('tinh_trang',1)
+                        ->get();
+        return response()->json([
+            'data'=> $data ,
+        ]);
+    }
     public function timkiem(Request $request)
     {
         $noi_dung = '%' . $request->noi_dung . '%';

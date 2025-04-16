@@ -10,9 +10,11 @@ use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\NhaCungCapController;
 use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\PhanQuyenController;
 use App\Http\Controllers\PhieuNhapController;
 use App\Http\Controllers\ThuocController;
 use App\Http\Controllers\ThuocKhoController;
+use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -109,8 +111,15 @@ Route::post("phieu-nhap/xoa",[PhieuNhapController::class,'delete']);
 Route::post("phieu-nhap/tao",[PhieuNhapController::class,'tao']);
 Route::post("phieu-nhap/loc-theo-ngay",[PhieuNhapController::class,'loc']);
 
+
 Route::post("thuoc-kho/loc",[ThuocKhoController::class,'loc']);
 Route::get("thuoc-kho/load",[ThuocKhoController::class,'load']);
 Route::post("thuoc-kho/tim-kiem",[ThuocKhoController::class,'timkiem']);
 
+
+Route::get('/phan-quyen/load-chuc-vu',[ChucVuController::class,'load_chuc_vu']);
+
+Route::get('/phan-quyen/load-chuc-nang',[PhanQuyenController::class,'load_chuc_nang']);
+Route::post('phan-quyen/cap-quyen',[PhanQuyenController::class,'cap_quyen']);
+Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_kiem_cn']);
 
