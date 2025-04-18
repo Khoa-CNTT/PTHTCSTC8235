@@ -17,5 +17,6 @@ class NhanVien extends Model
         'hinh_anh',
         'tinh_trang',
         'id_chucvu',
+        'is_bac_si',
     ];
 }
