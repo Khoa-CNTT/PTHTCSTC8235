@@ -85,6 +85,7 @@ Route::post("nhan-vien/doi-TT",[NhanVienController::class,'doi']);
 Route::post("nhan-vien/update",[NhanVienController::class,'update']);
 Route::post("nhan-vien/xoa",[NhanVienController::class,'delete']);
 Route::post('/nhan-vien/tim-kiem',[NhanVienController::class,'timkiem']);
+Route::get('/nhan-vien/load-chi-tiet/{id}', [NhanVienController::class, 'LoadDataChiTiet']);
 
 Route::post("danh-gia/them",[DanhGiaController::class,'them']);
 Route::get("danh-gia/load",[DanhGiaController::class,'load']);

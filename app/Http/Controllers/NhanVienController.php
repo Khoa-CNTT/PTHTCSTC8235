@@ -72,4 +72,11 @@ class NhanVienController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
+    public function LoadDataChiTiet($id){
+        $data = NhanVien::where('id', $id)
+                    -> first();
+        return response()->json([
+            'data' => $data
+        ]);
+    }
 }
