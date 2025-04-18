@@ -36,6 +36,7 @@ Route::post('dich-vu/tim-kiem',[DichVuController::class,'timkiem']);
 Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
 Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
 Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
+Route::get("dich-vu/load-bac-si",[DichVuController::class,'loadBacSi']);
 
 
 Route::post("thuoc/them",[ThuocController::class,'them']);
