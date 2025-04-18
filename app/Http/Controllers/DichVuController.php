@@ -40,7 +40,7 @@ class DichVuController extends Controller
             'data' => $dichVus
         ]);
     }
-    
+
     public function load()
     {
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
@@ -52,7 +52,7 @@ class DichVuController extends Controller
         ]);
     }
     public function LoadDataChiTiet($id){
-        $data = DichVu::where('id', $id)    
+        $data = DichVu::where('id', $id)
                     -> first();
         return response()->json([
             'data' => $data
@@ -95,7 +95,6 @@ class DichVuController extends Controller
     {
         $noi_dung = '%' . $request->noi_dung . '%';
         $data = DichVu::where('ten_dv', 'like', $noi_dung)
-            ->orwhere('mo_ta', 'like', $noi_dung)
             ->get();
 
         return response()->json([
