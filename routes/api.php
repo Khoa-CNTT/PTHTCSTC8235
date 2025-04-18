@@ -40,7 +40,7 @@ Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
 
 Route::post("thuoc/them",[ThuocController::class,'them']);
 Route::get("thuoc/load",[ThuocController::class,'load']);
-Route::post("thuoc/doi",[ThuocController::class,'doi']);
+Route::post("thuoc/doi-TT",[ThuocController::class,'doi']);
 Route::post("thuoc/update",[ThuocController::class,'update']);
 Route::post("thuoc/del",[ThuocController::class,'delete']);
 Route::post('thuoc/tim-kiem',[ThuocController::class,'timkiem']);
@@ -111,6 +111,7 @@ Route::post('phieu-nhap/tim-kiem',[PhieuNhapController::class,'timkiem']);
 Route::post("phieu-nhap/xoa",[PhieuNhapController::class,'delete']);
 Route::post("phieu-nhap/tao",[PhieuNhapController::class,'tao']);
 Route::post("phieu-nhap/loc-theo-ngay",[PhieuNhapController::class,'loc']);
+Route::post("phieu-nhap/update",[PhieuNhapController::class,'update']);
 
 
 Route::post("thuoc-kho/loc",[ThuocKhoController::class,'loc']);

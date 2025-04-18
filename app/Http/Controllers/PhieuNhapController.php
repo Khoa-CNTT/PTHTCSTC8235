@@ -78,6 +78,70 @@ class PhieuNhapController extends Controller
             ]);
         }
     }
+    public function update(Request $request)
+    {
+        $data = $request->all();
+
+        $phieu = PhieuNhap::find($data['id']);
+        if (!$phieu) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không tìm thấy phiếu nhập!'
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Xóa chi tiết cũ
+            PhieuNhapChiTiet::where('id_phieu_nhap', $phieu->id)->delete();
+
+            // Ghi lại chi tiết mới
+            foreach ($data['chi_tiet'] as $item) {
+                PhieuNhapChiTiet::create([
+                    'id_phieu_nhap' => $phieu->id,
+                    'id_thuoc' => $item['id_thuoc'],
+                    'so_luong' => $item['so_luong'],
+                    'gia_nhap' => $item['gia_nhap'],
+                    'han_su_dung' => $item['han_su_dung'],
+                ]);
+            }
+
+            // Cập nhật lại tồn kho bằng cách tổng hợp từ chi tiết
+            foreach ($data['chi_tiet'] as $item) {
+                $tong_so_luong = DB::table('phieu_nhap_chi_tiets')
+                    ->join('phieu_nhaps', 'phieu_nhap_chi_tiets.id_phieu_nhap', '=', 'phieu_nhaps.id')
+                    ->where('phieu_nhaps.id_kho', $phieu->id_kho)
+                    ->where('phieu_nhap_chi_tiets.id_thuoc', $item['id_thuoc'])
+                    ->sum('phieu_nhap_chi_tiets.so_luong');
+
+                DB::table('thuoc_khos')->updateOrInsert(
+                    [
+                        'id_kho' => $phieu->id_kho,
+                        'id_thuoc' => $item['id_thuoc'],
+                    ],
+                    [
+                        'so_luong_ton_kho' => $tong_so_luong,
+                        'gia_nhap' => $item['gia_nhap'],
+                        'han_su_dung' => $item['han_su_dung'],
+                        'ngay_nhap' => now(),
+                    ]
+                );
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Cập nhật phiếu nhập thành công!'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi khi cập nhật: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     public function timkiem(Request $request)
     {
         $noi_dung = '%' . $request->noi_dung . '%';
@@ -147,6 +211,20 @@ class PhieuNhapController extends Controller
                         'han_su_dung' => $item['han_su_dung'],
                         'ngay_nhap' => $data['ngay_nhap'],
                     ]);
+                }
+                // 5. Tính tổng tồn kho tất cả lô thuốc của thuốc đó trong kho
+                $tongSoLuong = ThuocKho::where([
+                    ['id_kho', '=', $data['id_kho']],
+                    ['id_thuoc', '=', $item['id_thuoc']],
+                ])->sum('so_luong_ton_kho');
+
+                // 6. Nếu tổng tồn kho bằng chính lô đang nhập → cập nhật giá bán
+                if ($tongSoLuong == $item['so_luong']) {
+                    DB::table('thuocs')
+                        ->where('id', $item['id_thuoc'])
+                        ->update([
+                            'gia_ban' => round($item['gia_nhap'] * 1.2)
+                        ]);
                 }
             }
 
