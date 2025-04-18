@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('mo_ta');
             $table->string('hinh_anh');
-            $table->integer('tinh_trang');
+            $table->integer('tinh_trang')->default(0);
             $table->integer('id_chucvu');
             $table->timestamps();
         });

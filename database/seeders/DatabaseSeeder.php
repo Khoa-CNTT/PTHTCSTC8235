@@ -19,10 +19,13 @@ class DatabaseSeeder extends Seeder
             LoaiDichVuSeeder::class,
             KhoSeeder::class,
             NhaCungCapSeeder::class,
+            ChucVuSeeder::class,
             ThuocSeeder::class,
             DanhGiaSeeder::class,
             KhachHangSeeder::class,
             NhaCungCapSeeder::class,
+            NhanVienSeeder::class,
+            PetSeeder::class,
         ]);
     }
 }

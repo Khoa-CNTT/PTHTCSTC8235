@@ -9,11 +9,14 @@ class PetController extends Controller
 {
     public function Load()
     {
-        $data = pet::get();
+        $data = pet::join('khach_hangs', 'khach_hangs.id', '=', 'pets.id_kh')
+                    ->select('pets.*', 'khach_hangs.ho_va_ten')
+                     ->get();
         return response()->json([
-            'data' => $data
+            "data" => $data
         ]);
     }
+
     public function Doitt(Request $request)
     {
         $data = pet::find($request->id);
@@ -45,7 +48,8 @@ class PetController extends Controller
             'message' => 'Sửa thông tin pet thành công :3'
         ]);
     }
-    public function Them(Request $request){
+    public function Them(Request $request)
+    {
         pet::create($request->all());
         return response()->json([
             'status' => 1,
