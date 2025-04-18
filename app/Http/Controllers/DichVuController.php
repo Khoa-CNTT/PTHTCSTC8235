@@ -16,17 +16,48 @@ class DichVuController extends Controller
             "message" => "Thêm mới dịch vụ thành công",
         ]);
     }
+
+    public function loadTiemChung()
+    {
+        $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+            ->where('dich_vus.id_loaidv', 1)
+            ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
+            ->get();
+
+        return response()->json([
+            'data' => $dichVus
+        ]);
+    }
+
+    public function loadChamSoc()
+    {
+        $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+            ->where('dich_vus.id_loaidv', 2)
+            ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
+            ->get();
+
+        return response()->json([
+            'data' => $dichVus
+        ]);
+    }
+    
     public function load()
     {
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
             ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
             ->get();
 
-            return response()->json([
-                'data' => $dichVus
-            ]);
+        return response()->json([
+            'data' => $dichVus
+        ]);
     }
-
+    public function LoadDataChiTiet($id){
+        $data = DichVu::where('id', $id)    
+                    -> first();
+        return response()->json([
+            'data' => $data
+        ]);
+    }
     public function update(Request $request)
     {
         $data = $request->all();
@@ -60,11 +91,12 @@ class DichVuController extends Controller
             "message" => "Xóa dịch vụ thành công"
         ]);
     }
-    public function timkiem(Request $request){
-        $noi_dung='%'.$request->noi_dung.'%';
-        $data= DichVu::where('ten_dv','like',$noi_dung)
-                        ->orwhere('mo_ta','like',$noi_dung)
-                        ->get();
+    public function timkiem(Request $request)
+    {
+        $noi_dung = '%' . $request->noi_dung . '%';
+        $data = DichVu::where('ten_dv', 'like', $noi_dung)
+            ->orwhere('mo_ta', 'like', $noi_dung)
+            ->get();
 
         return response()->json([
             'data' => $data

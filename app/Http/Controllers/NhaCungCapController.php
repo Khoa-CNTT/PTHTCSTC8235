@@ -37,7 +37,7 @@ class NhaCungCapController extends Controller
 
         return response()->json([
             "status" =>'1',
-            "message" =>"Cập nhật dịch vụ thành công"
+            "message" =>"Cập nhật thành công"
         ]);
     }
     public function doi(Request $request){

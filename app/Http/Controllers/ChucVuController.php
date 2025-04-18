@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\NhanVien;
+use App\Models\ChucVu;
 use Illuminate\Http\Request;
 
-class NhanVienController extends Controller
+class ChucVuController extends Controller
 {
+    public function load_chuc_vu(){
+        $data = ChucVu::where('tinh_trang',1)
+                        ->get();
+        return response()->json([
+            'data'=> $data ,
+        ]);
+    }
     public function timkiem(Request $request)
     {
         $noi_dung = '%' . $request->noi_dung . '%';
-        $data = NhanVien::where('ten_nv', 'like', $noi_dung)
-            ->orwhere('email', 'like', $noi_dung)
+        $data = ChucVu::where('ten_chuc_vu', 'like', $noi_dung)
             ->get();
 
         return response()->json([
@@ -21,37 +27,32 @@ class NhanVienController extends Controller
     public function them(Request $request)
     {
         $data = $request->all();
-        NhanVien::create($data);
+        ChucVu::create($data);
         return response()->json([
             'status' => '1',
             "message" => "Thêm mới thành công",
         ]);
     }
-
     public function load()
     {
-        $data = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')
-        ->select('nhan_viens.*', 'chuc_vus.ten_chuc_vu')
-        ->get();
+        $data = ChucVu::get();
         return response()->json([
             "data" => $data
         ]);
-
     }
-
     public function update(Request $request)
     {
         $data = $request->all();
-        NhanVien::find($request->id)->update($data);
+        ChucVu::find($request->id)->update($data);
 
         return response()->json([
             "status" => '1',
-            "message" => "Cập nhật nhân viên thành công"
+            "message" => "Cập nhật thành công"
         ]);
     }
     public function doi(Request $request)
     {
-        $data = NhanVien::find($request->id);
+        $data = ChucVu::find($request->id);
         if ($data->tinh_trang == 1) {
             $data->tinh_trang = 0;
             $data->save();
@@ -66,7 +67,7 @@ class NhanVienController extends Controller
     }
     public function delete(Request $request)
     {
-        NhanVien::where('id', $request->id)->delete();
+        ChucVu::where('id', $request->id)->delete();
         return response()->json([
             "status" => '1',
             "message" => "Xóa thành công"

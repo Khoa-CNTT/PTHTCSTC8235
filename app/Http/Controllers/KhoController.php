@@ -51,4 +51,14 @@ class KhoController extends Controller
             "message" =>"Xóa kho thành công"
         ]);
     }
+    public function timkiem(Request $request){
+        $noi_dung='%'.$request->noi_dung.'%';
+        $data= Kho::where('ten_kho','like',$noi_dung)
+                        ->orwhere('dia_chi','like',$noi_dung)
+                        ->get();
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
 }

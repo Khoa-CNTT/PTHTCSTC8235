@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('pets', function (Blueprint $table) {
             $table->id();
-            $table->string('id_kh');
+            $table->integer('id_kh');
             $table->string('ten_pet');
-            $table->string("chung_loai");
-            $table->integer("gioi_tinh");
-            $table->integer("tuoi");
-            $table->string("hinh_anh");
-            $table->integer("can_nang");
-            $table->integer("tinh_trang");
+            $table->integer('chung_loai')->default(0);
+            $table->integer('gioi_tinh')->default(0);
+            $table->string('tuoi');
+            $table->string('hinh_anh');
+            $table->integer('can_nang');
+            $table->integer('tinh_trang')->default(0);
             $table->timestamps();
         });
     }
