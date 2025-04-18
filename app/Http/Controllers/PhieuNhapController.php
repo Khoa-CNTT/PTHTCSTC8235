@@ -8,6 +8,7 @@ use App\Models\NhaCungCap;
 use App\Models\PhieuNhap;
 use App\Models\PhieuNhapChiTiet;
 use App\Models\Thuoc;
+use App\Models\ThuocKho;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -45,7 +46,6 @@ class PhieuNhapController extends Controller
             'data' => $ds
         ]);
     }
-
 
     public function load()
     {
@@ -98,7 +98,7 @@ class PhieuNhapController extends Controller
     {
         $data = $request->validated();
 
-        // Kiểm tra trùng thuốc
+        // Kiểm tra trùng thuốc trong chi tiết
         $thuocIds = array_column($data['chi_tiet'], 'id_thuoc');
         if (count($thuocIds) !== count(array_unique($thuocIds))) {
             return response()->json([
@@ -109,13 +109,16 @@ class PhieuNhapController extends Controller
 
         DB::beginTransaction();
         try {
+            // Tạo phiếu nhập
             $phieu = PhieuNhap::create([
                 'id_kho' => $data['id_kho'],
                 'id_ncc' => $data['id_ncc'],
                 'ngay_nhap' => $data['ngay_nhap'],
             ]);
 
+            // Duyệt chi tiết và cập nhật bảng tồn kho
             foreach ($data['chi_tiet'] as $item) {
+                // Lưu chi tiết phiếu nhập
                 PhieuNhapChiTiet::create([
                     'id_phieu_nhap' => $phieu->id,
                     'id_thuoc' => $item['id_thuoc'],
@@ -123,12 +126,34 @@ class PhieuNhapController extends Controller
                     'gia_nhap' => $item['gia_nhap'],
                     'han_su_dung' => $item['han_su_dung'],
                 ]);
+
+                // Cập nhật hoặc thêm mới trong bảng tồn kho
+                $tonKho = ThuocKho::where([
+                    ['id_kho', '=', $data['id_kho']],
+                    ['id_thuoc', '=', $item['id_thuoc']],
+                    ['gia_nhap', '=', $item['gia_nhap']],
+                    ['han_su_dung', '=', $item['han_su_dung']],
+                ])->first();
+
+                if ($tonKho) {
+                    $tonKho->so_luong_ton_kho += $item['so_luong'];
+                    $tonKho->save();
+                } else {
+                    ThuocKho::create([
+                        'id_kho' => $data['id_kho'],
+                        'id_thuoc' => $item['id_thuoc'],
+                        'gia_nhap' => $item['gia_nhap'],
+                        'so_luong_ton_kho' => $item['so_luong'],
+                        'han_su_dung' => $item['han_su_dung'],
+                        'ngay_nhap' => $data['ngay_nhap'],
+                    ]);
+                }
             }
 
             DB::commit();
             return response()->json([
                 'status' => true,
-                'message' => 'Lưu phiếu nhập thành công!',
+                'message' => 'Lưu phiếu nhập và cập nhật tồn kho thành công!',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

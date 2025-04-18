@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DichVu;
+use App\Models\NhanVien;
 use Illuminate\Http\Request;
 
 class DichVuController extends Controller
@@ -40,7 +41,20 @@ class DichVuController extends Controller
             'data' => $dichVus
         ]);
     }
-    
+
+    public function loadBacSi()
+{
+    $bacSiList = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')
+        ->where('chuc_vus.ten_chuc_vu', 'Bác sĩ')
+        ->select('nhan_viens.*', 'chuc_vus.ten_chuc_vu')
+        ->get();
+
+    return response()->json([
+        'data' => $bacSiList
+    ]);
+}
+
+
     public function load()
     {
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
@@ -52,7 +66,7 @@ class DichVuController extends Controller
         ]);
     }
     public function LoadDataChiTiet($id){
-        $data = DichVu::where('id', $id)    
+        $data = DichVu::where('id', $id)
                     -> first();
         return response()->json([
             'data' => $data
