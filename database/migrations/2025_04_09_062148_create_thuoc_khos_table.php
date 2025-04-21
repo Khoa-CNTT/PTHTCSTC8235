@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('so_luong_ton_kho');
             $table->date('han_su_dung');
             $table->date('ngay_nhap');
+            $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });
     }

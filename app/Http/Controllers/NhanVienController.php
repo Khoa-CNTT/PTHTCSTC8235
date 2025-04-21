@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NhanVien;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NhanVienController extends Controller
 {
@@ -21,6 +22,7 @@ class NhanVienController extends Controller
     public function them(Request $request)
     {
         $data = $request->all();
+        $data['password'] = bcrypt($request->password);
         NhanVien::create($data);
         return response()->json([
             'status' => '1',
@@ -32,12 +34,11 @@ class NhanVienController extends Controller
     public function load()
     {
         $data = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')
-        ->select('nhan_viens.*', 'chuc_vus.ten_chuc_vu')
-        ->get();
+            ->select('nhan_viens.*', 'chuc_vus.ten_chuc_vu')
+            ->get();
         return response()->json([
             "data" => $data
         ]);
-
     }
 
     public function update(Request $request)
@@ -72,5 +73,43 @@ class NhanVienController extends Controller
             "status" => '1',
             "message" => "Xóa thành công"
         ]);
+    }
+    public function dangNhap(Request $request)
+    {
+
+        $check = Auth::guard('nhan_vien')
+            ->attempt(['email' => $request->email, 'password' => $request->password]);
+        if ($check) {
+            $user = Auth::guard('nhan_vien')->user();
+            return response()->json([
+                'status' => 1,
+                'token' => $user->createToken('token')->plainTextToken,
+                'message' => 'Đăng nhập thành công',
+                'email' => $user->email,
+                'name' => $user->ten_nv,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Đăng nhập không thành công'
+            ]);
+        }
+    }
+    public function checkLogin()
+    {
+        $user = Auth::guard('nhan_vien')->user();
+        if ($user && $user instanceof \App\Models\NhanVien) {
+            return response()->json([
+                'status' => 1,
+                // gọi name và email để hiện lên top admin khi đăng nhập vào từng acc nhân viên
+                'name' => $user->ten_nv,
+                'email' => $user->email,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần phải đăng nhập',
+            ]);
+        }
     }
 }

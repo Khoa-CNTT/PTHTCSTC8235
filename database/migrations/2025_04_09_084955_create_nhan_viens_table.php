@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('ten_nv');
             $table->integer('gioi_tinh');
             $table->string('email');
-            $table->integer('tien_kham');
+            $table->integer('tien_kham')->nullable();
             $table->string('password');
             $table->string('mo_ta');
             $table->string('hinh_anh');
