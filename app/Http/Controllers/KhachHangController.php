@@ -100,10 +100,9 @@ class KhachHangController extends Controller
 
         if ($check) {
             $user = Auth::guard('khach_hang')->user();
-            $token = $user->createToken('token')->plainTextToken;
             return response()->json([
                 'status' => 1,
-                'token' => $token,
+                'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công ',
 
             ]);

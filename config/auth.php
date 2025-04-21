@@ -42,7 +42,7 @@ return [
         ],
 
         'nhan_vien' => [
-            'driver' => 'session',                          
+            'driver' => 'session',
             'provider' => 'nhan_vien',
         ],
         'khach_hang' => [
@@ -76,7 +76,7 @@ return [
 
         'khach_hang' => [
             'driver' => 'eloquent',
-            'model' =>  App\Models\KhachHang::class,
+            'model' =>  \App\Models\KhachHang::class,
         ],
 
         'nhan_vien' => [
