@@ -52,7 +52,7 @@ class PhieuNhapController extends Controller
         $phieuNhaps = PhieuNhap::with(['kho', 'ncc', 'chiTiet'])->orderByDesc('id')->get();
 
         return response()->json([
-            'status' => true,
+            'status' => 1,
             'data' => $phieuNhaps,
         ]);
     }
@@ -82,64 +82,21 @@ class PhieuNhapController extends Controller
     {
         $data = $request->all();
 
-        $phieu = PhieuNhap::find($data['id']);
-        if (!$phieu) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Không tìm thấy phiếu nhập!'
-            ]);
-        }
-
-        DB::beginTransaction();
-        try {
-            // Xóa chi tiết cũ
-            PhieuNhapChiTiet::where('id_phieu_nhap', $phieu->id)->delete();
-
-            // Ghi lại chi tiết mới
-            foreach ($data['chi_tiet'] as $item) {
-                PhieuNhapChiTiet::create([
-                    'id_phieu_nhap' => $phieu->id,
-                    'id_thuoc' => $item['id_thuoc'],
-                    'so_luong' => $item['so_luong'],
-                    'gia_nhap' => $item['gia_nhap'],
-                    'han_su_dung' => $item['han_su_dung'],
+        foreach ($data['chi_tiet'] as $chiTietData) {
+            $chiTiet = PhieuNhapChiTiet::find($chiTietData['id']);
+            $thuocKho = ThuocKho::find($chiTietData['id']);
+            if ($chiTiet) {
+                $chiTiet->update($chiTietData);
+                $thuocKho->update([
+                    'so_luong_ton_kho' => $thuocKho->so_luong_ton_kho - $chiTiet->getOriginal('so_luong') + $chiTietData['so_luong'],
                 ]);
             }
-
-            // Cập nhật lại tồn kho bằng cách tổng hợp từ chi tiết
-            foreach ($data['chi_tiet'] as $item) {
-                $tong_so_luong = DB::table('phieu_nhap_chi_tiets')
-                    ->join('phieu_nhaps', 'phieu_nhap_chi_tiets.id_phieu_nhap', '=', 'phieu_nhaps.id')
-                    ->where('phieu_nhaps.id_kho', $phieu->id_kho)
-                    ->where('phieu_nhap_chi_tiets.id_thuoc', $item['id_thuoc'])
-                    ->sum('phieu_nhap_chi_tiets.so_luong');
-
-                DB::table('thuoc_khos')->updateOrInsert(
-                    [
-                        'id_kho' => $phieu->id_kho,
-                        'id_thuoc' => $item['id_thuoc'],
-                    ],
-                    [
-                        'so_luong_ton_kho' => $tong_so_luong,
-                        'gia_nhap' => $item['gia_nhap'],
-                        'han_su_dung' => $item['han_su_dung'],
-                        'ngay_nhap' => now(),
-                    ]
-                );
-            }
-
-            DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Cập nhật phiếu nhập thành công!'
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'status' => false,
-                'message' => 'Lỗi khi cập nhật: ' . $e->getMessage()
-            ]);
         }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Cập nhật chi tiết phiếu nhập thành công'
+        ]);
     }
 
     public function timkiem(Request $request)

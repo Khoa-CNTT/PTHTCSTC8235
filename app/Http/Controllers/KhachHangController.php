@@ -150,22 +150,6 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function check()
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user && $user instanceof \App\Models\KhachHang) {
-            return response()->json([
-                'status' => 1,
-                'name' => $user->ho_va_ten,
-                'email' => $user->email,
-            ]);
-        } else {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Bạn cần phải đăng nhập',
-            ]);
-        }
-    }
     public function kichHoat(Request $request)
     {
         $check = KhachHang::where('hash_active', $request->id_khach_hang)
