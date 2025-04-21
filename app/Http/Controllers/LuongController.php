@@ -18,7 +18,7 @@ class LuongController extends Controller
         $data = Luong::join('nhan_viens', 'luongs.id_nv', '=', 'nhan_viens.id')
                     ->select('luongs.*', 'nhan_viens.ten_nv')
                     ->get();
-    
+
         return response()->json([
             'data' => $data
         ]);
@@ -43,6 +43,23 @@ class LuongController extends Controller
         return response()->json([
             'status' => 1,
             'message' => 'Thêm mới Luong thành công'
+        ]);
+    }
+    public function xoaLuong(Request $request)
+    {
+        Luong::where('id', $request->id)->delete();
+        return response()->json([
+            "status" => '1',
+            "message" => "Xóa thành công"
+        ]);
+    }
+    public function suaLuong(Request $request)
+    {
+        $data = $request->all();
+        Luong::find($request->id)->update($data);
+        return response()->json([
+            "status" => '1',
+            "message" => "Cập nhật lương thành công"
         ]);
     }
     public function TimKiem(Request $request){

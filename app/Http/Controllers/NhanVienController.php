@@ -28,6 +28,7 @@ class NhanVienController extends Controller
         ]);
     }
 
+    
     public function load()
     {
         $data = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')

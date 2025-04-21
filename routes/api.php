@@ -78,6 +78,8 @@ Route::post('/them-luong', [LuongController::class, 'Them']);
 Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
 Route::get('/load-luong', [LuongController::class, 'LoadLuong']);
 Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
+Route::post("/sua-luong",[LuongController::class,'suaLuong']);
+Route::post("/xoa-luong",[LuongController::class,'xoaLuong']);
 
 Route::post("nhan-vien/them",[NhanVienController::class,'them']);
 Route::get("nhan-vien/load",[NhanVienController::class,'load']);
