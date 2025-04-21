@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class NhapThuocController extends Controller
 {
+    private $id_chuc_nang = 1;
     public function loadKhoNCCThuoc()
     {
         return response()->json([
