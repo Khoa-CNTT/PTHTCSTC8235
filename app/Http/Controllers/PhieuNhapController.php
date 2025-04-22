@@ -128,7 +128,7 @@ class PhieuNhapController extends Controller
             'message' => 'Cập nhật chi tiết phiếu nhập thành công'
         ]);
     }
-
+    }
     public function timkiem(Request $request)
     {
         $noi_dung = '%' . $request->noi_dung . '%';
@@ -145,6 +145,7 @@ class PhieuNhapController extends Controller
             'data' => $data
         ]);
     }
+
     public function tao(PhieuNhapRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
