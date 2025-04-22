@@ -113,7 +113,7 @@ Route::get("phieu-nhap/load-kho-ncc-thuoc", [PhieuNhapController::class, 'loadKh
 Route::get("/phieu-nhap", [PhieuNhapController::class, 'load']);
 Route::post('phieu-nhap/tim-kiem', [PhieuNhapController::class, 'timkiem']);
 Route::post("phieu-nhap/xoa", [PhieuNhapController::class, 'delete']);
-Route::post("phieu-nhap/tao", [PhieuNhapController::class, 'tao']);
+Route::post("phieu-nhap/tao", [PhieuNhapController::class, 'tao']); //lưu phiếu nhập
 Route::post("phieu-nhap/loc-theo-ngay", [PhieuNhapController::class, 'loc']);
 Route::post("phieu-nhap/update", [PhieuNhapController::class, 'update']);
 

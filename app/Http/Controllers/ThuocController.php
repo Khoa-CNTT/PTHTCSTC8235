@@ -36,7 +36,7 @@ class ThuocController extends Controller
         Thuoc ::find($request->id)->update($data);
 
         return response()->json([
-            "status" =>'1',
+            "status" =>'1',     
             "message" =>"Cập nhật thuốc thành công"
         ]);
     }
