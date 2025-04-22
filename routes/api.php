@@ -4,6 +4,7 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\DonThuocController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;
@@ -123,4 +124,7 @@ Route::get('/phan-quyen/load-chuc-vu',[ChucVuController::class,'load_chuc_vu']);
 Route::get('/phan-quyen/load-chuc-nang',[PhanQuyenController::class,'load_chuc_nang']);
 Route::post('phan-quyen/cap-quyen',[PhanQuyenController::class,'cap_quyen']);
 Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_kiem_cn']);
+
+
+Route::get("don-thuoc/load-thuoc",[DonThuocController::class,'loadThuoc']);
 
