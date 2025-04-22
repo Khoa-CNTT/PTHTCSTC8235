@@ -78,6 +78,14 @@ class KhachHangController extends Controller
             ]);
         }
     }
+
+    public function layDuLieu(){
+        $user = Auth::guard('sanctum')->user();
+            return response()->json([
+                'data' => $user
+            ]);
+
+    }
     public function KiemTraDN()
     {
         $user = Auth::guard('sanctum')->user();
@@ -100,10 +108,9 @@ class KhachHangController extends Controller
 
         if ($check) {
             $user = Auth::guard('khach_hang')->user();
-            $token = $user->createToken('token')->plainTextToken;
             return response()->json([
                 'status' => 1,
-                'token' => $token,
+                'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công ',
 
             ]);
@@ -147,22 +154,6 @@ class KhachHangController extends Controller
             return response()->json([
                 'status' => 0,
                 'message' => 'Đăng xuất không thành công'
-            ]);
-        }
-    }
-    public function check()
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user && $user instanceof \App\Models\KhachHang) {
-            return response()->json([
-                'status' => 1,
-                'name' => $user->ho_va_ten,
-                'email' => $user->email,
-            ]);
-        } else {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Bạn cần phải đăng nhập',
             ]);
         }
     }
