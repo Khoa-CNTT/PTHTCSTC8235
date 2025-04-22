@@ -23,9 +23,6 @@ class LuongController extends Controller
                     ->select('luongs.*', 'nhan_viens.ten_nv')
                     ->get();
 
-            ->select('luongs.*', 'nhan_viens.ten_nv')
-            ->get();
-
         return response()->json([
             'data' => $data
         ]);

@@ -65,9 +65,6 @@ class DichVuController extends Controller
             'data' => $dichVus
         ]);
     }
-    public function LoadDataChiTiet($id){
-        $data = DichVu::where('id', $id)
-                    -> first();
     public function LoadDataChiTiet($id)
     {
         $data = DichVu::where('id', $id)
