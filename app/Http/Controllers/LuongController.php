@@ -20,6 +20,9 @@ class LuongController extends Controller
     public function LoadLuong()
     {
         $data = Luong::join('nhan_viens', 'luongs.id_nv', '=', 'nhan_viens.id')
+                    ->select('luongs.*', 'nhan_viens.ten_nv')
+                    ->get();
+
             ->select('luongs.*', 'nhan_viens.ten_nv')
             ->get();
 
