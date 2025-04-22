@@ -78,6 +78,14 @@ class KhachHangController extends Controller
             ]);
         }
     }
+
+    public function layDuLieu(){
+        $user = Auth::guard('sanctum')->user();
+            return response()->json([
+                'data' => $user
+            ]);
+
+    }
     public function KiemTraDN()
     {
         $user = Auth::guard('sanctum')->user();

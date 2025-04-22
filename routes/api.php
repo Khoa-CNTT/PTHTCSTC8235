@@ -64,6 +64,7 @@ Route::post("khach-hang/dang-nhap", [KhachHangController::class, 'dangNhap']);
 Route::get("khach-hang/dang-xuat", [KhachHangController::class, 'dangXuat']);
 Route::get("khach-hang/dang-xuat-all", [KhachHangController::class, 'dangXuatAll']);
 Route::post("khach-hang/Kiem-tra-dang-nhap", [KhachHangController::class, 'KiemTraDN']);
+Route::get("/khach-hang/lay-du-lieu", [KhachHangController::class, 'layDuLieu']);
 
 
 Route::post('/them-pet', [PetController::class, 'Them']);
