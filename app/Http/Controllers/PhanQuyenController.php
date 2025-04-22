@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class PhanQuyenController extends Controller
 {
+    private $id_chuc_nang = 18;
     public function load_chuc_nang(){
         $data = ChucNang::get();
         return response()->json([
