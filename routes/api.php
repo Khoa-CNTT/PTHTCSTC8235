@@ -89,6 +89,7 @@ Route::post("nhan-vien/update", [NhanVienController::class, 'update']);
 Route::post("nhan-vien/xoa", [NhanVienController::class, 'delete']);
 Route::post('/nhan-vien/tim-kiem', [NhanVienController::class, 'timkiem']);
 Route::post('/nhan-vien/kiem-tra-dang-nhap', [NhanVienController::class, 'checkLogin']);
+Route::get('/nhan-vien/dang-xuat', [NhanVienController::class, 'dangXuat']);
 
 Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
 

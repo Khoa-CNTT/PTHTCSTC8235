@@ -40,6 +40,7 @@ class ChucVuController extends Controller
             "data" => $data
         ]);
     }
+    
     public function update(Request $request)
     {
         $data = $request->all();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NhanVienController extends Controller
 {
@@ -40,7 +41,23 @@ class NhanVienController extends Controller
             "data" => $data
         ]);
     }
-
+    public function dangXuat(){
+        $user = Auth::guard('sanctum')->user();
+        if ($user && $user instanceof \App\Models\NhanVien) {
+            DB::table('personal_access_tokens')
+                ->where('id', $user->currentAccessToken()->id)
+                ->delete();
+            return response()->json([
+                'status' => 1,
+                'message' => 'Đăng xuất thành công'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Đăng xuất không thành công'
+            ]);
+        }
+    }
     public function update(Request $request)
     {
         $data = $request->all();
