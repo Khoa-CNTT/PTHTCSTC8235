@@ -6,6 +6,7 @@ use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
+use App\Http\Controllers\LichHenController;
 use App\Http\Controllers\LichHenPetController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\LuongController;
@@ -132,3 +133,5 @@ Route::get("lich-hen/load",[LichHenPetController::class,'load']);
 Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
 Route::post("lich-hen/update",[LichHenPetController::class,'update']);
 Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
+
+Route::get("lich/load",[LichHenController::class,'load']);

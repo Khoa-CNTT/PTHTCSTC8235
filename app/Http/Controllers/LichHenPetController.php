@@ -21,7 +21,8 @@ class LichHenPetController extends Controller
     {
         $data = LichHenPet::join('pets', 'pets.id', '=', 'lich_hen_pets.id_pet')
         ->join('nhan_viens', 'nhan_viens.id', '=', 'lich_hen_pets.id_nv')
-        ->select('lich_hen_pets.*', 'pets.ten_pet', 'nhan_viens.ten_nv')
+        ->join('lich_hens', 'lich_hens.id', '=', 'lich_hen_pets.id_lich')
+        ->select('lich_hen_pets.*', 'pets.ten_pet', 'nhan_viens.ten_nv', 'lich_hen_pets.id_lich')
         ->get();
         return response()->json([
             "data" => $data
