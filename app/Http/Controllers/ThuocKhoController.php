@@ -13,10 +13,12 @@ class ThuocKhoController extends Controller
         $data = DB::table('thuoc_khos as tk')
             ->leftJoin('khos as k', 'tk.id_kho', '=', 'k.id')
             ->leftJoin('thuocs as t', 'tk.id_thuoc', '=', 't.id')
+            ->leftJoin('phieu_nhap_chi_tiets as pnct', 'tk.id_thuoc', '=', 'pnct.id_thuoc')
             ->select(
                 'tk.*',
                 'k.ten_kho',
-                't.ten_thuoc'
+                't.ten_thuoc',
+                'pnct.id_phieu_nhap'
             )
             ->orderByDesc('tk.id')
             ->get();
