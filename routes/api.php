@@ -34,8 +34,9 @@ Route::post("dich-vu/update", [DichVuController::class, 'update']);
 Route::post("dich-vu/del", [DichVuController::class, 'delete']);
 Route::post('dich-vu/tim-kiem', [DichVuController::class, 'timkiem']);
 Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
-Route::get("dich-vu/load-tiem-chung", [DichVuController::class, 'loadTiemChung']);
-Route::get("dich-vu/load-cham-soc", [DichVuController::class, 'loadChamSoc']);
+Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
+Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
+Route::get("dich-vu/load-bac-si",[DichVuController::class,'loadBacSi']);
 
 
 Route::post("thuoc/them", [ThuocController::class, 'them']);
@@ -78,6 +79,8 @@ Route::post('/them-luong', [LuongController::class, 'Them']);
 Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
 Route::get('/load-luong', [LuongController::class, 'LoadLuong']);
 Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
+Route::post("/sua-luong",[LuongController::class,'suaLuong']);
+Route::post("/xoa-luong",[LuongController::class,'xoaLuong']);
 
 Route::post("nhan-vien/them", [NhanVienController::class, 'them']);
 Route::get("nhan-vien/load", [NhanVienController::class, 'load']);
