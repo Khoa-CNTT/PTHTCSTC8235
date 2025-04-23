@@ -5,6 +5,7 @@ use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\DonThuocController;
+use App\Http\Controllers\HoSoBenhAnController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;
@@ -127,4 +128,12 @@ Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_ki
 
 
 Route::get("don-thuoc/load-thuoc",[DonThuocController::class,'loadThuoc']);
+
+
+Route::post("ho-so-benh-an/them",[HoSoBenhAnController::class,'them']);
+Route::get("ho-so-benh-an/load",[HoSoBenhAnController::class,'load']);
+Route::post("ho-so-benh-an/doi-TT",[HoSoBenhAnController::class,'doi']);
+Route::post("ho-so-benh-an/update",[HoSoBenhAnController::class,'update']);
+Route::post("ho-so-benh-an/xoa",[HoSoBenhAnController::class,'delete']);
+Route::post('/ho-so-benh-an/tim-kiem',[HoSoBenhAnController::class,'timkiem']);
 

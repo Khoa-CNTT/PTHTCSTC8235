@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer("id_nv");
             $table->date("ngay_kham");
-            $table->string("chuan_doan");
+            $table->string("chuan_doan")->nullable();
             $table->integer("id_pet");
             $table->integer('tinh_trang')->default(0);
             $table->timestamps();
