@@ -4,6 +4,8 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\DonThuocController;
+use App\Http\Controllers\HoSoBenhAnController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
 use App\Http\Controllers\LoaiDichVuController;

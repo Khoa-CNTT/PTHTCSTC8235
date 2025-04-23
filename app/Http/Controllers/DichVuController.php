@@ -57,6 +57,7 @@ class DichVuController extends Controller
     }
 
 
+
     public function loadBacSi()
 {
     $bacSiList = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')
@@ -80,9 +81,6 @@ class DichVuController extends Controller
             'data' => $dichVus
         ]);
     }
-    public function LoadDataChiTiet($id){
-        $data = DichVu::where('id', $id)
-                    -> first();
     public function LoadDataChiTiet($id)
     {
         $data = DichVu::where('id', $id)
@@ -161,7 +159,6 @@ class DichVuController extends Controller
     {
         $noi_dung = '%' . $request->noi_dung . '%';
         $data = DichVu::where('ten_dv', 'like', $noi_dung)
-            ->orwhere('mo_ta', 'like', $noi_dung)
             ->get();
 
         return response()->json([
