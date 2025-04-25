@@ -11,6 +11,7 @@ class Thuoc extends Model
         'ten_thuoc',
         'don_vi',
         'mo_ta',
+        'gia_ban',
         'tinh_trang'
     ];
 }

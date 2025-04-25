@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'nhan_vien' => [
+            'driver' => 'session',
+            'provider' => 'nhan_vien',
+        ],
         'khach_hang' => [
             'driver' => 'session',
             'provider' => 'khach_hang',
@@ -68,9 +73,15 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
+
         'khach_hang' => [
             'driver' => 'eloquent',
-            'model' =>  App\Models\KhachHang::class,
+            'model' =>  \App\Models\KhachHang::class,
+        ],
+
+        'nhan_vien' => [
+            'driver' => 'eloquent',
+            'model' => \App\Models\NhanVien::class,
         ],
     ],
 

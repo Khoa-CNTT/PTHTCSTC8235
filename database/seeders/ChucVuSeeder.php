@@ -25,6 +25,11 @@ class ChucVuSeeder extends Seeder
                 'ten_chuc_vu' => 'Nhân viên',
                 'tinh_trang' => 1,
             ],
+            [
+                'id' => 3,
+                'ten_chuc_vu' => 'ADMIN',
+                'tinh_trang' => 1,
+            ],
         ]);
     }
 }

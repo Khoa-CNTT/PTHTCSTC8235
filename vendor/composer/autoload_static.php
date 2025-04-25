@@ -208,8 +208,8 @@ class ComposerStaticInitace95a9f311dc7ec268a40fdac2753e9
         'phpDocumentor\\Reflection\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
-            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
         ),
         'Whoops\\' => 
         array (
@@ -365,8 +365,8 @@ class ComposerStaticInitace95a9f311dc7ec268a40fdac2753e9
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -438,8 +438,8 @@ class ComposerStaticInitace95a9f311dc7ec268a40fdac2753e9
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri-interfaces',
-            1 => __DIR__ . '/..' . '/league/uri',
+            0 => __DIR__ . '/..' . '/league/uri',
+            1 => __DIR__ . '/..' . '/league/uri-interfaces',
         ),
         'League\\MimeTypeDetection\\' => 
         array (
@@ -593,11 +593,43 @@ class ComposerStaticInitace95a9f311dc7ec268a40fdac2753e9
     );
 
     public static $classMap = array (
+        'App\\Http\\Controllers\\ChucVuController' => __DIR__ . '/../..' . '/app/Http/Controllers/ChucVuController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
-        'App\\Models\\BacSi' => __DIR__ . '/../..' . '/app/Models/BacSi.php',
+        'App\\Http\\Controllers\\DanhGiaController' => __DIR__ . '/../..' . '/app/Http/Controllers/DanhGiaController.php',
+        'App\\Http\\Controllers\\DichVuController' => __DIR__ . '/../..' . '/app/Http/Controllers/DichVuController.php',
+        'App\\Http\\Controllers\\KhachHangController' => __DIR__ . '/../..' . '/app/Http/Controllers/KhachHangController.php',
+        'App\\Http\\Controllers\\KhoController' => __DIR__ . '/../..' . '/app/Http/Controllers/KhoController.php',
+        'App\\Http\\Controllers\\LoaiDichVuController' => __DIR__ . '/../..' . '/app/Http/Controllers/LoaiDichVuController.php',
+        'App\\Http\\Controllers\\LuongController' => __DIR__ . '/../..' . '/app/Http/Controllers/LuongController.php',
+        'App\\Http\\Controllers\\NhaCungCapController' => __DIR__ . '/../..' . '/app/Http/Controllers/NhaCungCapController.php',
+        'App\\Http\\Controllers\\NhanVienController' => __DIR__ . '/../..' . '/app/Http/Controllers/NhanVienController.php',
+        'App\\Http\\Controllers\\NhapThuocController' => __DIR__ . '/../..' . '/app/Http/Controllers/NhapThuocController.php',
+        'App\\Http\\Controllers\\PetController' => __DIR__ . '/../..' . '/app/Http/Controllers/PetController.php',
+        'App\\Http\\Controllers\\PhanQuyenController' => __DIR__ . '/../..' . '/app/Http/Controllers/PhanQuyenController.php',
+        'App\\Http\\Controllers\\PhieuNhapController' => __DIR__ . '/../..' . '/app/Http/Controllers/PhieuNhapController.php',
+        'App\\Http\\Controllers\\ThuocController' => __DIR__ . '/../..' . '/app/Http/Controllers/ThuocController.php',
+        'App\\Http\\Controllers\\ThuocKhoController' => __DIR__ . '/../..' . '/app/Http/Controllers/ThuocKhoController.php',
+        'App\\Http\\Middleware\\KiemTraMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/KiemTraMiddleware.php',
+        'App\\Http\\Requests\\NhapThuocRequest' => __DIR__ . '/../..' . '/app/Http/Requests/NhapThuocRequest.php',
+        'App\\Http\\Requests\\PhieuNhapRequest' => __DIR__ . '/../..' . '/app/Http/Requests/PhieuNhapRequest.php',
+        'App\\Mail\\TaiKhoan' => __DIR__ . '/../..' . '/app/Mail/TaiKhoan.php',
+        'App\\Models\\ChucNang' => __DIR__ . '/../..' . '/app/Models/ChucNang.php',
+        'App\\Models\\ChucVu' => __DIR__ . '/../..' . '/app/Models/ChucVu.php',
+        'App\\Models\\DanhGia' => __DIR__ . '/../..' . '/app/Models/DanhGia.php',
+        'App\\Models\\DichVu' => __DIR__ . '/../..' . '/app/Models/DichVu.php',
         'App\\Models\\DonThuoc' => __DIR__ . '/../..' . '/app/Models/DonThuoc.php',
         'App\\Models\\KhachHang' => __DIR__ . '/../..' . '/app/Models/KhachHang.php',
+        'App\\Models\\Kho' => __DIR__ . '/../..' . '/app/Models/Kho.php',
+        'App\\Models\\LichHenPet' => __DIR__ . '/../..' . '/app/Models/LichHenPet.php',
+        'App\\Models\\LoaiDichVu' => __DIR__ . '/../..' . '/app/Models/LoaiDichVu.php',
+        'App\\Models\\Luong' => __DIR__ . '/../..' . '/app/Models/Luong.php',
+        'App\\Models\\NhaCungCap' => __DIR__ . '/../..' . '/app/Models/NhaCungCap.php',
+        'App\\Models\\NhanVien' => __DIR__ . '/../..' . '/app/Models/NhanVien.php',
+        'App\\Models\\PhanQuyen' => __DIR__ . '/../..' . '/app/Models/PhanQuyen.php',
+        'App\\Models\\PhieuNhap' => __DIR__ . '/../..' . '/app/Models/PhieuNhap.php',
+        'App\\Models\\PhieuNhapChiTiet' => __DIR__ . '/../..' . '/app/Models/PhieuNhapChiTiet.php',
         'App\\Models\\Thuoc' => __DIR__ . '/../..' . '/app/Models/Thuoc.php',
+        'App\\Models\\ThuocKho' => __DIR__ . '/../..' . '/app/Models/ThuocKho.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Models\\pet' => __DIR__ . '/../..' . '/app/Models/pet.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
@@ -719,7 +751,19 @@ class ComposerStaticInitace95a9f311dc7ec268a40fdac2753e9
         'Cron\\MinutesField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/MinutesField.php',
         'Cron\\MonthField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/MonthField.php',
         'Database\\Factories\\UserFactory' => __DIR__ . '/../..' . '/database/factories/UserFactory.php',
+        'Database\\Seeders\\ChucNangSeeder' => __DIR__ . '/../..' . '/database/seeders/ChucNangSeeder.php',
+        'Database\\Seeders\\ChucVuSeeder' => __DIR__ . '/../..' . '/database/seeders/ChucVuSeeder.php',
+        'Database\\Seeders\\DanhGiaSeeder' => __DIR__ . '/../..' . '/database/seeders/DanhGiaSeeder.php',
         'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeders/DatabaseSeeder.php',
+        'Database\\Seeders\\DichVuSeeder' => __DIR__ . '/../..' . '/database/seeders/DichVuSeeder.php',
+        'Database\\Seeders\\KhachHangSeeder' => __DIR__ . '/../..' . '/database/seeders/KhachHangSeeder.php',
+        'Database\\Seeders\\KhoSeeder' => __DIR__ . '/../..' . '/database/seeders/KhoSeeder.php',
+        'Database\\Seeders\\LoaiDichVuSeeder' => __DIR__ . '/../..' . '/database/seeders/LoaiDichVuSeeder.php',
+        'Database\\Seeders\\NhaCungCapSeeder' => __DIR__ . '/../..' . '/database/seeders/NhaCungCapSeeder.php',
+        'Database\\Seeders\\NhanVienSeeder' => __DIR__ . '/../..' . '/database/seeders/NhanVienSeeder.php',
+        'Database\\Seeders\\PetSeeder' => __DIR__ . '/../..' . '/database/seeders/PetSeeder.php',
+        'Database\\Seeders\\QLTonKhoSeeder' => __DIR__ . '/../..' . '/database/seeders/QLTonKhoSeeder.php',
+        'Database\\Seeders\\ThuocSeeder' => __DIR__ . '/../..' . '/database/seeders/ThuocSeeder.php',
         'DateError' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
         'DateException' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateException.php',
         'DateInvalidOperationException' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateInvalidOperationException.php',
