@@ -114,11 +114,12 @@ class NhanVienController extends Controller
     }
     public function checkLogin()
     {
-        $user = Auth::guard('nhan_vien')->user();
+        $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\NhanVien) {
+            $token = $user->createToken('token')->plainTextToken;
             return response()->json([
                 'status' => 1,
-                // gọi name và email để hiện lên top admin khi đăng nhập vào từng acc nhân viên
+                'token' => $token,
                 'name' => $user->ten_nv,
                 'email' => $user->email,
             ]);

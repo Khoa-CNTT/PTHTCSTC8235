@@ -189,3 +189,8 @@ Route::middleware(['auth:sanctum', 'KiemTraAdmin:15'])->group(function () {
     Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
     Route::get("lich/load",[LichHenController::class,'load']);
 });
+
+// Route kiểm tra quyền
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/phan-quyen/kiem-tra-quyen/{id_chuc_nang}', [PhanQuyenController::class, 'kiemTraQuyen']);
+});
