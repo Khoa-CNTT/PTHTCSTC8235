@@ -9,6 +9,7 @@ class LichHenPet extends Model
     protected $table = 'lich_hen_pets';
     protected $fillable = [
         "id_lich",
+        "id_dv",
         "id_pet",
         "ngay_gio_hen",
         "id_nv",
