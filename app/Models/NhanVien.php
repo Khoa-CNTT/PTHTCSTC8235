@@ -23,4 +23,8 @@ class NhanVien extends Authenticatable
         'tinh_trang',
         'id_chucvu',
     ];
+    public function chuc_vu()
+    {
+        return $this->belongsTo(ChucVu::class, 'id_chucvu', 'id');
+    }
 }
