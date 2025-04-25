@@ -4,8 +4,12 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\DonThuocController;
+use App\Http\Controllers\HoSoBenhAnController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
+use App\Http\Controllers\LichHenController;
+use App\Http\Controllers\LichHenPetController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\NhaCungCapController;
@@ -90,8 +94,8 @@ Route::post("nhan-vien/xoa", [NhanVienController::class, 'delete']);
 Route::post('/nhan-vien/tim-kiem', [NhanVienController::class, 'timkiem']);
 Route::post('/nhan-vien/kiem-tra-dang-nhap', [NhanVienController::class, 'checkLogin']);
 Route::get('/nhan-vien/dang-xuat', [NhanVienController::class, 'dangXuat']);
-
 Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
+Route::get('/nhan-vien/load-chi-tiet/{id}', [NhanVienController::class, 'LoadDataChiTiet']);
 
 Route::post("danh-gia/them", [DanhGiaController::class, 'them']);
 Route::get("danh-gia/load", [DanhGiaController::class, 'load']);
@@ -134,3 +138,14 @@ Route::post('/phan-quyen/load-cap-quyen', [PhanQuyenController::class, 'load_cap
 Route::post('/phan-quyen/xoa', [PhanQuyenController::class, 'xoa']);
 Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
 Route::post('/phan-quyen/tim-kiem-chuc-nang', [PhanQuyenController::class, 'tim_kiem_cn']);
+Route::get('/phan-quyen/load-chuc-nang',[PhanQuyenController::class,'load_chuc_nang']);
+Route::post('phan-quyen/cap-quyen',[PhanQuyenController::class,'cap_quyen']);
+Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_kiem_cn']);
+
+Route::post("lich-hen/them",[LichHenPetController::class,'them']);
+Route::get("lich-hen/load",[LichHenPetController::class,'load']);
+Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
+Route::post("lich-hen/update",[LichHenPetController::class,'update']);
+Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
+
+Route::get("lich/load",[LichHenController::class,'load']);

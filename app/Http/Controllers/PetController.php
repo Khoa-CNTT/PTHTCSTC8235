@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\pet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PetController extends Controller
 {
     public function Load()
     {
         $data = pet::join('khach_hangs', 'khach_hangs.id', '=', 'pets.id_kh')
-                    ->select('pets.*', 'khach_hangs.ho_va_ten')
-                     ->get();
+            ->select('pets.*', 'khach_hangs.ho_va_ten')
+            ->get();
         return response()->json([
             "data" => $data
         ]);
@@ -55,5 +56,11 @@ class PetController extends Controller
             'status' => 1,
             'message' => 'Thêm mới pet thành công'
         ]);
+    }
+    public function getPetsByUser(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        $pets = Pet::where('id_kh', $user->id)->get();
+        return response()->json(['data' => $pets]);
     }
 }

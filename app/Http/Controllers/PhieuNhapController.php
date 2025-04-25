@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 
 class PhieuNhapController extends Controller
 {
-    private $id_chuc_nang = 1;
     public function loadKhovaNCCvaThuoc()
     {
         $khos = Kho::where('tinh_trang', 1)->get();
@@ -32,11 +31,7 @@ class PhieuNhapController extends Controller
     }
     public function loc(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
+
             $query = PhieuNhap::with(['kho', 'ncc', 'chiTiet']);
 
             if ($request->filled('tu_ngay')) {
@@ -53,12 +48,7 @@ class PhieuNhapController extends Controller
                 'status' => true,
                 'data' => $ds
             ]);
-        } else {
-            return response()->json([
-                'status' => '0',
-                "message" => "Bạn không có quyền lọc phiếu nhập",
-            ]);
-        }
+
     }
 
     public function load()
@@ -72,11 +62,7 @@ class PhieuNhapController extends Controller
     }
     public function delete(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
+
             $id = $request->id;
 
             try {
@@ -96,20 +82,11 @@ class PhieuNhapController extends Controller
                     'message' => 'Lỗi khi xoá: ' . $e->getMessage(),
                 ]);
             }
-        } else {
-            return response()->json([
-                'status' => '0',
-                "message" => "Bạn không có quyền thêm nhà cung cấp",
-            ]);
-        }
+
     }
     public function update(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
+
             $data = $request->all();
 
         foreach ($data['chi_tiet'] as $chiTietData) {
@@ -127,7 +104,7 @@ class PhieuNhapController extends Controller
             'status' => 1,
             'message' => 'Cập nhật chi tiết phiếu nhập thành công'
         ]);
-    }
+
     }
     public function timkiem(Request $request)
     {
@@ -148,12 +125,8 @@ class PhieuNhapController extends Controller
 
     public function tao(PhieuNhapRequest $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
 
-        if ($check) {
+
             $data = $request->validated();
 
             // Kiểm tra trùng thuốc trong chi tiết
@@ -234,12 +207,7 @@ class PhieuNhapController extends Controller
                     'message' => 'Lỗi: ' . $e->getMessage(),
                 ], 500);
             }
-        } else {
-            return response()->json([
-                'status' => '0',
-                "message" => "Bạn không có quyền tạo phiếu nhập",
-            ]);
-        }
+        
     }
 }
 

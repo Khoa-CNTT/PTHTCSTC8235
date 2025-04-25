@@ -9,7 +9,11 @@ class DonThuoc extends Model
     protected $table = 'don_thuocs';
     protected $fillable = [
             'id_hsba',
-            'ngay_ke_don',
-            'ghi_chu',
+            'ten_nv',
+            'ngay_kham',
+            'chuan_doan',
+            'id_thuoc',
+            'so_luong',
+            'lieu_luong',
     ];
 }

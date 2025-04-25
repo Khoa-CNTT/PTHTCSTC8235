@@ -53,31 +53,33 @@ class LuongController extends Controller
             ]);
         }
     }
-    public function Them(Request $request)
-    {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
-            Luong::create($request->all());
-            return response()->json([
-                'status' => 1,
-                'message' => 'Thêm mới lương thành công'
-            ]);
-        } else {
-            return response()->json([
-                'status' => '0',
-                "message" => "Bạn không có quyền thêm lương",
-            ]);
-        }
-
-
+    public function Them(Request $request){
+        Luong::create($request->all());
+        return response()->json([
+            'status' => 1,
+            'message' => 'Thêm mới Luong thành công'
+        ]);
     }
-    public function TimKiem(Request $request)
+    public function xoaLuong(Request $request)
     {
-        $content = '%' . $request->noi_dung . '%';
-        $data = Luong::where('ten_nv', 'like', $content)->get();
+        Luong::where('id', $request->id)->delete();
+        return response()->json([
+            "status" => '1',
+            "message" => "Xóa thành công"
+        ]);
+    }
+    public function suaLuong(Request $request)
+    {
+        $data = $request->all();
+        Luong::find($request->id)->update($data);
+        return response()->json([
+            "status" => '1',
+            "message" => "Cập nhật lương thành công"
+        ]);
+    }
+    public function TimKiem(Request $request){
+        $content = '%'.$request->noi_dung.'%';
+        $data= Luong::where('ten_nv', 'like', $content)->get();
         return response()->json([
             'data' => $data
         ]);
