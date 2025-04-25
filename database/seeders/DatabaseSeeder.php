@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             QLTonKhoSeeder::class,
             NhanVienSeeder::class,
             PetSeeder::class,
+            PhanQuyenSeeder::class,
         ]);
     }
 }
