@@ -18,7 +18,8 @@ return new class extends Migration
             $table->decimal('gia_nhap', 15, 2);
             $table->integer('so_luong_ton_kho');
             $table->date('han_su_dung');
-            $table->date('ngay_nhap');
+            $table->decimal('gia_ban',15,2);
+            $table->integer('id_phieu_nhap_CT')->nullable();
             $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });

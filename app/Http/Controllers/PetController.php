@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KhachHang;
 use App\Models\pet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,10 +58,15 @@ class PetController extends Controller
             'message' => 'Thêm mới pet thành công'
         ]);
     }
-    public function getPetsByUser(Request $request)
+    public function showPetsByUserId($id)
     {
-        $user = Auth::guard('sanctum')->user();
-        $pets = Pet::where('id_kh', $user->id)->get();
-        return response()->json(['data' => $pets]);
+        $user = KhachHang::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $pets = Pet::where('id_kh', $id)->get();
+
+        return response()->json(['pets' => $pets], 200);
     }
 }
