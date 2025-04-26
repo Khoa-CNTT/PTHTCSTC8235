@@ -6,6 +6,7 @@ use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\PhanQuyen;
 
 class NhanVienController extends Controller
 {
@@ -91,6 +92,41 @@ class NhanVienController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
+    public function kiemTraQuyen($id)
+    {
+        try {
+            // Lấy user từ guard Sanctum
+            $user = Auth::guard('sanctum')->user();
+            if (!$user || !($user instanceof NhanVien)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Bạn cần đăng nhập.'
+                ], 401);
+            }
+
+            // Kiểm tra quyền dựa trên chức vụ và chức năng
+            $coQuyen = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->where('id_chuc_nang', $id)
+                ->exists();
+
+            if ($coQuyen) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Có quyền truy cập.'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Bạn không có quyền truy cập chức năng này.'
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi server: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     public function dangNhap(Request $request)
     {
 
@@ -116,10 +152,8 @@ class NhanVienController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\NhanVien) {
-            $token = $user->createToken('token')->plainTextToken;
             return response()->json([
                 'status' => 1,
-                'token' => $token,
                 'name' => $user->ten_nv,
                 'email' => $user->email,
             ]);

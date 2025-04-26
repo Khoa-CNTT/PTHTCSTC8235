@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'KiemTraAdmin'=> \App\Http\Middleware\KiemTraMiddleware::class,
+            'kiemtra.quyen' => \App\Http\Middleware\KiemTraQuyenMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

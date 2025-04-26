@@ -7,9 +7,14 @@ use App\Models\NhanVien;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DichVuController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(KiemTraMiddleware::class);
+    }
     public function them(Request $request)
     {
             $data = $request->all();
@@ -22,6 +27,7 @@ class DichVuController extends Controller
 
     public function loadTiemChung()
     {
+        $this->kiemTraChucNang(4);
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
             ->where('dich_vus.id_loaidv', 1)
             ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
@@ -34,6 +40,7 @@ class DichVuController extends Controller
 
     public function loadChamSoc()
     {
+        $this->kiemTraChucNang(4);
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
             ->where('dich_vus.id_loaidv', 2)
             ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
@@ -44,10 +51,9 @@ class DichVuController extends Controller
         ]);
     }
 
-
-
     public function loadBacSi()
 {
+    $this->kiemTraChucNang(4);
     $bacSiList = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')
         ->where('chuc_vus.ten_chuc_vu', 'Bác sĩ')
         ->select('nhan_viens.*', 'chuc_vus.ten_chuc_vu')
@@ -61,6 +67,7 @@ class DichVuController extends Controller
 
     public function load()
     {
+        $this->kiemTraChucNang(4);
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
             ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
             ->get();

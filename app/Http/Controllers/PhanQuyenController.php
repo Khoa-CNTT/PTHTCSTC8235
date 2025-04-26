@@ -64,25 +64,4 @@ class PhanQuyenController extends Controller
             'data' => $data
         ]);
     }
-
-    public function kiemTraQuyen($id_chuc_nang)
-    {
-        $user = Auth::guard('sanctum')->user();
-        if (!$user || !($user instanceof \App\Models\NhanVien)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Bạn không có quyền truy cập'
-            ], 403);
-        }
-
-        $hasPermission = DB::table('phan_quyens')
-            ->where('id_chuc_vu', $user->id_chucvu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->exists();
-
-        return response()->json([
-            'status' => $hasPermission,
-            'message' => $hasPermission ? 'Có quyền truy cập' : 'Không có quyền truy cập'
-        ]);
-    }
 }
