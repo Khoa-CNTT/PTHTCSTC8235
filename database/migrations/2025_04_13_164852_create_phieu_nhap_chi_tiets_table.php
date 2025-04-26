@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_phieu_nhap');
             $table->integer('id_thuoc');
             $table->integer('so_luong');
-            $table->integer('gia_nhap');
+            $table->decimal('gia_nhap',15,2);
+            $table->decimal('gia_ban',15,2);
             $table->date('han_su_dung');
             $table->timestamps();
         });
