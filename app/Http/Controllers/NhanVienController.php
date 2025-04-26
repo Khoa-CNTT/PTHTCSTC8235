@@ -129,4 +129,12 @@ class NhanVienController extends Controller
             ]);
         }
     }
+    public function LoadDataChiTiet(Request $request)
+    {
+        $data = NhanVien::where("id", $request->id)
+            ->first();
+        return response()->json([
+            'data' => $data,
+        ]);
+    }
 }
