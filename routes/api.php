@@ -143,7 +143,7 @@ Route::get('/phan-quyen/load-chuc-nang',[PhanQuyenController::class,'load_chuc_n
 Route::post('phan-quyen/cap-quyen',[PhanQuyenController::class,'cap_quyen']);
 Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_kiem_cn']);
 
-Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
+Route::middleware('auth:sanctum')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
 Route::get("lich-hen/load",[LichHenPetController::class,'load']);
 Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
 Route::post("lich-hen/update",[LichHenPetController::class,'update']);
