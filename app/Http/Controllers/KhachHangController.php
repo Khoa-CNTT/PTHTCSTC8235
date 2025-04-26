@@ -46,19 +46,6 @@ class KhachHangController extends Controller
             "message" => "Mail đã được gửi, vui lòng xác nhận email"
         ]);
     }
-    public function sendMail(Request $request)
-    {
-        $hash_active = Str::uuid();
-        $khach_hang = KhachHang::where('email', $request->email)->first();
-        $khach_hang['hash_active'] = $hash_active;
-        $khach_hang->save();
-        $data['ho_va_ten'] = $khach_hang->ho_va_ten;
-        $data['link'] = "http://localhost:3000/doi-mat-khau/" . $khach_hang->hash_active;
-        Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Xác nhận đổi mật khẩu', 'DoiMatKhauMail', $data));
-        return response()->json([
-            "message" => "Kiểm tra email của bạn"
-        ]);
-    }
     public function doimk(Request $request)
     {
         $khach_hang = KhachHang::where('hash_active', $request->ma)
@@ -78,7 +65,43 @@ class KhachHangController extends Controller
             ]);
         }
     }
-
+    public function  quenmk(Request $request){
+        $hash_active = Str::uuid();
+        $khach_hang = KhachHang::where('email',$request->email)->first();
+        $khach_hang['hash_active']=$hash_active;
+        $khach_hang->save();
+        $data['ho_va_ten'] = $khach_hang->ho_va_ten;
+        $data['link'] = "http://localhost:3000/khach-hang/doi-mat-khau" . $khach_hang->hash_active;
+        Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Bạn muốn đổi mật khẩu?', 'DoiMatKhauMail', $data));
+        return response()->json([
+            "message" => "Kiểm tra email của bạn"
+        ]);
+    }
+    public function kichHoat(Request $request)
+    {
+        $check = KhachHang::where('hash_active', $request->id_khach_hang)
+            ->first();
+        if ($check) {
+            if ($check->is_active == 0) {
+                $check->is_active = 1;
+                $check->save();
+                return response()->json([
+                    "status" => 1,
+                    "message" => "kích hoạt thành công"
+                ]);
+            } else {
+                return response()->json([
+                    "status" => 2,
+                    "message" => "Tài khoản đã được kích hoạt trước đó"
+                ]);
+            }
+        } else {
+            return response()->json([
+                "status" => 0,
+                "message" => "Kích hoạt không thành công"
+            ]);
+        }
+    }
     public function layDuLieu(){
         $user = Auth::guard('sanctum')->user();
             return response()->json([
@@ -157,30 +180,4 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function kichHoat(Request $request)
-    {
-        $check = KhachHang::where('hash_active', $request->id_khach_hang)
-            ->first();
-        if ($check) {
-            if ($check->is_active == 0) {
-                $check->is_active = 1;
-                $check->save();
-                return response()->json([
-                    "status" => 1,
-                    "message" => "kích hoạt thành công"
-                ]);
-            } else {
-                return response()->json([
-                    "status" => 2,
-                    "message" => "Tài khoản đã được kích hoạt trước đó"
-                ]);
-            }
-        } else {
-            return response()->json([
-                "status" => 0,
-                "message" => "Kích hoạt không thành công"
-            ]);
-        }
-    }
-
 }

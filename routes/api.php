@@ -80,7 +80,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:6'])->group(function () {
 // client khach hang routes
 Route::post("khach-hang/dang-ky", [KhachHangController::class, 'dangKy']);
 Route::post("khach-hang/doi-mat-khau", [KhachHangController::class, 'doimk']);
-Route::Post("khach-hang/quen-mat-khau", [KhachHangController::class, 'sendMail']);
+Route::Post("khach-hang/quen-mat-khau", [KhachHangController::class, 'quenmk']);
 Route::post("khach-hang/kich-hoat", [KhachHangController::class, 'kichHoat']);
 Route::post("khach-hang/dang-nhap", [KhachHangController::class, 'dangNhap']);
 Route::get("khach-hang/dang-xuat", [KhachHangController::class, 'dangXuat']);
