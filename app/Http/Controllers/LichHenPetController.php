@@ -4,18 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Models\LichHenPet;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 class LichHenPetController extends Controller
 {
-    public function them(Request $request)
-    {
-        $data = $request->all();
-        LichHenPet::create($data);
+    
+
+public function them(Request $request)
+{
+    $user = Auth::guard('api')->user();
+    if (!$user) {
         return response()->json([
-            'status' => '1',
-            "message" => "Thêm mới thành công",
-        ]);
+            'status' => '0',
+            'message' => 'Không xác thực được người dùng',
+        ], 401);
     }
+    $lichHen = new LichHenPet();
+    $lichHen->ten_dv = $request->ten_dv;
+    $lichHen->id_lich = $request->id_lich;
+    $lichHen->id_nv = $request->id_nv;
+    $lichHen->id_pet = $request->id_pet;
+    $lichHen->ngay = $request->ngay;
+    $lichHen->gio = $request->gio;
+
+    $lichHen->id_khach_hang = $user->id;
+    $lichHen->ten_khach_hang = $user->name;
+
+    $lichHen->save();
+
+    return response()->json([
+        'status' => '1',
+        'message' => 'Thêm mới thành công',
+        'data' => $lichHen
+    ]);
+}
+
 
     public function load()
     {
