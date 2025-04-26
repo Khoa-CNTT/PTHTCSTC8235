@@ -70,6 +70,7 @@ Route::get("khach-hang/dang-xuat", [KhachHangController::class, 'dangXuat']);
 Route::get("khach-hang/dang-xuat-all", [KhachHangController::class, 'dangXuatAll']);
 Route::post("khach-hang/Kiem-tra-dang-nhap", [KhachHangController::class, 'KiemTraDN']);
 Route::get("/khach-hang/lay-du-lieu", [KhachHangController::class, 'layDuLieu']);
+Route::post('/khach-hang/sua', [KhachHangController::class, 'Sua']);
 
 
 Route::post('/them-pet', [PetController::class, 'Them']);
@@ -77,7 +78,7 @@ Route::post('/xoa-pet', [PetController::class, 'Xoa']);
 Route::post('/sua-pet', [PetController::class, 'Sua']);
 Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
 Route::get('/load-pet', [PetController::class, 'Load']);
-
+Route::get('/pets/{id_kh}', [PetController::class, 'showPetsByUserId']);
 
 Route::post('/them-luong', [LuongController::class, 'Them']);
 Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
@@ -149,3 +150,6 @@ Route::post("lich-hen/update",[LichHenPetController::class,'update']);
 Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
 
 Route::get("lich/load",[LichHenController::class,'load']);
+
+Route::middleware('auth:sanctum')->get('/user/info', [KhachHangController::class, 'info']);
+
