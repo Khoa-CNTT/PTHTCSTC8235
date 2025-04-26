@@ -64,4 +64,19 @@ class PhanQuyenController extends Controller
             'data' => $data
         ]);
     }
+    public function kiemTraQuyen(Request $request, $id_chuc_nang)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user && $user instanceof \App\Models\NhanVien) {
+            $coQuyen = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->where('id_chuc_nang', $id_chuc_nang)
+                ->exists();
+            return response()->json([
+                'status' => $coQuyen ? 1 : 0,
+            ]);
+        }
+        return response()->json([
+            'status' => 0,
+        ]);
+    }
 }

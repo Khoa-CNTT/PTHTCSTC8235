@@ -92,41 +92,6 @@ class NhanVienController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
-    public function kiemTraQuyen($id)
-    {
-        try {
-            // Lấy user từ guard Sanctum
-            $user = Auth::guard('sanctum')->user();
-            if (!$user || !($user instanceof NhanVien)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Bạn cần đăng nhập.'
-                ], 401);
-            }
-
-            // Kiểm tra quyền dựa trên chức vụ và chức năng
-            $coQuyen = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
-                ->where('id_chuc_nang', $id)
-                ->exists();
-
-            if ($coQuyen) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Có quyền truy cập.'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Bạn không có quyền truy cập chức năng này.'
-                ], 403);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Lỗi server: ' . $e->getMessage()
-            ], 500);
-        }
-    }
     public function dangNhap(Request $request)
     {
 
@@ -134,12 +99,17 @@ class NhanVienController extends Controller
             ->attempt(['email' => $request->email, 'password' => $request->password]);
         if ($check) {
             $user = Auth::guard('nhan_vien')->user();
+            $permissions = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->pluck('id_chuc_nang');
             return response()->json([
                 'status' => 1,
                 'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công',
                 'email' => $user->email,
                 'name' => $user->ten_nv,
+                'id_chucvu' => $user->id_chucvu,
+                'ten_chuc_vu' => optional($user->chuc_vu)->ten_chuc_vu,
+                'permissions' => $permissions,
             ]);
         } else {
             return response()->json([

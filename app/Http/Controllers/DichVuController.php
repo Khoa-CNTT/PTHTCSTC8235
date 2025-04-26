@@ -8,13 +8,11 @@ use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Middleware\KiemTraMiddleware;
 
 class DichVuController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(KiemTraMiddleware::class);
-    }
+
     public function them(Request $request)
     {
             $data = $request->all();

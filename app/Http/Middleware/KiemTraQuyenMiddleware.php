@@ -4,28 +4,35 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\PhanQuyen;
 use Illuminate\Support\Facades\Auth;
+use App\Models\PhanQuyen;
+use Symfony\Component\HttpFoundation\Response;
 
 class KiemTraQuyenMiddleware
 {
-    public function handle(Request $request, Closure $next, $idChucNang)
+    public function handle(Request $request, Closure $next, $id_chuc_nang)
     {
-        // Lấy thông tin nhân viên đang đăng nhập
-        $nhanVien = Auth::user();
+        // Lấy người dùng hiện tại qua Sanctum
+        $user = Auth::guard('sanctum')->user();
+        if (!$user || !($user instanceof \App\Models\NhanVien)) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Chưa đăng nhập'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
 
-        // Kiểm tra quyền của nhân viên với chức năng
-        $coQuyen = PhanQuyen::where('id_chuc_vu', $nhanVien->id_chucvu)
-            ->where('id_chuc_nang', $idChucNang)
+        // Kiểm tra phân quyền trong bảng phan_quyens
+        $hasPermission = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+            ->where('id_chuc_nang', $id_chuc_nang)
             ->exists();
 
-        if (!$coQuyen) {
+        if (!$hasPermission) {
             return response()->json([
-                'status' => false,
-                'message' => 'Bạn không có quyền truy cập chức năng này'
-            ], 403);
+                'status' => 0,
+                'message' => 'Không có quyền truy cập'
+            ], Response::HTTP_FORBIDDEN);
         }
 
         return $next($request);
     }
-} 
+}

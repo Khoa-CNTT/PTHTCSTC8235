@@ -10,13 +10,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class KiemTraMiddleware
 {
-    public function handle(Request $request, Closure $next, $idChucNang)
+    public function handle(Request $request, Closure $next)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\NhanVien) {
             return $next($request);
         } else {
-            return response()->json('bien');
+            return response()->json('');
         }
     }
 }
