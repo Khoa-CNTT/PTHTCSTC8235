@@ -71,12 +71,21 @@ class PhanQuyenController extends Controller
             $coQuyen = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
                 ->where('id_chuc_nang', $id_chuc_nang)
                 ->exists();
-            return response()->json([
-                'status' => $coQuyen ? 1 : 0,
-            ]);
+            if ($coQuyen) {
+                return response()->json([
+                    'status' => 1,
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền truy cập',
+                ]);
+            }
         }
         return response()->json([
             'status' => 0,
         ]);
     }
+
 }
+

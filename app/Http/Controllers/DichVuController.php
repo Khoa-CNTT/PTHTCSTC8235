@@ -8,7 +8,7 @@ use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Http\Middleware\KiemTraMiddleware;
+
 
 class DichVuController extends Controller
 {
@@ -65,7 +65,6 @@ class DichVuController extends Controller
 
     public function load()
     {
-        $this->kiemTraChucNang(4);
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
             ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
             ->get();
