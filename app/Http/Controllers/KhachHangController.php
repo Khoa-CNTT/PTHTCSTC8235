@@ -65,13 +65,13 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function  quenmk(Request $request){
+    public function guiMail(Request $request){
         $hash_active = Str::uuid();
         $khach_hang = KhachHang::where('email',$request->email)->first();
         $khach_hang['hash_active']=$hash_active;
         $khach_hang->save();
         $data['ho_va_ten'] = $khach_hang->ho_va_ten;
-        $data['link'] = "http://localhost:3000/khach-hang/doi-mat-khau" . $khach_hang->hash_active;
+        $data['link'] = "http://localhost:3000/client/doi-mat-khau/". $khach_hang->hash_active;
         Mail::to($request->email)->send(new \App\Mail\TaiKhoan('Bạn muốn đổi mật khẩu?', 'DoiMatKhauMail', $data));
         return response()->json([
             "message" => "Kiểm tra email của bạn"

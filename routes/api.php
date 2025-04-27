@@ -43,12 +43,13 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:4'])->group(function () {
 });
 
 // client dich vu
+Route::get("dich-vu/load-bac-si",[DichVuController::class,'loadBacSi']);
 Route::get("dich-vu/load", [DichVuController::class, 'load']);
 Route::post('dich-vu/tim-kiem', [DichVuController::class, 'timkiem']);
 Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
 Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
 Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
-Route::get("dich-vu/load-bac-si",[DichVuController::class,'loadBacSi']);
+
 
 
 // admin Thuoc routes
@@ -80,7 +81,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:6'])->group(function () {
 // client khach hang routes
 Route::post("khach-hang/dang-ky", [KhachHangController::class, 'dangKy']);
 Route::post("khach-hang/doi-mat-khau", [KhachHangController::class, 'doimk']);
-Route::Post("khach-hang/quen-mat-khau", [KhachHangController::class, 'quenmk']);
+Route::post("khach-hang/send-mail", [KhachHangController::class, 'guiMail']);
 Route::post("khach-hang/kich-hoat", [KhachHangController::class, 'kichHoat']);
 Route::post("khach-hang/dang-nhap", [KhachHangController::class, 'dangNhap']);
 Route::get("khach-hang/dang-xuat", [KhachHangController::class, 'dangXuat']);
@@ -195,5 +196,4 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:15'])->group(function () {
 });
 
 // Route kiểm tra quyền
-
 Route::get('/phan-quyen/kiem-tra-quyen/{id_chuc_nang}', [PhanQuyenController::class, 'kiemTraQuyen']);
