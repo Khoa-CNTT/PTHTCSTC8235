@@ -72,6 +72,9 @@ Route::post("khach-hang/Kiem-tra-dang-nhap", [KhachHangController::class, 'KiemT
 Route::get("/khach-hang/lay-du-lieu", [KhachHangController::class, 'layDuLieu']);
 Route::post('/khach-hang/sua', [KhachHangController::class, 'Sua'])->middleware('auth:sanctum');
 Route::post("khach-hang/doi-mat-khau-tcn", [KhachHangController::class, 'doipassTcn'])->middleware('auth:sanctum');
+Route::post("khach-hang/them-pet", [KhachHangController::class, 'themPet'])->middleware('auth:sanctum');
+Route::post("khach-hang/update-pet", [KhachHangController::class, 'updatePet'])->middleware('auth:sanctum');
+Route::post("khach-hang/xoa-pet", [KhachHangController::class, 'xoaPet'])->middleware('auth:sanctum');
 
 
 

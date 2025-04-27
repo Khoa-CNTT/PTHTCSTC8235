@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DoiMatKhauRequest;
 use App\Models\KhachHang;
+use App\Models\pet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -241,6 +242,99 @@ class KhachHangController extends Controller
         return response()->json([
             'status' => 1,
             'message' => 'Sửa thông tin thành công :3'
+        ]);
+    }
+    public function themPet(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user(); // Lấy user đang đăng nhập
+
+        if (!$user || !$user instanceof KhachHang) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần đăng nhập để thêm thú cưng'
+            ], 401);
+        }
+
+        $pet = new pet();
+        $pet->id_kh = $user->id; // Gán id khách hàng đăng nhập
+        $pet->ten_pet = $request->ten_pet;
+        $pet->chung_loai = $request->chung_loai;
+        $pet->gioi_tinh = $request->gioi_tinh;
+        $pet->tuoi = $request->tuoi;
+        $pet->can_nang = $request->can_nang;
+        $pet->hinh_anh = $request->hinh_anh ?? null;
+        $pet->save();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Thêm thú cưng thành công'
+        ]);
+    }
+    public function updatePet(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if (!$user || !$user instanceof \App\Models\KhachHang) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần đăng nhập'
+            ], 401);
+        }
+
+        // Kiểm tra thú cưng có tồn tại và có thuộc về user này không
+        $pet = \App\Models\Pet::where('id', $request->id)
+            ->where('id_kh', $user->id)
+            ->first();
+
+        if (!$pet) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy thú cưng để cập nhật'
+            ]);
+        }
+
+        // Update thông tin
+        $pet->update([
+            'ten_pet' => $request->ten_pet,
+            'chung_loai' => $request->chung_loai,
+            'gioi_tinh' => $request->gioi_tinh,
+            'tuoi' => $request->tuoi,
+            'can_nang' => $request->can_nang,
+            'hinh_anh' => $request->hinh_anh
+        ]);
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Cập nhật thông tin thú cưng thành công'
+        ]);
+    }
+    public function xoaPet(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if (!$user || !$user instanceof \App\Models\KhachHang) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần đăng nhập'
+            ], 401);
+        }
+
+        // Kiểm tra thú cưng có tồn tại và có thuộc về user này không
+        $pet = \App\Models\Pet::where('id', $request->id)
+            ->where('id_kh', $user->id)
+            ->first();
+
+        if (!$pet) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy thú cưng để xóa'
+            ]);
+        }
+
+        // Xóa thú cưng
+        $pet->delete();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Xóa thú cưng thành công'
         ]);
     }
 }
