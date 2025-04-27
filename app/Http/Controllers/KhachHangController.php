@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DoiMatKhauRequest;
 use App\Models\KhachHang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,7 @@ class KhachHangController extends Controller
             "message" => "Kiểm tra email của bạn"
         ]);
     }
+    // giao dien dang nhap
     public function doimk(Request $request)
     {
         $khach_hang = KhachHang::where('hash_active', $request->ma)
@@ -78,7 +80,37 @@ class KhachHangController extends Controller
             ]);
         }
     }
+    public function doipassTcn(DoiMatKhauRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
 
+        if (!$user || !$user instanceof \App\Models\KhachHang) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần phải đăng nhập'
+            ]);
+        }        // Kiểm tra mật khẩu cũ
+        if (!Hash::check($request->mat_khau_cu, $user->password)) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Mật khẩu cũ không đúng'
+            ]);
+        }
+        // Cập nhật mật khẩu mới
+        $user->password = Hash::make($request->mat_khau_moi);
+        $user->save();
+
+        // Logout tất cả thiết bị
+        DB::table('personal_access_tokens')
+            ->where('tokenable_id', $user->id)
+            ->where('tokenable_type', \App\Models\KhachHang::class)
+            ->delete();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.'
+        ]);
+    }
     public function layDuLieu()
     {
         $user = Auth::guard('sanctum')->user();
@@ -146,16 +178,16 @@ class KhachHangController extends Controller
         $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\KhachHang) {
             DB::table('personal_access_tokens')
-                ->where('id', $user->id)
-                ->delete();
+                ->where('tokenable_id', $user->id)->delete();
             return response()->json([
                 'status' => 1,
-                'message' => 'Đăng xuất thành công'
+                'message' => 'Đăng xuất thành công',
+
             ]);
         } else {
             return response()->json([
                 'status' => 0,
-                'message' => 'Đăng xuất không thành công'
+                'message' => 'Đăng xuất không thành công',
             ]);
         }
     }
@@ -186,7 +218,14 @@ class KhachHangController extends Controller
     }
     public function info(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('sanctum')->user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần đăng nhập'
+            ], 401);
+        }
 
         return response()->json([
             'id' => $user->id,

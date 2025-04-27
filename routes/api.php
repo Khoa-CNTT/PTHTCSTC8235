@@ -70,12 +70,14 @@ Route::get("khach-hang/dang-xuat", [KhachHangController::class, 'dangXuat']);
 Route::get("khach-hang/dang-xuat-all", [KhachHangController::class, 'dangXuatAll']);
 Route::post("khach-hang/Kiem-tra-dang-nhap", [KhachHangController::class, 'KiemTraDN']);
 Route::get("/khach-hang/lay-du-lieu", [KhachHangController::class, 'layDuLieu']);
-Route::post('/khach-hang/sua', [KhachHangController::class, 'Sua']);
+Route::post('/khach-hang/sua', [KhachHangController::class, 'Sua'])->middleware('auth:sanctum');
+Route::post("khach-hang/doi-mat-khau-tcn", [KhachHangController::class, 'doipassTcn'])->middleware('auth:sanctum');
 
 
-Route::post('/them-pet', [PetController::class, 'Them']);
-Route::post('/xoa-pet', [PetController::class, 'Xoa']);
-Route::post('/sua-pet', [PetController::class, 'Sua']);
+
+Route::post('/them-pet', [PetController::class, 'Them'])->middleware('auth:sanctum');
+Route::post('/xoa-pet', [PetController::class, 'Xoa'])->middleware('auth:sanctum');
+Route::post('/sua-pet', [PetController::class, 'Sua'])->middleware('auth:sanctum');
 Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
 Route::get('/load-pet', [PetController::class, 'Load']);
 Route::get('/pets/{id_kh}', [PetController::class, 'showPetsByUserId']);
@@ -134,7 +136,6 @@ Route::post("thuoc-kho/tim-kiem", [ThuocKhoController::class, 'timkiem']);
 
 Route::get('/phan-quyen/load-chuc-vu', [ChucVuController::class, 'load_chuc_vu']);
 
-Route::get('/phan-quyen/load-chuc-nang', [PhanQuyenController::class, 'load_chuc_nang']);
 Route::post('/phan-quyen/load-cap-quyen', [PhanQuyenController::class, 'load_cap_quyen']);
 Route::post('/phan-quyen/xoa', [PhanQuyenController::class, 'xoa']);
 Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
