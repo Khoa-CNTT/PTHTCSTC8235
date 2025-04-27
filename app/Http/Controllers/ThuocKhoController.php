@@ -13,17 +13,20 @@ class ThuocKhoController extends Controller
         $data = DB::table('thuoc_khos as tk')
             ->leftJoin('khos as k', 'tk.id_kho', '=', 'k.id')
             ->leftJoin('thuocs as t', 'tk.id_thuoc', '=', 't.id')
-            ->select(
-                'tk.*',
-                'k.ten_kho',
-                't.ten_thuoc'
-            )
+            ->select('tk.*', 'k.ten_kho', 't.ten_thuoc')
             ->orderByDesc('tk.id')
             ->get();
 
         return response()->json([
             'status' => true,
             'data' => $data
+        ]);
+    }
+    public function xoa(Request $request){
+        ThuocKho::where('id',$request->id)->delete();
+        return response()->json([
+            "status" =>'1',
+            "message" =>"Xóa thuốc thành công"
         ]);
     }
     public function timkiem(Request $request)

@@ -12,6 +12,7 @@ class PhieuNhap extends Model
         'id_ncc',
         'ngay_nhap',
         'tinh_trang',
+        'da_nhap_kho',
     ];
     public function kho()
     {

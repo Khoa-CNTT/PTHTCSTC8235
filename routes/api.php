@@ -128,9 +128,11 @@ Route::post("phieu-nhap/xoa", [PhieuNhapController::class, 'delete']);
 Route::post("phieu-nhap/tao", [PhieuNhapController::class, 'tao']); //lưu phiếu nhập
 Route::post("phieu-nhap/loc-theo-ngay", [PhieuNhapController::class, 'loc']);
 Route::post("phieu-nhap/update", [PhieuNhapController::class, 'update']);
+Route::post("phieu-nhap/nhap-kho", [PhieuNhapController::class, 'nhapKho']);
 
 
 Route::post("thuoc-kho/loc", [ThuocKhoController::class, 'loc']);
+Route::post("thuoc-kho/del", [ThuocKhoController::class, 'xoa']);
 Route::get("thuoc-kho/load", [ThuocKhoController::class, 'load']);
 Route::post("thuoc-kho/tim-kiem", [ThuocKhoController::class, 'timkiem']);
 
