@@ -18,11 +18,11 @@ class KhachHangSeeder extends Seeder
         DB::table('khach_hangs')->insert([
             [
                 'id' => 1,
-                'ho_va_ten' => 'Nguyen Thi A',
-                'email' => 'nguyenthia@example.com',
-                'password' => bcrypt('password123'), // Mã hóa mật khẩu
+                'ho_va_ten' => 'Lương Văn Ái',
+                'email' => 'linkcrdy@gmail.com',
+                'password' => bcrypt('Luongvan@i1019'), // Mã hóa mật khẩu
                 'so_dien_thoai' => '0123456789',
-                'ngay_sinh' => '1995-03-25',
+                'ngay_sinh' => '2003-04-30',
                 'is_active' => 1,
                 'is_block' => 0,
                 'hash_active' => Str::random(40), // Tạo chuỗi hash ngẫu nhiên
@@ -32,29 +32,15 @@ class KhachHangSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'ho_va_ten' => 'Tran Minh B',
-                'email' => 'tranminhb@example.com',
-                'password' => bcrypt('password456'),
-                'so_dien_thoai' => '0987654321',
-                'ngay_sinh' => '1990-06-15',
+                'ho_va_ten' => 'Huỳnh Nguyễn Cao Đức',
+                'email' => 'tthello123@gmail.com',
+                'password' => bcrypt('Huynhvanduc284@'), // Mã hóa mật khẩu
+                'so_dien_thoai' => '0123456789',
+                'ngay_sinh' => '2003-04-28',
                 'is_active' => 1,
                 'is_block' => 0,
-                'hash_active' => Str::random(40),
-                'hash_reset' => Str::random(40),
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'id' => 3,
-                'ho_va_ten' => 'Le Thanh C',
-                'email' => 'lethanhc@example.com',
-                'password' => bcrypt('password789'),
-                'so_dien_thoai' => '0912345678',
-                'ngay_sinh' => '1985-11-20',
-                'is_active' => 1,
-                'is_block' => 0,
-                'hash_active' => Str::random(40),
-                'hash_reset' => Str::random(40),
+                'hash_active' => Str::random(40), // Tạo chuỗi hash ngẫu nhiên
+                'hash_reset' => Str::random(40), // Tạo chuỗi hash ngẫu nhiên
                 'created_at' => now(),
                 'updated_at' => now()
             ],
