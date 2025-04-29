@@ -4,8 +4,12 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\DonThuocController;
+use App\Http\Controllers\HoSoBenhAnController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
+use App\Http\Controllers\LichHenController;
+use App\Http\Controllers\LichHenPetController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\NhaCungCapController;
@@ -34,8 +38,9 @@ Route::post("dich-vu/update", [DichVuController::class, 'update']);
 Route::post("dich-vu/del", [DichVuController::class, 'delete']);
 Route::post('dich-vu/tim-kiem', [DichVuController::class, 'timkiem']);
 Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
-Route::get("dich-vu/load-tiem-chung", [DichVuController::class, 'loadTiemChung']);
-Route::get("dich-vu/load-cham-soc", [DichVuController::class, 'loadChamSoc']);
+Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
+Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
+Route::get("dich-vu/load-bac-si",[DichVuController::class,'loadBacSi']);
 
 
 Route::post("thuoc/them", [ThuocController::class, 'them']);
@@ -65,6 +70,7 @@ Route::get("khach-hang/dang-xuat", [KhachHangController::class, 'dangXuat']);
 Route::get("khach-hang/dang-xuat-all", [KhachHangController::class, 'dangXuatAll']);
 Route::post("khach-hang/Kiem-tra-dang-nhap", [KhachHangController::class, 'KiemTraDN']);
 Route::get("/khach-hang/lay-du-lieu", [KhachHangController::class, 'layDuLieu']);
+Route::post('/khach-hang/sua', [KhachHangController::class, 'Sua']);
 
 
 Route::post('/them-pet', [PetController::class, 'Them']);
@@ -72,12 +78,14 @@ Route::post('/xoa-pet', [PetController::class, 'Xoa']);
 Route::post('/sua-pet', [PetController::class, 'Sua']);
 Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
 Route::get('/load-pet', [PetController::class, 'Load']);
-
+Route::get('/pets/{id_kh}', [PetController::class, 'showPetsByUserId']);
 
 Route::post('/them-luong', [LuongController::class, 'Them']);
 Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
 Route::get('/load-luong', [LuongController::class, 'LoadLuong']);
 Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
+Route::post("/sua-luong",[LuongController::class,'suaLuong']);
+Route::post("/xoa-luong",[LuongController::class,'xoaLuong']);
 
 Route::post("nhan-vien/them", [NhanVienController::class, 'them']);
 Route::get("nhan-vien/load", [NhanVienController::class, 'load']);
@@ -87,8 +95,8 @@ Route::post("nhan-vien/xoa", [NhanVienController::class, 'delete']);
 Route::post('/nhan-vien/tim-kiem', [NhanVienController::class, 'timkiem']);
 Route::post('/nhan-vien/kiem-tra-dang-nhap', [NhanVienController::class, 'checkLogin']);
 Route::get('/nhan-vien/dang-xuat', [NhanVienController::class, 'dangXuat']);
-
 Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
+Route::get('/nhan-vien/load-chi-tiet/{id}', [NhanVienController::class, 'LoadDataChiTiet']);
 
 Route::post("danh-gia/them", [DanhGiaController::class, 'them']);
 Route::get("danh-gia/load", [DanhGiaController::class, 'load']);
@@ -118,9 +126,11 @@ Route::post("phieu-nhap/xoa", [PhieuNhapController::class, 'delete']);
 Route::post("phieu-nhap/tao", [PhieuNhapController::class, 'tao']); //lưu phiếu nhập
 Route::post("phieu-nhap/loc-theo-ngay", [PhieuNhapController::class, 'loc']);
 Route::post("phieu-nhap/update", [PhieuNhapController::class, 'update']);
+Route::post("phieu-nhap/nhap-kho", [PhieuNhapController::class, 'nhapKho']);
 
 
 Route::post("thuoc-kho/loc", [ThuocKhoController::class, 'loc']);
+Route::post("thuoc-kho/del", [ThuocKhoController::class, 'xoa']);
 Route::get("thuoc-kho/load", [ThuocKhoController::class, 'load']);
 Route::post("thuoc-kho/tim-kiem", [ThuocKhoController::class, 'timkiem']);
 
@@ -131,3 +141,17 @@ Route::post('/phan-quyen/load-cap-quyen', [PhanQuyenController::class, 'load_cap
 Route::post('/phan-quyen/xoa', [PhanQuyenController::class, 'xoa']);
 Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
 Route::post('/phan-quyen/tim-kiem-chuc-nang', [PhanQuyenController::class, 'tim_kiem_cn']);
+Route::get('/phan-quyen/load-chuc-nang',[PhanQuyenController::class,'load_chuc_nang']);
+Route::post('phan-quyen/cap-quyen',[PhanQuyenController::class,'cap_quyen']);
+Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_kiem_cn']);
+
+Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
+Route::get("lich-hen/load",[LichHenPetController::class,'load']);
+Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
+Route::post("lich-hen/update",[LichHenPetController::class,'update']);
+Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
+
+Route::get("lich/load",[LichHenController::class,'load']);
+
+Route::middleware('auth:sanctum')->get('/user/info', [KhachHangController::class, 'info']);
+

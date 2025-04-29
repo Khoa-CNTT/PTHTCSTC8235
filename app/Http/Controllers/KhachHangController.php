@@ -79,12 +79,12 @@ class KhachHangController extends Controller
         }
     }
 
-    public function layDuLieu(){
+    public function layDuLieu()
+    {
         $user = Auth::guard('sanctum')->user();
-            return response()->json([
-                'data' => $user
-            ]);
-
+        return response()->json([
+            'data' => $user
+        ]);
     }
     public function KiemTraDN()
     {
@@ -122,7 +122,8 @@ class KhachHangController extends Controller
         }
     }
 
-    public function dangXuat(){
+    public function dangXuat()
+    {
         $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\KhachHang) {
             DB::table('personal_access_tokens')
@@ -140,7 +141,8 @@ class KhachHangController extends Controller
         }
     }
 
-    public function dangXuatAll(){
+    public function dangXuatAll()
+    {
         $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\KhachHang) {
             DB::table('personal_access_tokens')
@@ -182,5 +184,24 @@ class KhachHangController extends Controller
             ]);
         }
     }
+    public function info(Request $request)
+    {
+        $user = Auth::user();
 
+        return response()->json([
+            'id' => $user->id,
+            'ho_va_ten' => $user->ho_va_ten,
+            'email' => $user->email,
+            'so_dien_thoai' => $user->so_dien_thoai,
+            'ngay_sinh' => $user->ngay_sinh,
+        ]);
+    }
+    public function Sua(Request $request)
+    {
+        KhachHang::find($request->id)->update($request->all());
+        return response()->json([
+            'status' => 1,
+            'message' => 'Sửa thông tin thành công :3'
+        ]);
+    }
 }

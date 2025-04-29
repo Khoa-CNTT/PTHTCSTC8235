@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 
 class PhieuNhapController extends Controller
 {
-    private $id_chuc_nang = 1;
     public function loadKhovaNCCvaThuoc()
     {
         $khos = Kho::where('tinh_trang', 1)->get();
@@ -32,23 +31,24 @@ class PhieuNhapController extends Controller
     }
     public function loc(Request $request)
     {
-            $query = PhieuNhap::with(['kho', 'ncc', 'chiTiet']);
 
-            if ($request->filled('tu_ngay')) {
-                $query->whereDate('ngay_nhap', '>=', $request->tu_ngay);
-            }
+        $query = PhieuNhap::with(['kho', 'ncc', 'chiTiet']);
 
-            if ($request->filled('den_ngay')) {
-                $query->whereDate('ngay_nhap', '<=', $request->den_ngay);
-            }
-
-            $ds = $query->orderByDesc('id')->get();
-
-            return response()->json([
-                'status' => true,
-                'data' => $ds
-            ]);
+        if ($request->filled('tu_ngay')) {
+            $query->whereDate('ngay_nhap', '>=', $request->tu_ngay);
         }
+
+        if ($request->filled('den_ngay')) {
+            $query->whereDate('ngay_nhap', '<=', $request->den_ngay);
+        }
+
+        $ds = $query->orderByDesc('id')->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $ds
+        ]);
+    }
 
     public function load()
     {
@@ -61,29 +61,31 @@ class PhieuNhapController extends Controller
     }
     public function delete(Request $request)
     {
-            $id = $request->id;
 
-            try {
-                // Xoá chi tiết thuốc trước
-                PhieuNhapChiTiet::where('id_phieu_nhap', $id)->delete();
+        $id = $request->id;
 
-                // Xoá phiếu nhập
-                PhieuNhap::where('id', $id)->delete();
+        try {
+            // Xoá chi tiết thuốc trước
+            PhieuNhapChiTiet::where('id_phieu_nhap', $id)->delete();
 
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Đã xoá phiếu nhập thành công!',
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Lỗi khi xoá: ' . $e->getMessage(),
-                ]);
-            }
+            // Xoá phiếu nhập
+            PhieuNhap::where('id', $id)->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Đã xoá phiếu nhập thành công!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi khi xoá: ' . $e->getMessage(),
+            ]);
         }
+    }
     public function update(Request $request)
     {
-            $data = $request->all();
+
+        $data = $request->all();
 
         foreach ($data['chi_tiet'] as $chiTietData) {
             $chiTiet = PhieuNhapChiTiet::find($chiTietData['id']);
@@ -118,86 +120,82 @@ class PhieuNhapController extends Controller
 
     public function tao(PhieuNhapRequest $request)
     {
-            $data = $request->validated();
-
-            // Kiểm tra trùng thuốc trong chi tiết
-            $thuocIds = array_column($data['chi_tiet'], 'id_thuoc');
-            if (count($thuocIds) !== count(array_unique($thuocIds))) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Không được chọn trùng thuốc trong phiếu!',
-                ]);
-            }
-
+        try {
             DB::beginTransaction();
-            try {
-                // Tạo phiếu nhập
-                $phieu = PhieuNhap::create([
-                    'id_kho' => $data['id_kho'],
-                    'id_ncc' => $data['id_ncc'],
-                    'ngay_nhap' => $data['ngay_nhap'],
+
+            // Tạo phiếu nhập (mặc định da_nhap_kho = false)
+            $phieu = PhieuNhap::create([
+                'id_kho' => $request->id_kho,
+                'id_ncc' => $request->id_ncc,
+                'ngay_nhap' => $request->ngay_nhap,
+                'da_nhap_kho' => false,
+            ]);
+
+            // Lưu từng dòng chi tiết
+            foreach ($request->chi_tiet as $ct) {
+                PhieuNhapChiTiet::create([
+                    'id_phieu_nhap' => $phieu->id,
+                    'id_thuoc' => $ct['id_thuoc'],
+                    'so_luong' => $ct['so_luong'],
+                    'gia_nhap' => $ct['gia_nhap'],
+                    'gia_ban' => $ct['gia_ban'],
+                    'han_su_dung' => $ct['han_su_dung'],
                 ]);
-
-                // Duyệt chi tiết và cập nhật bảng tồn kho
-                foreach ($data['chi_tiet'] as $item) {
-                    // Lưu chi tiết phiếu nhập
-                    PhieuNhapChiTiet::create([
-                        'id_phieu_nhap' => $phieu->id,
-                        'id_thuoc' => $item['id_thuoc'],
-                        'so_luong' => $item['so_luong'],
-                        'gia_nhap' => $item['gia_nhap'],
-                        'han_su_dung' => $item['han_su_dung'],
-                    ]);
-
-                    // Cập nhật hoặc thêm mới trong bảng tồn kho
-                    $tonKho = ThuocKho::where([
-                        ['id_kho', '=', $data['id_kho']],
-                        ['id_thuoc', '=', $item['id_thuoc']],
-                        ['gia_nhap', '=', $item['gia_nhap']],
-                        ['han_su_dung', '=', $item['han_su_dung']],
-                    ])->first();
-
-                    if ($tonKho) {
-                        $tonKho->so_luong_ton_kho += $item['so_luong'];
-                        $tonKho->save();
-                    } else {
-                        ThuocKho::create([
-                            'id_kho' => $data['id_kho'],
-                            'id_thuoc' => $item['id_thuoc'],
-                            'gia_nhap' => $item['gia_nhap'],
-                            'so_luong_ton_kho' => $item['so_luong'],
-                            'han_su_dung' => $item['han_su_dung'],
-                            'ngay_nhap' => $data['ngay_nhap'],
-                        ]);
-                    }
-                    // 5. Tính tổng tồn kho tất cả lô thuốc của thuốc đó trong kho
-                    $tongSoLuong = ThuocKho::where([
-                        ['id_kho', '=', $data['id_kho']],
-                        ['id_thuoc', '=', $item['id_thuoc']],
-                    ])->sum('so_luong_ton_kho');
-
-                    // 6. Nếu tổng tồn kho bằng chính lô đang nhập → cập nhật giá bán
-                    if ($tongSoLuong == $item['so_luong']) {
-                        DB::table('thuocs')
-                            ->where('id', $item['id_thuoc'])
-                            ->update([
-                                'gia_ban' => round($item['gia_nhap'] * 1.2)
-                            ]);
-                    }
-                }
-
-                DB::commit();
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Lưu phiếu nhập và cập nhật tồn kho thành công!',
-                ]);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Lỗi: ' . $e->getMessage(),
-                ], 500);
             }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Tạo phiếu nhập thành công!',
+                'id_phieunhap' => $phieu->id
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi khi tạo phiếu nhập: ' . $e->getMessage()
+            ], 500);
         }
     }
+    public function nhapKho(Request $request)
+    {
+        $phieu = PhieuNhap::find($request->id);
 
+        if (!$phieu || $phieu->da_nhap_kho) {
+            return response()->json([
+                'status' => false,
+                'message' => !$phieu ? 'Phiếu nhập không tồn tại' : 'Phiếu đã được nhập kho'
+            ]);
+        }
+
+        $chiTiet = PhieuNhapChiTiet::where('id_phieu_nhap', $phieu->id)->get();
+
+        $dataThuocKho = [];
+
+        foreach ($chiTiet as $ct) {
+            $dataThuocKho[] = [
+                'id_kho' => $phieu->id_kho,
+                'id_thuoc' => $ct->id_thuoc,
+                'gia_nhap' => $ct->gia_nhap,
+                'gia_ban' => $ct->gia_ban,
+                'so_luong_ton_kho' => $ct->so_luong,
+                'han_su_dung' => $ct->han_su_dung,
+                'id_phieu_nhap_CT' => $ct->id,
+                'tinh_trang' => 1,
+            ];
+            // lấy giá bán cao nhất
+            $thuoc = Thuoc::find($ct->id_thuoc);
+            if ($thuoc && $ct->gia_ban > $thuoc->gia_ban) {
+                $thuoc->update(['gia_ban' => $ct->gia_ban]);
+            }
+        }
+
+        ThuocKho::insert($dataThuocKho);
+
+        $phieu->update(['da_nhap_kho' => true]);
+
+        return response()->json(['status' => true, 'message' => 'Đã nhập kho thành công']);
+    }
+}

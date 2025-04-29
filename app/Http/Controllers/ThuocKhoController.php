@@ -28,6 +28,13 @@ class ThuocKhoController extends Controller
             'data' => $data
         ]);
     }
+    public function xoa(Request $request){
+        ThuocKho::where('id',$request->id)->delete();
+        return response()->json([
+            "status" =>'1',
+            "message" =>"Xóa thuốc thành công"
+        ]);
+    }
     public function timkiem(Request $request)
     {
         $noi_dung = '%' . $request->noi_dung . '%';

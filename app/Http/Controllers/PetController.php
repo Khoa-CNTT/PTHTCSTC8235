@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KhachHang;
 use App\Models\pet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PetController extends Controller
 {
     public function Load()
     {
         $data = pet::join('khach_hangs', 'khach_hangs.id', '=', 'pets.id_kh')
-                    ->select('pets.*', 'khach_hangs.ho_va_ten')
-                     ->get();
+            ->select('pets.*', 'khach_hangs.ho_va_ten')
+            ->get();
         return response()->json([
             "data" => $data
         ]);
@@ -55,5 +57,16 @@ class PetController extends Controller
             'status' => 1,
             'message' => 'Thêm mới pet thành công'
         ]);
+    }
+    public function showPetsByUserId($id)
+    {
+        $user = KhachHang::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $pets = Pet::where('id_kh', $id)->get();
+
+        return response()->json(['pets' => $pets], 200);
     }
 }

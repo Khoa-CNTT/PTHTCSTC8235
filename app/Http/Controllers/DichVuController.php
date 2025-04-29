@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DichVu;
+use App\Models\NhanVien;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +55,21 @@ class DichVuController extends Controller
             'data' => $dichVus
         ]);
     }
+
+
+
+    public function loadBacSi()
+{
+    $bacSiList = NhanVien::join('chuc_vus', 'chuc_vus.id', '=', 'nhan_viens.id_chucvu')
+        ->where('chuc_vus.ten_chuc_vu', 'Bác sĩ')
+        ->select('nhan_viens.*', 'chuc_vus.ten_chuc_vu')
+        ->get();
+
+    return response()->json([
+        'data' => $bacSiList
+    ]);
+}
+
 
     public function load()
     {
@@ -143,7 +159,6 @@ class DichVuController extends Controller
     {
         $noi_dung = '%' . $request->noi_dung . '%';
         $data = DichVu::where('ten_dv', 'like', $noi_dung)
-            ->orwhere('mo_ta', 'like', $noi_dung)
             ->get();
 
         return response()->json([
