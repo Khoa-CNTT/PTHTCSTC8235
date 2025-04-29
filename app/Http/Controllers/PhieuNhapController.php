@@ -92,9 +92,7 @@ class PhieuNhapController extends Controller
             $thuocKho = ThuocKho::find($chiTietData['id']);
             if ($chiTiet) {
                 $chiTiet->update($chiTietData);
-                $thuocKho->update([
-                    'so_luong_ton_kho' => $thuocKho->so_luong_ton_kho - $chiTiet->getOriginal('so_luong') + $chiTietData['so_luong'],
-                ]);
+                $thuocKho->update($chiTietData);
             }
         }
 

@@ -3,18 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChucNang;
+use App\Models\ChucVu;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class PhanQuyenController extends Controller
 {
-    private $id_chuc_nang = 18;
     public function load_chuc_nang(){
         $data = ChucNang::get();
         return response()->json([
             'data'=> $data,
         ]);
     }
+
     public function load_cap_quyen(Request $request)
     {
         $data = PhanQuyen::join('chuc_vus', 'chuc_vus.id', 'id_chuc_vu')
@@ -23,7 +26,8 @@ class PhanQuyenController extends Controller
             ->select('phan_quyens.*', 'chuc_vus.ten_chuc_vu', 'chuc_nangs.ten_chuc_nang')
             ->get();
         return response()->json([
-            "data" => $data
+            'status' => true,
+            'data' => $data
         ]);
     }
     public function cap_quyen(Request $request){
@@ -56,7 +60,32 @@ class PhanQuyenController extends Controller
                         ->get();
 
         return response()->json([
+            'status' => true,
             'data' => $data
         ]);
     }
+    public function kiemTraQuyen(Request $request, $id_chuc_nang)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user && $user instanceof \App\Models\NhanVien) {
+            $coQuyen = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->where('id_chuc_nang', $id_chuc_nang)
+                ->exists();
+            if ($coQuyen) {
+                return response()->json([
+                    'status' => 1,
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền truy cập',
+                ]);
+            }
+        }
+        return response()->json([
+            'status' => 0,
+        ]);
+    }
+
 }
+
