@@ -142,4 +142,26 @@ class NhanVienController extends Controller
             'data' => $data,
         ]);
     }
+    public function loadBacSi()
+    {
+        try {
+            $bac_si = NhanVien::with('chuc_vu')
+                ->whereHas('phanQuyen', function($query) {
+                    $query->where('id_chuc_nang', 17);
+                })
+                ->select('id', 'ten_nv', 'id_chucvu')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $bac_si,
+                'message' => 'Danh sách bác sĩ đã được tải thành công'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi khi tải danh sách bác sĩ: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

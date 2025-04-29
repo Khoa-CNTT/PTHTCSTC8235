@@ -80,7 +80,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:6'])->group(function () {
 
 // client khach hang routes
 Route::post("khach-hang/dang-ky", [KhachHangController::class, 'dangKy']);
-Route::post("khach-hang/doi-mat-khau", [KhachHangController::class, 'doimk']);
+Route::post("/khach-hang/doi-mat-khau", [KhachHangController::class, 'doimk']);
 Route::post("khach-hang/send-mail", [KhachHangController::class, 'guiMail']);
 Route::post("khach-hang/kich-hoat", [KhachHangController::class, 'kichHoat']);
 Route::post("khach-hang/dang-nhap", [KhachHangController::class, 'dangNhap']);
@@ -194,6 +194,22 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:15'])->group(function () {
     Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
     Route::get("lich/load",[LichHenController::class,'load']);
 });
-
+//bac si routes
+Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
+    Route::get("/don-thuoc/load-thuoc",[DonThuocController::class,'loadThuoc']);  
+    Route::get("ho-so-benh-an/load",[HoSoBenhAnController::class,'load']);  
+    Route::post("ho-so-benh-an/doi-TT",[HoSoBenhAnController::class,'doi']);
+    Route::post("ho-so-benh-an/update",[HoSoBenhAnController::class,'update']);
+    Route::post("ho-so-benh-an/xoa",[HoSoBenhAnController::class,'delete']);
+    Route::post("ho-so-benh-an/tim-kiem",[HoSoBenhAnController::class,'timkiem']);
+    Route::post("ho-so-benh-an/them",[HoSoBenhAnController::class,'them']);
+    Route::get('/don-thuoc/load-thuoc', [DonThuocController::class, 'loadThuoc']);
+    Route::post('/don-thuoc/them', [DonThuocController::class, 'them']);
+    Route::get('/don-thuoc/load', [DonThuocController::class, 'load']);
+    Route::post('/don-thuoc/xoa', [DonThuocController::class, 'xoa']);
+    Route::get('/khach-hang/load', [KhachHangController::class, 'load']);
+    Route::get('/nhan-vien/load-bac-si', [NhanVienController::class, 'loadBacSi']);
+});
 // Route kiểm tra quyền
 Route::get('/phan-quyen/kiem-tra-quyen/{id_chuc_nang}', [PhanQuyenController::class, 'kiemTraQuyen']);
+

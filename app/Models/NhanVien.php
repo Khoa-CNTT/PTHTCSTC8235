@@ -27,4 +27,9 @@ class NhanVien extends Authenticatable
     {
         return $this->belongsTo(ChucVu::class, 'id_chucvu', 'id');
     }
+
+    public function phanQuyen()
+    {
+        return $this->hasMany(PhanQuyen::class, 'id_chuc_vu', 'id_chucvu');
+    }
 }
