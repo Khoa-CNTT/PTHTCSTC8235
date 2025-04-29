@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 class LichHenPetController extends Controller
 {
-    
+
 
 public function them(Request $request)
 {
@@ -58,7 +58,7 @@ public function them(Request $request)
 
         return response()->json([
             "status" => '1',
-            "message" => "Cập nhật nhân viên thành công"
+            "message" => "Cập nhật lịch hẹn thành công"
         ]);
     }
     public function doi(Request $request)
@@ -72,7 +72,7 @@ public function them(Request $request)
             $data->save();
         }
         return response()->json([
-            "status" => '1',
+            "status" => 1,
             "message" => "Đổi trạng thái thành công"
         ]);
     }
