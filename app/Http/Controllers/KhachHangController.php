@@ -118,6 +118,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
+
     public function doipassTcn(DoiMatKhauRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
@@ -229,31 +230,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function kichHoat(Request $request)
-    {
-        $check = KhachHang::where('hash_active', $request->id_khach_hang)
-            ->first();
-        if ($check) {
-            if ($check->is_active == 0) {
-                $check->is_active = 1;
-                $check->save();
-                return response()->json([
-                    "status" => 1,
-                    "message" => "kích hoạt thành công"
-                ]);
-            } else {
-                return response()->json([
-                    "status" => 2,
-                    "message" => "Tài khoản đã được kích hoạt trước đó"
-                ]);
-            }
-        } else {
-            return response()->json([
-                "status" => 0,
-                "message" => "Kích hoạt không thành công"
-            ]);
-        }
-    }
+
     public function info(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
