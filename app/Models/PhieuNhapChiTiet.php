@@ -12,6 +12,7 @@ class PhieuNhapChiTiet extends Model
         'id_thuoc',
         'so_luong',
         'gia_nhap',
+        'gia_ban',
         'han_su_dung'
     ];
 }

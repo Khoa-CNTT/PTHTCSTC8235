@@ -1,72 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đổi Mật Khẩu</title>
-    <style>
+    <title>ĐỔI MẬT KHẨU CỦA BẠN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style scoped>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f2f4f8;
             margin: 0;
             padding: 0;
+            animation: fadeIn 1.2s ease-out both;
         }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
         .email-container {
             max-width: 600px;
-            margin: 20px auto;
-            background: #ffffff;
-            border-radius: 8px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #3498db; /* Viền màu xanh dương */
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: dropShadow 1.5s ease-in-out both;
         }
-        .email-header {
-            background-color: #4CAF50;
+
+        @keyframes dropShadow {
+            0% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+            100% { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08); }
+        }
+
+        .header {
+            background:#3498db ;
+            background-size: cover;
             color: #ffffff;
             text-align: center;
-            padding: 20px;
+            padding: 40px 20px;
+            animation: slideDown 1s ease-out both;
         }
-        .email-body {
-            padding: 20px;
+
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .content {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .content p {
+            font-size: 16px;
             color: #333333;
+            margin: 14px 0;
             line-height: 1.6;
         }
-        .email-body p {
-            margin: 10px 0;
+
+        .content strong {
+            color: #3498db; /* Chữ in đậm màu xanh dương */
         }
-        .email-footer {
-            text-align: center;
-            padding: 20px;
-            background-color: #f4f4f4;
-            font-size: 12px;
-            color: #777777;
-        }
+
         .btn {
             display: inline-block;
-            padding: 10px 20px;
-            margin-top: 20px;
-            background-color: #4CAF50;
+            margin-top: 25px;
+            padding: 14px 32px;
+            background-color: #3498db;
             color: #ffffff;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
         }
+
         .btn:hover {
-            background-color: #45a049;
+            background-color: #ff0000;
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            background-color: #fafafa;
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #999999;
+            border-top: 1px solid #eeeeee;
         }
     </style>
 </head>
 <body>
     <div class="email-container">
-        <div class="email-header">
-            <h1>Đổi Mật Khẩu</h1>
+        <div class="header">
+            <h1>CHÀO MỪNG BẠN ĐẾN VỚI PETCARE!</h1>
         </div>
-        <div class="email-body">
-            <p>Xin chào,</p>
-            <p>Bạn đã yêu cầu đổi mật khẩu. Vui lòng nhấn vào nút bên dưới để đặt lại mật khẩu của bạn:</p>
-            <a href="{{ $resetLink }}" class="btn">Click vào đây để đổi mật khẩu</a>
-            <p>Nếu bạn không yêu cầu đổi mật khẩu, vui lòng bỏ qua email này.</p>
+        <div class="content">
+            <p>Xin chào, <strong>{{$data["ho_va_ten"]}}</strong></p>
+            <p>Để hoàn tất quá trình đổi mật khẩu, vui lòng nhấn vào nút bên dưới để vào trang đổi mật khẩu:</p>
+        <a href="{{ $data['link'] }}" class="btn"><span style="color:#ffffff">ĐỔI MẬT KHẨU</span></a>
+            <p style="margin-top: 30px;">Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.</p>
         </div>
-        <div class="email-footer">
-            <p>Trân trọng,<br>Đội ngũ hỗ trợ</p>
+        <div class="footer">
+            <p>&copy; 2025 PetCare. <br>
+                Cảm ơn bạn đã đồng hành cùng <strong>PETCARE</strong>
+            </p>
         </div>
     </div>
+</body>
+</html>

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('ten_thuoc');
             $table->string('don_vi');
             $table->string('mo_ta');
-            $table->decimal('gia_ban',12,2)->nullable();
+            $table->decimal('gia_ban',15,2)->nullable();
             $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });

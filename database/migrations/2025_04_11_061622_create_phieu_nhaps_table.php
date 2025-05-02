@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('id_kho');
             $table->integer('id_ncc');
             $table->date('ngay_nhap');
+            $table->integer('da_nhap_kho')->default(1);
             $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });
