@@ -181,53 +181,18 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:2'])->group(function () {
 
 
 
-// admin PhanQuyen routes
-Route::middleware(['auth:sanctum', 'kiemtra.quyen:16'])->group(function () {
-    Route::get('/phan-quyen/load-chuc-vu', [ChucVuController::class, 'load_chuc_vu']);
-    Route::get('/phan-quyen/load-chuc-nang', [PhanQuyenController::class, 'load_chuc_nang']);
-    Route::post('/phan-quyen/load-cap-quyen', [PhanQuyenController::class, 'load_cap_quyen']);
-    Route::post('/phan-quyen/xoa', [PhanQuyenController::class, 'xoa']);
-    Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
-    Route::post('/phan-quyen/tim-kiem-chuc-nang', [PhanQuyenController::class, 'tim_kiem_cn']);
-    Route::post("chuc-vu/them", [ChucVuController::class, 'them']);
-    Route::get("chuc-vu/load", [ChucVuController::class, 'load']);
-    Route::post("chuc-vu/doi-TT", [ChucVuController::class, 'doi']);
-    Route::post("chuc-vu/update", [ChucVuController::class, 'update']);
-    Route::post("chuc-vu/xoa", [ChucVuController::class, 'delete']);
-    Route::post('/chuc-vu/tim-kiem', [ChucVuController::class, 'timkiem']);
-});
+Route::get('/phan-quyen/load-chuc-vu', [ChucVuController::class, 'load_chuc_vu']);
 
+Route::get('/phan-quyen/load-chuc-nang', [PhanQuyenController::class, 'load_chuc_nang']);
+Route::post('/phan-quyen/load-cap-quyen', [PhanQuyenController::class, 'load_cap_quyen']);
+Route::post('/phan-quyen/xoa', [PhanQuyenController::class, 'xoa']);
+Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
+Route::post('/phan-quyen/tim-kiem-chuc-nang', [PhanQuyenController::class, 'tim_kiem_cn']);
+Route::get('/phan-quyen/load-chuc-nang',[PhanQuyenController::class,'load_chuc_nang']);
+Route::post('phan-quyen/cap-quyen',[PhanQuyenController::class,'cap_quyen']);
+Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_kiem_cn']);
 
-// admin LichHen routes
-Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
-    Route::post("lich-hen/them",[LichHenPetController::class,'them']);
-    Route::get("lich-hen/load",[LichHenPetController::class,'load']);
-    Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
-    Route::post("lich-hen/update",[LichHenPetController::class,'update']);
-    Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
-    Route::get("lich/load",[LichHenController::class,'load']);
-});
-//bac si routes
-Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
-    Route::get("/don-thuoc/load-thuoc",[DonThuocController::class,'loadThuoc']);  
-    Route::get("ho-so-benh-an/load",[HoSoBenhAnController::class,'load']);  
-    Route::post("ho-so-benh-an/doi-TT",[HoSoBenhAnController::class,'doi']);
-    Route::post("ho-so-benh-an/update",[HoSoBenhAnController::class,'update']);
-    Route::post("ho-so-benh-an/xoa",[HoSoBenhAnController::class,'delete']);
-    Route::post("ho-so-benh-an/tim-kiem",[HoSoBenhAnController::class,'timkiem']);
-    Route::post("ho-so-benh-an/them",[HoSoBenhAnController::class,'them']);
-    Route::get('/don-thuoc/load-thuoc', [DonThuocController::class, 'loadThuoc']);
-    Route::post('/don-thuoc/them', [DonThuocController::class, 'them']);
-    Route::get('/don-thuoc/load', [DonThuocController::class, 'load']);
-    Route::post('/don-thuoc/xoa', [DonThuocController::class, 'xoa']);
-    Route::get('/khach-hang/load', [KhachHangController::class, 'load']);
-    Route::get('/nhan-vien/load-bac-si', [NhanVienController::class, 'loadBacSi']);
-});
-// Route kiểm tra quyền
-Route::get('/phan-quyen/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
-
-//client lich hen routes
-Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
+Route::middleware('auth:sanctum')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
 Route::get("lich-hen/load",[LichHenPetController::class,'load']);
 Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
 Route::post("lich-hen/update",[LichHenPetController::class,'update']);

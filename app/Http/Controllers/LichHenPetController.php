@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LichHenPet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class LichHenPetController extends Controller
 {
 
@@ -31,25 +32,22 @@ public function them(Request $request)
 
     $lichHen->save();
 
-    return response()->json([
-        'status' => '1',
-        'message' => 'Thêm mới thành công',
-        'data' => $lichHen
-    ]);
-}
-
+        return response()->json([
+            'message' => 'Đặt lịch thành công!',
+            'data' => $lichHen
+        ], 201);
+    }
 
     public function load()
     {
         $data = LichHenPet::join('pets', 'pets.id', '=', 'lich_hen_pets.id_pet')
-        ->join('nhan_viens', 'nhan_viens.id', '=', 'lich_hen_pets.id_nv')
-        ->join('lich_hens', 'lich_hens.id', '=', 'lich_hen_pets.id_lich')
-        ->select('lich_hen_pets.*', 'pets.ten_pet', 'nhan_viens.ten_nv', 'lich_hen_pets.id_lich')
-        ->get();
+            ->join('nhan_viens', 'nhan_viens.id', '=', 'lich_hen_pets.id_nv')
+            ->join('lich_hens', 'lich_hens.id', '=', 'lich_hen_pets.id_lich')
+            ->select('lich_hen_pets.*', 'pets.ten_pet', 'nhan_viens.ten_nv', 'lich_hen_pets.id_lich')
+            ->get();
         return response()->json([
             "data" => $data
         ]);
-
     }
     public function update(Request $request)
     {
