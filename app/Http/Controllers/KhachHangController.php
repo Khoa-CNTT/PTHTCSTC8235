@@ -184,6 +184,7 @@ class KhachHangController extends Controller
                 'status' => 1,
                 'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công ',
+                'id_khach_hang' => $user->id,
 
             ]);
         } else {
@@ -266,6 +267,7 @@ class KhachHangController extends Controller
             'message' => 'Thêm thú cưng thành công'
         ]);
     }
+
     public function updatePet(Request $request)
     {
         $user = Auth::guard('sanctum')->user();

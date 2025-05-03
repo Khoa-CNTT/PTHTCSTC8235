@@ -43,12 +43,12 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:4'])->group(function () {
 });
 
 // client dich vu
-Route::get("dich-vu/load-bac-si",[DichVuController::class,'loadBacSi']);
+Route::get("dich-vu/load-bac-si", [DichVuController::class, 'loadBacSi']);
 Route::get("dich-vu/load", [DichVuController::class, 'load']);
 Route::post('dich-vu/tim-kiem', [DichVuController::class, 'timkiem']);
 Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
-Route::get("dich-vu/load-tiem-chung",[DichVuController::class,'loadTiemChung']);
-Route::get("dich-vu/load-cham-soc",[DichVuController::class,'loadChamSoc']);
+Route::get("dich-vu/load-tiem-chung", [DichVuController::class, 'loadTiemChung']);
+Route::get("dich-vu/load-cham-soc", [DichVuController::class, 'loadChamSoc']);
 
 
 
@@ -102,7 +102,6 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:7'])->group(function () {
     Route::post('/sua-pet', [PetController::class, 'Sua']);
     Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
     Route::get('/load-pet', [PetController::class, 'Load']);
-
 });
 
 // admin Luong routes
@@ -111,16 +110,16 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:10'])->group(function () {
     Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
     Route::get('/load-luong', [LuongController::class, 'LoadLuong']);
     Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
-    Route::post("/sua-luong",[LuongController::class,'suaLuong']);
-    Route::post("/xoa-luong",[LuongController::class,'xoaLuong']);
+    Route::post("/sua-luong", [LuongController::class, 'suaLuong']);
+    Route::post("/xoa-luong", [LuongController::class, 'xoaLuong']);
 });
 
 Route::post('/them-luong', [LuongController::class, 'Them']);
 Route::post('/thay-doi-trang-thai-luong', [LuongController::class, 'Doitt']);
 Route::get('/load-luong', [LuongController::class, 'LoadLuong']);
 Route::post('/tim-kiem-luong', [LuongController::class, 'TimKiem']);
-Route::post("/sua-luong",[LuongController::class,'suaLuong']);
-Route::post("/xoa-luong",[LuongController::class,'xoaLuong']);
+Route::post("/sua-luong", [LuongController::class, 'suaLuong']);
+Route::post("/xoa-luong", [LuongController::class, 'xoaLuong']);
 
 // admin NhanVien routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:5'])->group(function () {
@@ -138,6 +137,8 @@ Route::get('/nhan-vien/kiem-tra-dang-nhap', [NhanVienController::class, 'checkLo
 Route::get('/nhan-vien/dang-xuat', [NhanVienController::class, 'dangXuat']);
 Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
 Route::get('/NhanVien/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
+Route::get('/phan-quyen/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
+
 
 // admin DanhGia routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
@@ -171,7 +172,6 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:1'])->group(function () {
     Route::post("phieu-nhap/nhap-kho", [PhieuNhapController::class, 'nhapKho']);
 });
 
-
 // admin ThuocKho routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:2'])->group(function () {
     Route::post("thuoc-kho/loc", [ThuocKhoController::class, 'loc']);
@@ -189,15 +189,15 @@ Route::post('/phan-quyen/load-cap-quyen', [PhanQuyenController::class, 'load_cap
 Route::post('/phan-quyen/xoa', [PhanQuyenController::class, 'xoa']);
 Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
 Route::post('/phan-quyen/tim-kiem-chuc-nang', [PhanQuyenController::class, 'tim_kiem_cn']);
-Route::get('/phan-quyen/load-chuc-nang',[PhanQuyenController::class,'load_chuc_nang']);
-Route::post('phan-quyen/cap-quyen',[PhanQuyenController::class,'cap_quyen']);
-Route::post('/phan-quyen/tim-kiem-chuc-nang',[PhanQuyenController::class,'tim_kiem_cn']);
+Route::get('/phan-quyen/load-chuc-nang', [PhanQuyenController::class, 'load_chuc_nang']);
+Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
+Route::post('/phan-quyen/tim-kiem-chuc-nang', [PhanQuyenController::class, 'tim_kiem_cn']);
+Route::get('/phan-quyen/kiem-tra-quyen/{id}', [PhanQuyenController::class, 'kiemTraQuyen']);
+
 
 Route::middleware('auth:sanctum')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
-Route::get("lich-hen/load",[LichHenPetController::class,'load']);
-Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
-Route::post("lich-hen/update",[LichHenPetController::class,'update']);
-Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
-Route::get("lich/load",[LichHenController::class,'load']);
-
-
+Route::get("lich-hen/load", [LichHenPetController::class, 'load']);
+Route::post("lich-hen/doi", [LichHenPetController::class, 'doi']);
+Route::post("lich-hen/update", [LichHenPetController::class, 'update']);
+Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
+Route::get("lich/load", [LichHenController::class, 'load']);
