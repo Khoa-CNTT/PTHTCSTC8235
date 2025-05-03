@@ -50,9 +50,15 @@ return [
             'provider' => 'khach_hang',
         ],
         'api' => [
-            'driver' => 'token',
-            'provider' => 'khach_hang',
+            'driver' => 'sanctum',
+            'provider' => 'users',
         ],
+        // 'api' => [
+        //     'driver' => 'token',
+        //     'provider' => 'users',
+        //     'hash' => false,
+        // ],
+
     ],
 
     /*
