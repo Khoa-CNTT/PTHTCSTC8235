@@ -118,6 +118,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
+
     public function doipassTcn(DoiMatKhauRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
@@ -153,7 +154,8 @@ class KhachHangController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         return response()->json([
-            'data' => $user
+            'status' => 1,
+            "data" => $user
         ]);
     }
     public function KiemTraDN()
@@ -182,6 +184,7 @@ class KhachHangController extends Controller
                 'status' => 1,
                 'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công ',
+                'id_khach_hang' => $user->id,
 
             ]);
         } else {
@@ -229,6 +232,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
+
     public function info(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
@@ -282,6 +286,7 @@ class KhachHangController extends Controller
             'message' => 'Thêm thú cưng thành công'
         ]);
     }
+
     public function updatePet(Request $request)
     {
         $user = Auth::guard('sanctum')->user();

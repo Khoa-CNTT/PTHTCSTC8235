@@ -65,8 +65,9 @@ class PetController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        $pets = Pet::where('id_kh', $id)->get();
-
+        $pets = Pet::where('id_kh', $id)
+        ->select('id', 'ten_pet', 'gioi_tinh', 'tuoi', 'can_nang', 'hinh_anh', 'chung_loai')
+        ->get();
         return response()->json(['pets' => $pets], 200);
     }
 }

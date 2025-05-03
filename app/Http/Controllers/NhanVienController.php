@@ -164,4 +164,38 @@ class NhanVienController extends Controller
             ], 500);
         }
     }
+
+    public function kiemTraQuyen($id_chuc_nang)
+    {
+        try {
+            $user = Auth::guard('sanctum')->user();
+            if (!$user) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn cần đăng nhập để thực hiện chức năng này'
+                ], 401);
+            }
+
+            $hasPermission = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->where('id_chuc_nang', $id_chuc_nang)
+                ->exists();
+
+            if ($hasPermission) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Bạn có quyền truy cập'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền truy cập chức năng này'
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi khi kiểm tra quyền: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
