@@ -154,7 +154,8 @@ class KhachHangController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         return response()->json([
-            'data' => $user
+            'status' => 1,
+            "data" => $user
         ]);
     }
     public function KiemTraDN()
@@ -231,25 +232,6 @@ class KhachHangController extends Controller
         }
     }
 
-    public function info(Request $request)
-    {
-        $user = Auth::guard('sanctum')->user();
-
-        if (!$user) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Bạn cần đăng nhập'
-            ], 401);
-        }
-
-        return response()->json([
-            'id' => $user->id,
-            'ho_va_ten' => $user->ho_va_ten,
-            'email' => $user->email,
-            'so_dien_thoai' => $user->so_dien_thoai,
-            'ngay_sinh' => $user->ngay_sinh,
-        ]);
-    }
     public function Sua(Request $request)
     {
         KhachHang::find($request->id)->update($request->all());
