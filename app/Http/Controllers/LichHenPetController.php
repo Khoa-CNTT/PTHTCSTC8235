@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DichVu;
 use App\Models\LichHenPet;
 use App\Models\pet;
 use Illuminate\Http\Request;
@@ -9,64 +10,34 @@ use Illuminate\Support\Facades\Auth;
 
 class LichHenPetController extends Controller
 {
-    // public function them(Request $request)
-    // {
-    //     $user = Auth::guard('api')->user();
-    //     if (!$user) {
-    //         return response()->json([
-    //             'status' => '0',
-    //             'message' => 'Không xác thực được người dùng',
-    //         ], 401);
-    //     }
-    //     $data = $request->all();
-    //     LichHenPet::create($data);
-    //     return response()->json([
-    //         'status' => '1',
-    //         "message" => "Thêm mới đánh giá thành công",
-    //     ]);
-    // }
     public function them(Request $request)
     {
-        // if (!Auth::check()) {
-        //     return response()->json([
-        //         'status' => '0',
-        //         'message' => 'Không xác thực được người dùng',
-        //     ], 401);
-        // }
-        // $data = $request->only(['id_lich', 'id_kh', 'id_dv', 'id_pet', 'ngay', 'gio']);
-        // $pet = pet::find($data['id_pet']);
-        // if ($pet->khach_hang_id !== $data['id_kh']) {
-        //     return response()->json([
-        //         'status' => '0',
-        //         'message' => 'Thú cưng không thuộc về khách hàng này.',
-        //     ], 400);
-        // }
-        // try {
-        //     $lichHen = LichHenPet::create([
-        //         'id_lich' => $data['id_lich'],
-        //         'id_kh' => $data['id_kh'],
-        //         'id_dv' => $data['id_dv'],
-        //         'id_pet' => $data['id_pet'],
-        //         'ngay' => $data['ngay'],
-        //         'gio' => $data['gio'],
-        //     ]);
+        $dichVu = DichVu::find($request->id_dv);
 
-        //     return response()->json([
-        //         'status' => '1',
-        //         'message' => 'Đặt lịch thành công!',
-        //         'data' => $lichHen
-        //     ]);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'status' => '0',
-        //         'message' => 'Có lỗi xảy ra khi tạo lịch hẹn.',
-        //         'error' => $e->getMessage(),
-        //     ], 500);
-        // }
-        LichHenPet::create($request->all());
+        if (!$dichVu) {
+            return response()->json([
+                'status' => '0',
+                'message' => 'Không tìm thấy dịch vụ.'
+            ], 404);
+        }
+
+        $tienCoc = $dichVu->gia * 0.25;
+
+        $lichHen = LichHenPet::create([
+            'id_lich' => $request->id_lich,
+            'id_kh' => $request->id_kh,
+            'id_dv' => $request->id_dv,
+            'id_pet' => $request->id_pet,
+            'tinh_trang' => $request->tinh_trang,
+            'ngay' => $request->ngay,
+            'gio' => $request->gio,
+            'tien_coc' => $tienCoc,
+        ]);
+
         return response()->json([
             'status' => '1',
-            "message" => "Thêm mới thành công",
+            'message' => 'Thêm mới thành công',
+            'data' => $lichHen
         ]);
     }
     public function load()
