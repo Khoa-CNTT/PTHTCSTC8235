@@ -34,7 +34,17 @@ class DichVuController extends Controller
             'data' => $dichVus
         ]);
     }
+    public function loadKhamBenh()
+    {
+        $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+            ->where('dich_vus.id_loaidv', 4)
+            ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
+            ->get();
 
+        return response()->json([
+            'data' => $dichVus
+        ]);
+    }
     public function loadChamSoc()
     {
         $dichVus = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
