@@ -194,8 +194,13 @@ Route::post('phan-quyen/cap-quyen', [PhanQuyenController::class, 'cap_quyen']);
 Route::post('/phan-quyen/tim-kiem-chuc-nang', [PhanQuyenController::class, 'tim_kiem_cn']);
 Route::get('/phan-quyen/kiem-tra-quyen/{id}', [PhanQuyenController::class, 'kiemTraQuyen']);
 
+//client
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
+    Route::get('/lich-hen/thong-tin-slot', [LichHenPetController::class, 'thongTinSlot']);
+});
 
-Route::middleware('auth:sanctum')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
+// admin
 Route::get("lich-hen/load", [LichHenPetController::class, 'load']);
 Route::post("lich-hen/doi", [LichHenPetController::class, 'doi']);
 Route::post("lich-hen/update", [LichHenPetController::class, 'update']);
