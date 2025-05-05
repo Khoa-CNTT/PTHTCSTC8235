@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lich_hen_pets', function (Blueprint $table) {
             $table->id();
             $table->string('id_lich');
+            $table->string('id_dv');
             $table->string('id_pet');
             $table->datetime('ngay_gio_hen');
             $table->string('id_nv');

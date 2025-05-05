@@ -7,9 +7,12 @@ use App\Models\NhanVien;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class DichVuController extends Controller
 {
+
     public function them(Request $request)
     {
             $data = $request->all();
@@ -43,8 +46,6 @@ class DichVuController extends Controller
             'data' => $dichVus
         ]);
     }
-
-
 
     public function loadBacSi()
 {

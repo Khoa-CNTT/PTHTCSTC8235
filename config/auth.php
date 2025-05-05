@@ -49,6 +49,10 @@ return [
             'driver' => 'session',
             'provider' => 'khach_hang',
         ],
+        'api' => [
+            'driver' => 'token',
+            'provider' => 'khach_hang',
+        ],
     ],
 
     /*

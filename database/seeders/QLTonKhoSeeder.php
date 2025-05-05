@@ -19,92 +19,102 @@ class QLTonKhoSeeder extends Seeder
         DB::table('thuoc_khos')->insert([
             [
                 'id_kho' => 1,
-                'id_thuoc' => 1, // Paracetamol 500mg
+                'id_thuoc' => 1,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 1500,
-                'so_luong_ton_kho' => 500,
+                'gia_ban' => 2200,
+                'so_luong_ton_kho' => 5,
                 'han_su_dung' => Carbon::now()->addMonths(12),
-                'ngay_nhap' => Carbon::now()->subDays(10),
                 'tinh_trang' => 1
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 2, // Amoxicillin 500mg
+                'id_thuoc' => 2,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 2000,
-                'so_luong_ton_kho' => 300,
+                'gia_ban' => 2800,
+                'so_luong_ton_kho' => 3,
                 'han_su_dung' => Carbon::now()->addMonths(10),
-                'ngay_nhap' => Carbon::now()->subDays(15),
                 'tinh_trang' => 1
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 3, // Vitamin C 1000mg
+                'id_thuoc' => 3,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 1800,
-                'so_luong_ton_kho' => 1000,
+                'gia_ban' => 2500,
+                'so_luong_ton_kho' => 2,
                 'han_su_dung' => Carbon::now()->addMonths(8),
-                'ngay_nhap' => Carbon::now()->subDays(5),
                 'tinh_trang' => 2
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 4, // Hydrocortisone 1%
+                'id_thuoc' => 4,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 2200,
-                'so_luong_ton_kho' => 150,
+                'gia_ban' => 3000,
+                'so_luong_ton_kho' => 1,
                 'han_su_dung' => Carbon::now()->addMonths(9),
-                'ngay_nhap' => Carbon::now()->subDays(12),
                 'tinh_trang' => 3
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 5, // Omeprazole 20mg
+                'id_thuoc' => 5,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 2500,
-                'so_luong_ton_kho' => 400,
+                'gia_ban' => 3500,
+                'so_luong_ton_kho' => 4,
                 'han_su_dung' => Carbon::now()->addMonths(14),
-                'ngay_nhap' => Carbon::now()->subDays(20),
                 'tinh_trang' => 1
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 6, // Loratadine 10mg
+                'id_thuoc' => 6,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 1600,
-                'so_luong_ton_kho' => 250,
+                'gia_ban' => 2300,
+                'so_luong_ton_kho' => 2,
                 'han_su_dung' => Carbon::now()->addMonths(11),
-                'ngay_nhap' => Carbon::now()->subDays(7),
                 'tinh_trang' => 1
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 7, // Cefuroxime 500mg
+                'id_thuoc' => 7,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 2700,
-                'so_luong_ton_kho' => 220,
+                'gia_ban' => 3800,
+                'so_luong_ton_kho' => 2,
                 'han_su_dung' => Carbon::now()->addMonths(10),
-                'ngay_nhap' => Carbon::now()->subDays(9),
                 'tinh_trang' => 3
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 8, // Prednisolone 5mg
+                'id_thuoc' => 8,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 2100,
-                'so_luong_ton_kho' => 180,
+                'gia_ban' => 2900,
+                'so_luong_ton_kho' => 1,
                 'han_su_dung' => Carbon::now()->addMonths(12),
-                'ngay_nhap' => Carbon::now()->subDays(11),
                 'tinh_trang' => 2
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 9, // Metformin 500mg
+                'id_thuoc' => 9,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 1900,
-                'so_luong_ton_kho' => 600,
+                'gia_ban' => 2700,
+                'so_luong_ton_kho' => 6,
                 'han_su_dung' => Carbon::now()->addDays(13),
-                'ngay_nhap' => Carbon::now()->subDays(6),
                 'tinh_trang' => 1
             ],
             [
                 'id_kho' => 1,
-                'id_thuoc' => 10, // Aspirin 81mg
+                'id_thuoc' => 10,
+                'id_phieu_nhap_CT' => null,
                 'gia_nhap' => 1200,
-                'so_luong_ton_kho' => 800,
+                'gia_ban' => 2000,
+                'so_luong_ton_kho' => 8,
                 'han_su_dung' => Carbon::now()->subDays(14),
-                'ngay_nhap' => Carbon::now()->subMonths(10),
                 'tinh_trang' => 1
             ],
         ]);

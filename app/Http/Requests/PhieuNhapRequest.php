@@ -30,6 +30,7 @@ class PhieuNhapRequest extends FormRequest
             'chi_tiet.*.id_thuoc' => 'required|integer|exists:thuocs,id',
             'chi_tiet.*.so_luong' => 'required|integer|min:1',
             'chi_tiet.*.gia_nhap' => 'required|integer|min:1',
+            'chi_tiet.*.gia_ban' => 'required|integer|min:1',
             'chi_tiet.*.han_su_dung' => 'required|date|after:today',
         ];
     }
@@ -53,6 +54,7 @@ class PhieuNhapRequest extends FormRequest
             'chi_tiet.*.id_thuoc' => 'Thuốc',
             'chi_tiet.*.so_luong' => 'Số lượng',
             'chi_tiet.*.gia_nhap' => 'Giá nhập',
+            'chi_tiet.*.gia_ban' => 'Giá nhập',
             'chi_tiet.*.han_su_dung' => 'Hạn sử dụng',
         ];
     }

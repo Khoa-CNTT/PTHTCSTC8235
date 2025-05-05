@@ -6,6 +6,7 @@ use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\PhanQuyen;
 
 class NhanVienController extends Controller
 {
@@ -98,12 +99,17 @@ class NhanVienController extends Controller
             ->attempt(['email' => $request->email, 'password' => $request->password]);
         if ($check) {
             $user = Auth::guard('nhan_vien')->user();
+            $permissions = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->pluck('id_chuc_nang');
             return response()->json([
                 'status' => 1,
                 'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công',
                 'email' => $user->email,
                 'name' => $user->ten_nv,
+                'id_chucvu' => $user->id_chucvu,
+                'ten_chuc_vu' => optional($user->chuc_vu)->ten_chuc_vu,
+                'permissions' => $permissions,
             ]);
         } else {
             return response()->json([
@@ -114,11 +120,10 @@ class NhanVienController extends Controller
     }
     public function checkLogin()
     {
-        $user = Auth::guard('nhan_vien')->user();
+        $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\NhanVien) {
             return response()->json([
                 'status' => 1,
-                // gọi name và email để hiện lên top admin khi đăng nhập vào từng acc nhân viên
                 'name' => $user->ten_nv,
                 'email' => $user->email,
             ]);
@@ -127,6 +132,36 @@ class NhanVienController extends Controller
                 'status' => 0,
                 'message' => 'Bạn cần phải đăng nhập',
             ]);
+        }
+    }
+    public function LoadDataChiTiet(Request $request)
+    {
+        $data = NhanVien::where("id", $request->id)
+            ->first();
+        return response()->json([
+            'data' => $data,
+        ]);
+    }
+    public function loadBacSi()
+    {
+        try {
+            $bac_si = NhanVien::with('chuc_vu')
+                ->whereHas('phanQuyen', function($query) {
+                    $query->where('id_chuc_nang', 17);
+                })
+                ->select('id', 'ten_nv', 'id_chucvu')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $bac_si,
+                'message' => 'Danh sách bác sĩ đã được tải thành công'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi khi tải danh sách bác sĩ: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
