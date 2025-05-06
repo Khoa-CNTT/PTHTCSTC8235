@@ -32,56 +32,21 @@ class HoSoBenhAnController extends Controller
 
     public function chiTiet($id)
     {
-        try {
-            $ho_so_benh_an = DB::table('ho_so_benh_ans')
-                ->join('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
-                ->join('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
-                ->join('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
-                ->where('ho_so_benh_ans.id', $id)
-                ->select(
-                    'ho_so_benh_ans.*',
-                    'pets.ten_pet as ten_thu_cung',
-                    'pets.tuoi',
-                    'pets.can_nang',
-                    'pets.chung_loai',
-                    'pets.gioi_tinh as gioi_tinh_pet',
-                    'khach_hangs.ho_va_ten as ten_chu',
-                    'khach_hangs.so_dien_thoai as sdt',
-                    'nhan_viens.ten_nv as ten_bac_si'
-                )
-                ->first();
-
-            if (!$ho_so_benh_an) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Không tìm thấy hồ sơ bệnh án'
-                ]);
-            }
-
-            // Lấy thông tin thuốc từ đơn thuốc
-            $danh_sach_thuoc = DB::table('don_thuoc_chi_tiets')
-                ->join('don_thuocs', 'don_thuoc_chi_tiets.id_don_thuoc', '=', 'don_thuocs.id')
-                ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
-                ->where('don_thuocs.id_ho_so_benh_an', $id)
-                ->select(
-                    'thuocs.ten_thuoc',
-                    'don_thuoc_chi_tiets.so_luong',
-                    'don_thuoc_chi_tiets.lieu_luong',
-                    'don_thuoc_chi_tiets.ghi_chu'
-                )
-                ->get();
-
-            return response()->json([
-                'status' => true,
-                'data' => $ho_so_benh_an,
-                'danh_sach_thuoc' => $danh_sach_thuoc
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Lỗi: ' . $e->getMessage()
-            ]);
-        }
+        $chi_tiet = \DB::table('don_thuoc_chi_tiets')
+            ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+            ->where('don_thuoc_chi_tiets.id_don_thuoc', $id)
+            ->select(
+                'don_thuoc_chi_tiets.id_ctthuoc',
+                'don_thuoc_chi_tiets.id_thuoc',
+                'thuocs.ten_thuoc',
+                'don_thuoc_chi_tiets.so_luong',
+                'don_thuoc_chi_tiets.lieu_luong'
+            )
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $chi_tiet
+        ]);
     }
 
     public function them(Request $request)
