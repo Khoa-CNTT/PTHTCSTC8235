@@ -2,16 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class HoSoBenhAn extends Model
 {
+    use HasFactory;
+
     protected $table = 'ho_so_benh_ans';
+
     protected $fillable = [
-        "id_nv",
-        "ngay_kham",
-        "chuan_doan",
-        "id_pet",
-        "tinh_trang",
+        'id_nv',
+        'id_pet',
+        'ngay_kham',
+        'chuan_doan',
+        'tinh_trang'
     ];
+
+    public function chiTietThuocs()
+    {
+        return $this->hasMany(ChiTietThuoc::class, 'id_ho_so_benh_an');
+    }
 }
