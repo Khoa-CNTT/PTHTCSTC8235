@@ -20,7 +20,7 @@ class LoaiDichVuController extends Controller
     public function load(){
         $data=LoaiDichVu::get();
         return response()->json([
-            "data"=> $data
+            "data" => $data
         ]);
     }
     public function update(CapNhatLoaiDichVuRequest $request){

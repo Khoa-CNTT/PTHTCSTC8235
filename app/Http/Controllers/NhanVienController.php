@@ -7,6 +7,7 @@ use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\PhanQuyen;
 
 class NhanVienController extends Controller
 {
@@ -99,12 +100,17 @@ class NhanVienController extends Controller
             ->attempt(['email' => $request->email, 'password' => $request->password]);
         if ($check) {
             $user = Auth::guard('nhan_vien')->user();
+            $permissions = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->pluck('id_chuc_nang');
             return response()->json([
                 'status' => 1,
                 'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công',
                 'email' => $user->email,
                 'name' => $user->ten_nv,
+                'id_chucvu' => $user->id_chucvu,
+                'ten_chuc_vu' => optional($user->chuc_vu)->ten_chuc_vu,
+                'permissions' => $permissions,
             ]);
         } else {
             return response()->json([
@@ -115,11 +121,10 @@ class NhanVienController extends Controller
     }
     public function checkLogin()
     {
-        $user = Auth::guard('nhan_vien')->user();
+        $user = Auth::guard('sanctum')->user();
         if ($user && $user instanceof \App\Models\NhanVien) {
             return response()->json([
                 'status' => 1,
-                // gọi name và email để hiện lên top admin khi đăng nhập vào từng acc nhân viên
                 'name' => $user->ten_nv,
                 'email' => $user->email,
             ]);
@@ -137,5 +142,61 @@ class NhanVienController extends Controller
         return response()->json([
             'data' => $data,
         ]);
+    }
+    public function loadBacSi()
+    {
+        try {
+            $bac_si = NhanVien::with('chuc_vu')
+                ->whereHas('phanQuyen', function($query) {
+                    $query->where('id_chuc_nang', 17);
+                })
+                ->select('id', 'ten_nv', 'id_chucvu')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $bac_si,
+                'message' => 'Danh sách bác sĩ đã được tải thành công'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi khi tải danh sách bác sĩ: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function kiemTraQuyen($id_chuc_nang)
+    {
+        try {
+            $user = Auth::guard('sanctum')->user();
+            if (!$user) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn cần đăng nhập để thực hiện chức năng này'
+                ], 401);
+            }
+
+            $hasPermission = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
+                ->where('id_chuc_nang', $id_chuc_nang)
+                ->exists();
+
+            if ($hasPermission) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Bạn có quyền truy cập'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền truy cập chức năng này'
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi khi kiểm tra quyền: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

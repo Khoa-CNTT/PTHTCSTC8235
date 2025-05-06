@@ -49,6 +49,16 @@ return [
             'driver' => 'session',
             'provider' => 'khach_hang',
         ],
+        'api' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+        // 'api' => [
+        //     'driver' => 'token',
+        //     'provider' => 'users',
+        //     'hash' => false,
+        // ],
+
     ],
 
     /*

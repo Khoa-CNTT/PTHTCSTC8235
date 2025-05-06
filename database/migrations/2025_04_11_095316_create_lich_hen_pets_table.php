@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('lich_hen_pets', function (Blueprint $table) {
             $table->id();
             $table->string('id_lich');
+            $table->string('id_kh');
             $table->string('id_dv');
             $table->string('id_pet');
-            $table->datetime('ngay_gio_hen');
-            $table->string('id_nv');
-            $table->string('tinh_trang');
-            $table->string('tien_coc');
+            $table->date('ngay');
+            $table->string('gio');
+            $table->string('id_nv')->nullable();
+            $table->string('tinh_trang')->default(0);
+            $table->string('tien_coc')->nullable();
             $table->timestamps();
         });
     }

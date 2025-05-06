@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('id_kh');
             $table->string('noi_dung');
             $table->date('ngay_tao');
-            $table->integer('tinh_trang')->default(0);
+            $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });
     }
