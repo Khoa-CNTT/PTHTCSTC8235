@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatLoaiDichVuRequest;
+use App\Http\Requests\ThemLoaiDichVuRequest;
 use App\Models\LoaiDichVu;
 use Illuminate\Http\Request;
 
 class LoaiDichVuController extends Controller
 {
-    public function them(Request $request){
+    public function them(ThemLoaiDichVuRequest $request){
         $data = $request->all();
         LoaiDichVu::create($data);
         return response()->json([
@@ -21,7 +23,7 @@ class LoaiDichVuController extends Controller
             "data"=> $data
         ]);
     }
-    public function update(Request $request){
+    public function update(CapNhatLoaiDichVuRequest $request){
         $data = $request->all();
         LoaiDichVu ::find($request->id)->update($data);
 

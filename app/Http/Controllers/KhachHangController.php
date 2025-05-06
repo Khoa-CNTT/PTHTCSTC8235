@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DangKyRequest;
+use App\Http\Requests\DangNhapKhachHangRequest;
+use App\Http\Requests\DangNhapRequest;
 use App\Models\KhachHang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +33,7 @@ class KhachHangController extends Controller
             'data' => $data
         ]);
     }
-    public function dangKy(Request $request)
+    public function dangKy(DangKyRequest $request)
     {
         $hash_active = Str::uuid();
         $a = $request->all();
@@ -102,7 +105,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function dangNhap(Request $request)
+    public function dangNhap(DangNhapKhachHangRequest $request)
     {
         $check = Auth::guard('khach_hang')->attempt(['email' => $request->email, 'password' => $request->pass]);
 

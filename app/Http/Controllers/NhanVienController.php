@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DangNhapRequest;
 use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,7 +92,7 @@ class NhanVienController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
-    public function dangNhap(Request $request)
+    public function dangNhap(DangNhapRequest $request)
     {
 
         $check = Auth::guard('nhan_vien')

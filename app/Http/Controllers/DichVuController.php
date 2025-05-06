@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatDichVuRequest;
+use App\Http\Requests\ThemDichVuRequest;
 use App\Models\DichVu;
 use App\Models\NhanVien;
 use App\Models\PhanQuyen;
@@ -11,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 class DichVuController extends Controller
 {
     private $id_chuc_nang = 4;
-    public function them(Request $request)
+    public function them(ThemDichVuRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
@@ -89,7 +91,7 @@ class DichVuController extends Controller
             'data' => $data
         ]);
     }
-    public function update(Request $request)
+    public function update(CapNhatDichVuRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
