@@ -49,6 +49,7 @@ Route::post('dich-vu/tim-kiem', [DichVuController::class, 'timkiem']);
 Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
 Route::get("dich-vu/load-tiem-chung", [DichVuController::class, 'loadTiemChung']);
 Route::get("dich-vu/load-cham-soc", [DichVuController::class, 'loadChamSoc']);
+Route::get("dich-vu/load-kham-benh", [DichVuController::class, 'loadKhamBenh']);
 
 
 
@@ -150,6 +151,9 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
     Route::post("danh-gia/xoa", [DanhGiaController::class, 'delete']);
     Route::post('/danh-gia/tim-kiem', [DanhGiaController::class, 'timkiem']);
 });
+Route::get("danh-gia/load2", [DanhGiaController::class, 'load2']);
+Route::post("danh-gia/them2", [DanhGiaController::class, 'them2']);
+Route::get("khach-hang/load", [KhachHangController::class, 'load']);
 
 // admin Kho routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
@@ -244,3 +248,9 @@ Route::get('/lich-hen/thong-tin-slot', [LichHenPetController::class, 'thongTinSl
 Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
 
 Route::get("doctor/thong-tin-bac-si",[LichHenPetController::class,'load']);
+
+Route::post("gio/them", [LichHenController::class, 'them']);
+Route::get("gio/load", [LichHenController::class, 'load']);
+Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
+Route::post("gio/update", [LichHenController::class, 'update']);
+Route::post("gio/del", [LichHenController::class, 'delete']);
