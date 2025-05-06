@@ -135,6 +135,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:5'])->group(function () {
 Route::get('/nhan-vien/load-chi-tiet/{id}', [NhanVienController::class, 'LoadDataChiTiet']);
 Route::get("nhan-vien/load", [NhanVienController::class, 'load']);
 
+Route::middleware('auth:sanctum')->get('/doctor/thong-tin-bac-si', [NhanVienController::class, 'thongTinBacSi']);
 // dang nhap nhan vien routes
 Route::get('/nhan-vien/kiem-tra-dang-nhap', [NhanVienController::class, 'checkLogin']);
 Route::get('/nhan-vien/dang-xuat', [NhanVienController::class, 'dangXuat']);
@@ -230,7 +231,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
     Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
 });
 // Route kiểm tra quyền
-Route::get('/phan-quyen/kiem-tra-quyen/{id}', [PhanQuyenController::class, 'kiemTraQuyen']);
+Route::get('/phan-quyen/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
 
 //client lich hen routes
 Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
@@ -242,4 +243,4 @@ Route::get("lich/load",[LichHenController::class,'load']);
 Route::get('/lich-hen/thong-tin-slot', [LichHenPetController::class, 'thongTinSlot']);
 Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
 
-
+Route::get("doctor/thong-tin-bac-si",[LichHenPetController::class,'load']);

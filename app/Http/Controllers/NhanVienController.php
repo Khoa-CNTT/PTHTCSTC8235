@@ -205,4 +205,23 @@ class NhanVienController extends Controller
             ], 500);
         }
     }
+    public function thongTinBacSi()
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user && $user instanceof \App\Models\NhanVien) {
+            return response()->json([
+                'id' => $user->id,
+                'ten_nv' => $user->ten_nv,
+                'email' => $user->email,
+                'id_chucvu' => $user->id_chucvu,
+                'chuc_vu' => optional($user->chuc_vu)->ten_chuc_vu,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Không xác định được người dùng'
+        ], 401);
+    }
 }
