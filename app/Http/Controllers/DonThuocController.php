@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Thuoc;
 use App\Models\DonThuoc;
-use App\Models\ChiTietDonThuoc;
+use App\Models\DonThuocChiTiet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,26 +26,41 @@ class DonThuocController extends Controller
             DB::beginTransaction();
 
             $don_thuoc = new DonThuoc();
-            $don_thuoc->id_khach_hang = $request->id_khach_hang;
-            $don_thuoc->id_nhan_vien = $request->id_nhan_vien;
-            $don_thuoc->ngay_ke = now();
-            $don_thuoc->tinh_trang = 1;
+            $don_thuoc->id_hsba = $request->id_hsba;
+            $don_thuoc->ngay_ke_don = now();
             $don_thuoc->save();
 
             foreach ($request->chi_tiet as $item) {
-                $chi_tiet = new ChiTietDonThuoc();
+                $chi_tiet = new DonThuocChiTiet();
                 $chi_tiet->id_don_thuoc = $don_thuoc->id;
                 $chi_tiet->id_thuoc = $item['id_thuoc'];
                 $chi_tiet->so_luong = $item['so_luong'];
-                $chi_tiet->cach_dung = $item['cach_dung'];
+                $chi_tiet->lieu_luong = $item['lieu_luong'];
                 $chi_tiet->save();
             }
 
             DB::commit();
 
+            // Lấy lại đơn thuốc vừa thêm
+            $newDonThuoc = \DB::table('don_thuocs')
+                ->leftJoin('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
+                ->leftJoin('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
+                ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+                ->leftJoin('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
+                ->select(
+                    'don_thuocs.id',
+                    'khach_hangs.ho_va_ten as ten_khach_hang',
+                    'nhan_viens.ten_nv as ten_bac_si',
+                    'pets.ten_pet',
+                    'don_thuocs.created_at'
+                )
+                ->where('don_thuocs.id', $don_thuoc->id)
+                ->first();
+
             return response()->json([
                 'status' => 1,
-                'message' => 'Thêm đơn thuốc thành công'
+                'message' => 'Thêm đơn thuốc thành công',
+                'data' => $newDonThuoc
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -58,13 +73,24 @@ class DonThuocController extends Controller
 
     public function load()
     {
-        $don_thuoc = DonThuoc::with(['chiTietDonThuoc.thuoc', 'khachHang', 'nhanVien'])
-            ->orderBy('created_at', 'desc')
+        $don_thuoc = \DB::table('don_thuocs')
+            ->leftJoin('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
+            ->leftJoin('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
+            ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+            ->leftJoin('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
+            ->select(
+                'don_thuocs.id',
+                'khach_hangs.ho_va_ten as ten_khach_hang',
+                'nhan_viens.ten_nv as ten_bac_si',
+                'pets.ten_pet',
+                'don_thuocs.created_at'
+            )
+            ->orderBy('don_thuocs.created_at', 'desc')
             ->get();
 
         return response()->json([
             'status' => true,
-            'don_thuoc' => $don_thuoc
+            'data' => $don_thuoc
         ]);
     }
 
@@ -75,7 +101,7 @@ class DonThuocController extends Controller
 
             $don_thuoc = DonThuoc::find($request->id);
             if ($don_thuoc) {
-                ChiTietDonThuoc::where('id_don_thuoc', $don_thuoc->id)->delete();
+                DonThuocChiTiet::where('id_don_thuoc', $don_thuoc->id)->delete();
                 $don_thuoc->delete();
             }
 
@@ -92,5 +118,48 @@ class DonThuocController extends Controller
                 'message' => 'Xóa đơn thuốc thất bại: ' . $e->getMessage()
             ]);
         }
+    }
+
+    public function getAll()
+    {
+        $don_thuoc = \DB::table('don_thuocs')
+            ->leftJoin('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
+            ->leftJoin('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
+            ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+            ->leftJoin('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
+            ->select(
+                'don_thuocs.id',
+                'khach_hangs.ho_va_ten as ten_khach_hang',
+                'nhan_viens.ten_nv as ten_bac_si',
+                'pets.ten_pet',
+                'don_thuocs.ngay_ke_don',
+                'don_thuocs.created_at'
+            )
+            ->orderBy('don_thuocs.created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $don_thuoc
+        ]);
+    }
+
+    public function chiTiet($id)
+    {
+        $chi_tiet = \DB::table('don_thuoc_chi_tiets')
+            ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+            ->where('don_thuoc_chi_tiets.id_don_thuoc', $id)
+            ->select(
+                'don_thuoc_chi_tiets.id_ctthuoc',
+                'don_thuoc_chi_tiets.id_thuoc',
+                'thuocs.ten_thuoc',
+                'don_thuoc_chi_tiets.so_luong',
+                'don_thuoc_chi_tiets.lieu_luong'
+            )
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $chi_tiet
+        ]);
     }
 }
