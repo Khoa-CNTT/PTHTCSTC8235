@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('hoa_dons', function (Blueprint $table) {
             $table->id();
-            $table->id('id_kh');
-            $table->id('id_pet');
+            $table->integer('id_kh');
+            $table->integer('id_pet');
             $table->string('phuong_thuc');
             $table->date('ngay_xuat_hoa_don');
             $table->integer('tinh_trang')->default('0');
