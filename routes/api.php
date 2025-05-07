@@ -233,6 +233,9 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
     Route::get('/nhan-vien/load-bac-si', [NhanVienController::class, 'loadBacSi']);
     Route::get('/pet/load', [PetController::class, 'Load']);
     Route::get('don-thuoc/chi-tiet/{id}', [DonThuocController::class, 'chiTiet']);
+    Route::get('/don-thuoc/chi-tiet-in/{id}', [DonThuocController::class, 'getChiTietInDon']);
+    Route::get('/don-thuoc/khach-hang-dang-dieu-tri', [DonThuocController::class, 'loadKhachHangDangDieuTri']);
+    Route::post('/don-thuoc/toggle-tinh-trang', [DonThuocController::class, 'toggleTinhTrang']);
     Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
     Route::get('/lich-hen/doctor', [LichHenPetController::class, 'loadDoctorAppointments']);
     Route::get('/doctor/lich-hen', [LichHenPetController::class, 'layLichHenTheoBacSi']);
@@ -242,6 +245,16 @@ Route::get('/phan-quyen/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemT
 
 //client lich hen routes
 Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
+Route::get("lich-hen/load",[LichHenPetController::class,'load']);
+Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
+Route::post("lich-hen/update",[LichHenPetController::class,'update']);
+Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
+Route::get("lich/load",[LichHenController::class,'load']);
+
+Route::get('/ho-so-benh-an/loc-theo-bac-si/{id}', [HoSoBenhAnController::class, 'locTheoBacSi']);
+
+
+
 Route::get("lich-hen/load", [LichHenPetController::class, 'load']);
 Route::post("lich-hen/doi", [LichHenPetController::class, 'doi']);
 Route::post("lich-hen/update", [LichHenPetController::class, 'update']);

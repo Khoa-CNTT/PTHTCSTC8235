@@ -11,12 +11,20 @@ class PetController extends Controller
 {
     public function Load()
     {
+        try {
         $data = pet::join('khach_hangs', 'khach_hangs.id', '=', 'pets.id_kh')
             ->select('pets.*', 'khach_hangs.ho_va_ten')
             ->get();
         return response()->json([
+                "status" => true,
             "data" => $data
         ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status" => false,
+                "message" => "Lỗi khi tải danh sách pet: " . $e->getMessage()
+            ]);
+        }
     }
 
     public function Doitt(Request $request)
