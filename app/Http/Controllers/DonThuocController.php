@@ -269,4 +269,65 @@ class DonThuocController extends Controller
             ]);
         }
     }
+
+    public function danhSach()
+    {
+        $don_thuoc = DB::table('don_thuocs')
+            ->join('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
+            ->join('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
+            ->join('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+            ->join('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
+            ->select(
+                'don_thuocs.*',
+                'pets.ten_pet as ten_pet',
+                'khach_hangs.ho_va_ten as ten_khach_hang',
+                'nhan_viens.ten_nv as ten_bac_si'
+            )
+            ->orderBy('don_thuocs.created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $don_thuoc
+        ]);
+    }
+
+    public function timKiem(Request $request)
+    {
+        try {
+            $query = DB::table('don_thuocs')
+                ->join('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
+                ->join('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
+                ->join('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+                ->join('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
+                ->select(
+                    'don_thuocs.*',
+                    'pets.ten_pet as ten_pet',
+                    'khach_hangs.ho_va_ten as ten_khach_hang',
+                    'nhan_viens.ten_nv as ten_bac_si'
+                );
+
+            // Tìm kiếm theo tên bác sĩ (chính xác)
+            if ($request->has('ten_bac_si') && !empty($request->ten_bac_si)) {
+                $query->where('nhan_viens.ten_nv', $request->ten_bac_si);
+            }
+
+            // Tìm kiếm theo ngày kê
+            if ($request->has('ngay_ke') && !empty($request->ngay_ke)) {
+                $query->whereDate('don_thuocs.created_at', $request->ngay_ke);
+            }
+
+            $don_thuoc = $query->orderBy('don_thuocs.created_at', 'desc')->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $don_thuoc
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ]);
+        }
+    }
 }
