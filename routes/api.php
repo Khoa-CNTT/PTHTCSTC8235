@@ -206,23 +206,24 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:16'])->group(function () {
 
 // admin LichHen routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
-    Route::post("lich-hen/them",[LichHenPetController::class,'them']);
-    Route::get("lich-hen/load",[LichHenPetController::class,'load']);
-    Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
-    Route::post("lich-hen/update",[LichHenPetController::class,'update']);
-    Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
-    Route::get("lich/load",[LichHenController::class,'load']);
+    Route::post("lich-hen/them", [LichHenPetController::class, 'them']);
+    Route::get("lich-hen/load", [LichHenPetController::class, 'load']);
+    Route::post("lich-hen/doi", [LichHenPetController::class, 'doi']);
+    Route::post("lich-hen/update", [LichHenPetController::class, 'update']);
+    Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
+    Route::get("lich/load", [LichHenController::class, 'load']);
 });
+
 //bac si routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
-    Route::get("/don-thuoc/load-thuoc",[DonThuocController::class,'loadThuoc']);
+    Route::get("/don-thuoc/load-thuoc", [DonThuocController::class, 'loadThuoc']);
     Route::get('/ho-so-benh-an/chi-tiet/{id}', [HoSoBenhAnController::class, 'chiTiet']);
-    Route::get("ho-so-benh-an/load",[HoSoBenhAnController::class,'load']);
-    Route::post("ho-so-benh-an/doi-TT",[HoSoBenhAnController::class,'doi']);
-    Route::post("ho-so-benh-an/update",[HoSoBenhAnController::class,'update']);
-    Route::post("ho-so-benh-an/xoa",[HoSoBenhAnController::class,'delete']);
-    Route::post("ho-so-benh-an/tim-kiem",[HoSoBenhAnController::class,'search']);
-    Route::post("ho-so-benh-an/them",[HoSoBenhAnController::class,'them']);
+    Route::get("ho-so-benh-an/load", [HoSoBenhAnController::class, 'load']);
+    Route::post("ho-so-benh-an/doi-TT", [HoSoBenhAnController::class, 'doi']);
+    Route::post("ho-so-benh-an/update", [HoSoBenhAnController::class, 'update']);
+    Route::post("ho-so-benh-an/xoa", [HoSoBenhAnController::class, 'delete']);
+    Route::post("ho-so-benh-an/tim-kiem", [HoSoBenhAnController::class, 'search']);
+    Route::post("ho-so-benh-an/them", [HoSoBenhAnController::class, 'them']);
     Route::get('/don-thuoc/load-thuoc', [DonThuocController::class, 'loadThuoc']);
     Route::post('/don-thuoc/them', [DonThuocController::class, 'them']);
     Route::get('/don-thuoc/load', [DonThuocController::class, 'load']);
@@ -233,21 +234,23 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
     Route::get('/pet/load', [PetController::class, 'Load']);
     Route::get('don-thuoc/chi-tiet/{id}', [DonThuocController::class, 'chiTiet']);
     Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
+    Route::get('/lich-hen/doctor', [LichHenPetController::class, 'loadDoctorAppointments']);
+    Route::get('/doctor/lich-hen', [LichHenPetController::class, 'layLichHenTheoBacSi']);
 });
 // Route kiểm tra quyền
 Route::get('/phan-quyen/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
 
 //client lich hen routes
 Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
-Route::get("lich-hen/load",[LichHenPetController::class,'load']);
-Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
-Route::post("lich-hen/update",[LichHenPetController::class,'update']);
-Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
-Route::get("lich/load",[LichHenController::class,'load']);
+Route::get("lich-hen/load", [LichHenPetController::class, 'load']);
+Route::post("lich-hen/doi", [LichHenPetController::class, 'doi']);
+Route::post("lich-hen/update", [LichHenPetController::class, 'update']);
+Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
+Route::get("lich/load", [LichHenController::class, 'load']);
 Route::get('/lich-hen/thong-tin-slot', [LichHenPetController::class, 'thongTinSlot']);
 Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
 
-Route::get("doctor/thong-tin-bac-si",[LichHenPetController::class,'load']);
+Route::get("doctor/thong-tin-bac-si", [LichHenPetController::class, 'load']);
 
 Route::post("gio/them", [LichHenController::class, 'them']);
 Route::get("gio/load", [LichHenController::class, 'load']);

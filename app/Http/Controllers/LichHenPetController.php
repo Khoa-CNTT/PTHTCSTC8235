@@ -12,6 +12,33 @@ use Illuminate\Support\Facades\DB;
 
 class LichHenPetController extends Controller
 {
+    public function layLichHenTheoBacSi()
+    {
+        $doctorId = Auth::user()->id;
+
+        $ds = DB::table('lich_hen_pets')
+            ->join('lich_hens', 'lich_hens.id', '=', 'lich_hen_pets.id_lich')
+            ->join('pets', 'pets.id', '=', 'lich_hen_pets.id_pet')
+            ->join('khach_hangs', 'khach_hangs.id', '=', 'lich_hen_pets.id_kh')
+            ->join('dich_vus', 'dich_vus.id', '=', 'lich_hen_pets.id_dv')
+            ->where('lich_hen_pets.id_nv', $doctorId)
+            ->select(
+                'lich_hen_pets.*',
+                'lich_hen_pets.tinh_trang as trang_thai',
+                'pets.ten_pet as ten_thu_cung',
+                'khach_hangs.ho_va_ten as ten_khach_hang',
+                'khach_hangs.so_dien_thoai',
+                'dich_vus.ten_dv as dich_vu',
+                'lich_hens.khung_gio'
+            )
+            ->orderBy('lich_hen_pets.ngay', 'asc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $ds
+        ]);
+    }
     public function them(Request $request)
     {
         $dichVu = DichVu::find($request->id_dv);
