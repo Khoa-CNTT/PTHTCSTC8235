@@ -15,18 +15,19 @@ class CapNhatLoaiDichVuRequest extends FormRequest
     {
         return [
             'ten_loaidv' => 'required|string|max:255',
-            'mo_ta'      => 'nullable|string|max:1000',
+            'mo_ta'      => 'required|string|max:1000',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'ten_loaidv.required' => 'Tên dịch vụ không được để trống',
-            'ten_loaidv.string'   => 'Tên dịch vụ phải là chuỗi văn bản',
-            'ten_loaidv.max'      => 'Tên dịch vụ không được vượt quá 255 ký tự',
-            'mo_ta.string'        => 'Mô tả phải là văn bản',
-            'mo_ta.max'           => 'Mô tả không được vượt quá 1000 ký tự',
+            'ten_loaidv.required' => 'Vui lòng nhập tên loại dịch vụ.',
+            'ten_loaidv.string'   => 'Tên loại dịch vụ phải là chuỗi.',
+            'ten_loaidv.max'      => 'Tên loại dịch vụ không vượt quá 255 ký tự.',
+            'mo_ta.required'      => 'Vui lòng nhập mô tả cho loại dịch vụ.',
+            'mo_ta.string'        => 'Mô tả phải là chuỗi văn bản.',
+            'mo_ta.max'           => 'Mô tả không vượt quá 1000 ký tự.',
         ];
     }
 }

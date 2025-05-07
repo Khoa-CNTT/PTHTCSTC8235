@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\DB;
 class DichVuController extends Controller
 {
 
-    public function them(Request $request)
     private $id_chuc_nang = 4;
     public function them(ThemDichVuRequest $request)
     {
+
             $data = $request->all();
             DichVu::create($data);
             return response()->json([
