@@ -6,6 +6,7 @@ use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\HasApiTokens;
 use App\Models\PhanQuyen;
 
 class NhanVienController extends Controller
@@ -42,22 +43,21 @@ class NhanVienController extends Controller
             "data" => $data
         ]);
     }
-    public function dangXuat(){
+    public function dangXuat()
+    {
         $user = Auth::guard('sanctum')->user();
-        if ($user && $user instanceof \App\Models\NhanVien) {
-            DB::table('personal_access_tokens')
-                ->where('id', $user->currentAccessToken()->id)
-                ->delete();
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
             return response()->json([
                 'status' => 1,
                 'message' => 'Đăng xuất thành công'
             ]);
-        } else {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Đăng xuất không thành công'
-            ]);
         }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Đăng xuất không thành công'
+        ]);
     }
     public function update(Request $request)
     {
@@ -94,16 +94,22 @@ class NhanVienController extends Controller
     }
     public function dangNhap(Request $request)
     {
+        $check = Auth::guard('nhan_vien')->attempt([
+            'email' => $request->email,
+            'password' => $request->password
+        ]);
 
-        $check = Auth::guard('nhan_vien')
-            ->attempt(['email' => $request->email, 'password' => $request->password]);
         if ($check) {
             $user = Auth::guard('nhan_vien')->user();
             $permissions = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
                 ->pluck('id_chuc_nang');
+
+            // Tạo token tên khác nhau tùy loại người dùng
+            $tokenName = $permissions->contains(17) ? 'token_doctor' : 'token_admin';
+
             return response()->json([
                 'status' => 1,
-                'token' => $user->createToken('token')->plainTextToken,
+                'token' => $user->createToken($tokenName)->plainTextToken,
                 'message' => 'Đăng nhập thành công',
                 'email' => $user->email,
                 'name' => $user->ten_nv,
@@ -118,6 +124,7 @@ class NhanVienController extends Controller
             ]);
         }
     }
+
     public function checkLogin()
     {
         $user = Auth::guard('sanctum')->user();
@@ -146,7 +153,7 @@ class NhanVienController extends Controller
     {
         try {
             $bac_si = NhanVien::with('chuc_vu')
-                ->whereHas('phanQuyen', function($query) {
+                ->whereHas('phanQuyen', function ($query) {
                     $query->where('id_chuc_nang', 17);
                 })
                 ->select('id', 'ten_nv', 'id_chucvu')

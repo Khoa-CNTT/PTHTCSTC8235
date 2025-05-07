@@ -40,7 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-
+        'doctor' => [
+            'driver' => 'session',
+            'provider' => 'nhan_vien',
+        ],
         'nhan_vien' => [
             'driver' => 'session',
             'provider' => 'nhan_vien',
