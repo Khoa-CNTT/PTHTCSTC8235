@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ThemLichHenRequest;
 use App\Models\DichVu;
 use App\Models\LichHenPet;
 use App\Models\pet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LichHenPetController extends Controller
 {
@@ -82,6 +84,21 @@ class LichHenPetController extends Controller
         return response()->json([
             "status" => '1',
             "message" => "Xóa thành công"
+        ]);
+    }
+    public function thongTinSlot(Request $request)
+    {
+        $ngay = $request->ngay;
+
+        $slots = DB::table('lich_hen_pets')
+            ->select('id_lich', DB::raw('COUNT(*) as so_luot'))
+            ->where('ngay', $ngay)
+            ->groupBy('id_lich')
+            ->pluck('so_luot', 'id_lich'); 
+
+        return response()->json([
+            'status' => 1,
+            'data' => $slots
         ]);
     }
 }
