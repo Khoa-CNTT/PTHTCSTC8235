@@ -260,6 +260,9 @@ Route::get("lich-hen/load", [LichHenPetController::class, 'load']);
 Route::post("lich-hen/doi", [LichHenPetController::class, 'doi']);
 Route::post("lich-hen/update", [LichHenPetController::class, 'update']);
 Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
+
+Route::get("lich-hen/thong-tin-slot", [LichHenPetController::class, 'thongTinSlot']);
+
 Route::get("lich/load", [LichHenController::class, 'load']);
 Route::get('/lich-hen/thong-tin-slot', [LichHenPetController::class, 'thongTinSlot']);
 Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);

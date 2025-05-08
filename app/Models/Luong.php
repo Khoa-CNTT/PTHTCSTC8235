@@ -8,7 +8,6 @@ class Luong extends Model
 {
     protected $table = 'luongs';
     protected $fillable = [
-        'id_luong',
         'id_nv',
         'tien_luong',
         'ngay_thanh_toan',
