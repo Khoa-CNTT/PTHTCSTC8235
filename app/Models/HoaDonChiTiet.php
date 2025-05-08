@@ -12,6 +12,7 @@ class HoaDonChiTiet extends Model
         'id_ct_don_thuoc',
         'id_nv',
         'id_dvct',
-        'ngay_tt'
+        'ngay_tt',
+        'tien_kham'
     ];
 }

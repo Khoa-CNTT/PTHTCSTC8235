@@ -5,6 +5,7 @@ use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\DonThuocController;
+use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\HoSoBenhAnController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\KhoController;
@@ -270,3 +271,6 @@ Route::get("gio/load", [LichHenController::class, 'load']);
 Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
 Route::post("gio/update", [LichHenController::class, 'update']);
 Route::post("gio/del", [LichHenController::class, 'delete']);
+
+Route::get("hoa-don/load", [HoaDonController::class, 'load']);
+

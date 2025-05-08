@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('hoa_don_chi_tiets', function (Blueprint $table) {
             $table->id();
             $table->integer('id_hoadon');
-            $table->integer('id_ct_don_thuoc');
+            $table->integer('id_ct_don_thuoc')->nullable();
             $table->integer('id_nv');
-            $table->integer('id_dvct');
+            $table->integer('id_dvct')->nullable();
             $table->date('ngay_tt');
+            $table->decimal('tien_kham')->nullable();
             $table->timestamps();
         });
     }
