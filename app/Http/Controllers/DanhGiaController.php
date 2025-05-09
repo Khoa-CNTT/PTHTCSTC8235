@@ -20,18 +20,18 @@ class DanhGiaController extends Controller
     }
 
     public function load2()
-{
-    $data = DanhGia::join('khach_hangs', 'khach_hangs.id', '=', 'danh_gias.id_kh')
-        ->select('danh_gias.*', 'khach_hangs.ho_va_ten')
-        ->where('danh_gias.tinh_trang', 1)
-        ->orderBy('danh_gias.ngay_tao', 'desc')
-        ->get();
+    {
+        $data = DanhGia::join('khach_hangs', 'khach_hangs.id', '=', 'danh_gias.id_kh')
+            ->select('danh_gias.*', 'khach_hangs.ho_va_ten')
+            ->where('danh_gias.tinh_trang', 1)
+            ->orderBy('danh_gias.ngay_tao', 'desc')
+            ->get();
 
-    return response()->json([
-        'status' => true,
-        'data' => $data
-    ]);
-}
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
+    }
 
     public function timkiem(Request $request)
     {
@@ -87,21 +87,22 @@ class DanhGiaController extends Controller
         ]);
     }
     public function them2(Request $request)
-{
-    $data = $request->all();
+    {
+        $data = $request->only(['id_kh', 'noi_dung', 'ngay_tao']);
+        $data['tinh_trang'] = 1;
 
-    if (empty($data['id_kh'])) {
+        if (empty($data['id_kh'])) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần đăng nhập để gửi đánh giá',
+            ], 400); // Bad Request
+        }
+
+        DanhGia::create($data);
+
         return response()->json([
-            'status' => 0,
-            'message' => 'Bạn cần đăng nhập để gửi đánh giá',
-        ], 400); // Bad Request
+            'status' => 1,
+            'message' => 'Thêm mới đánh giá thành công',
+        ]);
     }
-
-    DanhGia::create($data);
-
-    return response()->json([
-        'status' => 1,
-        'message' => 'Thêm mới đánh giá thành công',
-    ]);
-}
 }
