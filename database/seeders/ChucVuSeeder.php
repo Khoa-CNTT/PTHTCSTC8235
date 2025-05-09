@@ -30,6 +30,7 @@ class ChucVuSeeder extends Seeder
                 'ten_chuc_vu' => 'ADMIN',
                 'tinh_trang' => 1,
             ],
+            
         ]);
     }
 }

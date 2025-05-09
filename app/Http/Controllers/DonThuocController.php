@@ -25,11 +25,17 @@ class DonThuocController extends Controller
         try {
             DB::beginTransaction();
 
+            // Tạo đơn thuốc trước
             $don_thuoc = new DonThuoc();
-            $don_thuoc->id_hsba = $request->id_hsba;
             $don_thuoc->ngay_ke_don = now();
             $don_thuoc->save();
 
+            // Gán đơn thuốc này vào hồ sơ bệnh án
+            DB::table('ho_so_benh_ans')
+                ->where('id', $request->id_hsba)
+                ->update(['id_don_thuoc' => $don_thuoc->id]);
+
+            // Lưu chi tiết đơn thuốc
             foreach ($request->chi_tiet as $item) {
                 $chi_tiet = new DonThuocChiTiet();
                 $chi_tiet->id_don_thuoc = $don_thuoc->id;
@@ -42,11 +48,12 @@ class DonThuocController extends Controller
 
             DB::commit();
 
-            // Lấy lại đơn thuốc vừa thêm
+            // Load lại đơn thuốc vừa thêm để trả về cho frontend
             $newDonThuoc = DB::table('don_thuocs')
-                ->leftJoin('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
-                ->leftJoin('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
-                ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+                ->leftJoin('ho_so_benh_ans', 'don_thuocs.id', '=', 'ho_so_benh_ans.id_don_thuoc') // đổi lại join
+                ->leftJoin('lich_hen_pets', 'ho_so_benh_ans.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+                ->leftJoin('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
+                ->leftJoin('khach_hangs', 'lich_hen_pets.id_kh', '=', 'khach_hangs.id')
                 ->leftJoin('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
                 ->select(
                     'don_thuocs.id',
@@ -75,8 +82,9 @@ class DonThuocController extends Controller
     public function load()
     {
         $don_thuoc = DB::table('don_thuocs')
-            ->leftJoin('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
-            ->leftJoin('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
+            ->leftJoin('ho_so_benh_ans', 'ho_so_benh_ans.id_don_thuoc', '=', 'don_thuocs.id')
+            ->leftJoin('lich_hen_pets', 'ho_so_benh_ans.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+            ->leftJoin('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
             ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
             ->leftJoin('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
             ->select(
@@ -124,9 +132,10 @@ class DonThuocController extends Controller
     public function getAll()
     {
         $don_thuoc = DB::table('don_thuocs')
-            ->leftJoin('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
-            ->leftJoin('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
-            ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+            ->leftJoin('ho_so_benh_ans', 'ho_so_benh_ans.id_don_thuoc', '=', 'don_thuocs.id')
+            ->leftJoin('lich_hen_pets', 'ho_so_benh_ans.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+            ->leftJoin('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
+            ->leftJoin('khach_hangs', 'lich_hen_pets.id_kh', '=', 'khach_hangs.id')
             ->leftJoin('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
             ->select(
                 'don_thuocs.id',
@@ -143,6 +152,27 @@ class DonThuocController extends Controller
         return response()->json([
             'status' => true,
             'data' => $don_thuoc
+        ]);
+    }
+    public function layPetsDangDieuTriTheoKhach($id_kh)
+    {
+        $pets = DB::table('ho_so_benh_ans')
+            ->join('lich_hen_pets', 'ho_so_benh_ans.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+            ->join('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
+            ->where('lich_hen_pets.id_kh', $id_kh)
+            ->where('ho_so_benh_ans.tinh_trang', 1)
+            ->select(
+                'pets.id as id_pet',
+                'pets.ten_pet',
+                'ho_so_benh_ans.id as id_hsba',
+                'ho_so_benh_ans.id_nv'
+            )
+            ->distinct()
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $pets
         ]);
     }
 
@@ -169,9 +199,10 @@ class DonThuocController extends Controller
 
     public function getChiTietInDon($id)
     {
-        $don_thuoc = \DB::table('don_thuocs')
-            ->leftJoin('ho_so_benh_ans', 'don_thuocs.id_hsba', '=', 'ho_so_benh_ans.id')
-            ->leftJoin('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
+        $don_thuoc = DB::table('don_thuocs')
+            ->leftJoin('ho_so_benh_ans', 'ho_so_benh_ans.id_don_thuoc', '=', 'don_thuocs.id')
+            ->leftJoin('lich_hen_pets', 'ho_so_benh_ans.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+            ->leftJoin('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
             ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
             ->leftJoin('nhan_viens', 'ho_so_benh_ans.id_nv', '=', 'nhan_viens.id')
             ->where('don_thuocs.id', $id)
@@ -179,21 +210,21 @@ class DonThuocController extends Controller
                 'don_thuocs.id',
                 'don_thuocs.ngay_ke_don',
                 'khach_hangs.ho_va_ten as ten_benh_nhan',
-                'ho_so_benh_ans.ngay_kham',
+                'lich_hen_pets.ngay as ngay_kham',
                 'ho_so_benh_ans.chuan_doan',
                 'nhan_viens.ten_nv as ten_bac_si',
                 'pets.ten_pet'
             )
             ->first();
-    
+
         if (!$don_thuoc) {
             return response()->json([
                 'status' => false,
                 'message' => 'Không tìm thấy thông tin đơn thuốc.'
             ]);
         }
-    
-        $chi_tiet = \DB::table('don_thuoc_chi_tiets')
+
+        $chi_tiet = DB::table('don_thuoc_chi_tiets')
             ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
             ->where('don_thuoc_chi_tiets.id_don_thuoc', $id)
             ->where('don_thuoc_chi_tiets.tinh_trang', '1')
@@ -203,7 +234,7 @@ class DonThuocController extends Controller
                 'don_thuoc_chi_tiets.lieu_luong'
             )
             ->get();
-    
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -246,16 +277,11 @@ class DonThuocController extends Controller
     {
         try {
             $khachHang = DB::table('ho_so_benh_ans')
-                ->join('pets', 'ho_so_benh_ans.id_pet', '=', 'pets.id')
-                ->join('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+                ->join('lich_hen_pets', 'ho_so_benh_ans.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+                ->join('khach_hangs', 'lich_hen_pets.id_kh', '=', 'khach_hangs.id')
                 ->where('ho_so_benh_ans.tinh_trang', 1)
-                ->select(
-                    'khach_hangs.id',
-                    'khach_hangs.ho_va_ten',
-                    'pets.id as id_pet',
-                    'pets.ten_pet',
-                    'ho_so_benh_ans.id as id_hsba'
-                )
+                ->select('khach_hangs.id', 'khach_hangs.ho_va_ten')
+                ->distinct()
                 ->get();
 
             return response()->json([

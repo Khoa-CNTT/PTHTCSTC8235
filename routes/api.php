@@ -204,9 +204,9 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:16'])->group(function () {
     Route::post('/chuc-vu/tim-kiem', [ChucVuController::class, 'timkiem']);
 });
 
-
 // admin LichHen routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
+    Route::get("lich-hen/khach-hang-load", [LichHenController::class, 'loadkh']);
     Route::post("lich-hen/them", [LichHenPetController::class, 'them']);
     Route::get("lich-hen/load", [LichHenPetController::class, 'load']);
     Route::post("lich-hen/doi", [LichHenPetController::class, 'doi']);
@@ -225,6 +225,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
     Route::post("ho-so-benh-an/xoa", [HoSoBenhAnController::class, 'delete']);
     Route::post("ho-so-benh-an/tim-kiem", [HoSoBenhAnController::class, 'search']);
     Route::post("ho-so-benh-an/them", [HoSoBenhAnController::class, 'them']);
+    Route::post('/ho-so-benh-an/tao-tu-lich', [HoSoBenhAnController::class, 'taoTuLich']);
     Route::get('/don-thuoc/load-thuoc', [DonThuocController::class, 'loadThuoc']);
     Route::post('/don-thuoc/them', [DonThuocController::class, 'them']);
     Route::get('/don-thuoc/load', [DonThuocController::class, 'load']);
@@ -236,6 +237,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
     Route::get('don-thuoc/chi-tiet/{id}', [DonThuocController::class, 'chiTiet']);
     Route::get('/don-thuoc/chi-tiet-in/{id}', [DonThuocController::class, 'getChiTietInDon']);
     Route::get('/don-thuoc/khach-hang-dang-dieu-tri', [DonThuocController::class, 'loadKhachHangDangDieuTri']);
+    Route::get('/don-thuoc/pets-dang-dieu-tri/{id_kh}', [DonThuocController::class, 'layPetsDangDieuTriTheoKhach']);
     Route::post('/don-thuoc/toggle-tinh-trang', [DonThuocController::class, 'toggleTinhTrang']);
     Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
     Route::get('/lich-hen/doctor', [LichHenPetController::class, 'loadDoctorAppointments']);
@@ -277,3 +279,10 @@ Route::post("gio/del", [LichHenController::class, 'delete']);
 
 Route::get("hoa-don/load", [HoaDonController::class, 'load']);
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('hoa-don/load', [HoaDonController::class, 'load']);
+    Route::get('hoa-don/danh-sach', [HoaDonController::class, 'danhSach']);
+    Route::get('hoa-don/chi-tiet/{id}', [HoaDonController::class, 'chiTiet']);
+    Route::post('hoa-don/update', [HoaDonController::class, 'update']);
+    Route::post('hoa-don/xoa', [HoaDonController::class, 'xoa']);
+});

@@ -3,10 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\LichHen;
+use App\Models\KhachHang;
 use Illuminate\Http\Request;
 
 class LichHenController extends Controller
 {
+    public function loadkh()
+    {
+        $data = KhachHang::get();
+        return response()->json([
+            "data" => $data
+        ]);
+    }
     public function load(){
         $data=LichHen::get();
         return response()->json([
