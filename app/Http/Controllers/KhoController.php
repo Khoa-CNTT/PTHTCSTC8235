@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatKhoRequest;
+use App\Http\Requests\ThemKhoRequest;
 use App\Models\Kho;
 use Illuminate\Http\Request;
 
 class KhoController extends Controller
 {
-    public function them(Request $request){
+    public function them(ThemKhoRequest $request){
         $data = $request->all();
         Kho::create($data);
         return response()->json([
@@ -21,7 +23,7 @@ class KhoController extends Controller
             "data"=> $data
         ]);
     }
-    public function update(Request $request){
+    public function update(CapNhatKhoRequest $request){
         $data = $request->all();
         Kho ::find($request->id)->update($data);
 

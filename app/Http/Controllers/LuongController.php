@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ThanhToanLuongRequest;
 use App\Models\Luong;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
@@ -53,7 +54,7 @@ class LuongController extends Controller
             ]);
         }
     }
-    public function Them(Request $request){
+    public function Them(ThanhToanLuongRequest $request){
         Luong::create($request->all());
         return response()->json([
             'status' => 1,
@@ -68,7 +69,7 @@ class LuongController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
-    public function suaLuong(Request $request)
+    public function suaLuong(ThanhToanLuongRequest $request)
     {
         $data = $request->all();
         Luong::find($request->id)->update($data);

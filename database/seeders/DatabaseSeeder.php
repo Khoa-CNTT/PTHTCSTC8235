@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             PetSeeder::class,
             HoSoBenhAnSeeder::class,
             PhanQuyenSeeder::class,
+            LichHenSeeder::class,
         ]);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatGioRequest;
+use App\Http\Requests\ThemGioRequest;
 use App\Models\LichHen;
 use Illuminate\Http\Request;
 
@@ -13,7 +15,7 @@ class LichHenController extends Controller
             "data"=> $data
         ]);
     }
-    public function update(Request $request)
+    public function update(CapNhatGioRequest $request)
     {
 
             $data = $request->all();
@@ -48,7 +50,7 @@ class LichHenController extends Controller
                 "message" => "Xóa giờ thành công"
             ]);
     }
-    public function them(Request $request)
+    public function them(ThemGioRequest $request)
     {
             $data = $request->all();
             LichHen::create($data);
