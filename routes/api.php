@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ChatbotController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -245,6 +246,14 @@ Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
 Route::get("lich/load",[LichHenController::class,'load']);
 
 Route::get('/ho-so-benh-an/loc-theo-bac-si/{id}', [HoSoBenhAnController::class, 'locTheoBacSi']);
+
+// Chatbot routes
+Route::post('/chatbot/chat', [ChatbotController::class, 'query']);
+Route::post('/chatbot/ask', [ChatbotController::class, 'ask']); // Legacy endpoint
+Route::get('/chatbot/suggest-services', [ChatbotController::class, 'suggestServices']);
+Route::get('/chatbot/get-available-slots', [ChatbotController::class, 'getAvailableSlots']);
+Route::get('/chatbot/get-service-reviews/{serviceId}', [ChatbotController::class, 'getServiceReviews']);
+
 
 
 
