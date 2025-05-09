@@ -29,29 +29,18 @@ class LuongController extends Controller
     }
     public function Doitt(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
-            $data = Luong::find($request->id);
-            if ($data->tinh_trang == 0) {
-                $data->tinh_trang = 1;
-                $data->save();
-            } else {
-                $data->tinh_trang = 0;
-                $data->save();
-            }
-            return response()->json([
-                'status' => 1,
-                'message' => 'Sửa đổi trạng thái thành công'
-            ]);
+        $data = Luong::find($request->id);
+        if ($data->tinh_trang == 1) {
+            $data->tinh_trang = 0;
+            $data->save();
         } else {
-            return response()->json([
-                'status' => '0',
-                "message" => "Bạn không có quyền thêm lương",
-            ]);
+            $data->tinh_trang = 1;
+            $data->save();
         }
+        return response()->json([
+            "status" => '1',
+            "message" => "Đổi trạng thái thành công"
+        ]);
     }
     public function Them(Request $request){
         Luong::create($request->all());
