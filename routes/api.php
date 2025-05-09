@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ChatbotController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -87,12 +88,14 @@ Route::post("khach-hang/dang-nhap", [KhachHangController::class, 'dangNhap']);
 Route::get("khach-hang/dang-xuat", [KhachHangController::class, 'dangXuat']);
 Route::get("khach-hang/dang-xuat-all", [KhachHangController::class, 'dangXuatAll']);
 Route::post("khach-hang/Kiem-tra-dang-nhap", [KhachHangController::class, 'KiemTraDN']);
-Route::get("/khach-hang/lay-du-lieu", [KhachHangController::class, 'layDuLieu']);
+Route::get("/khach-hang/lay-du-lieu", [KhachHangController::class, 'layDuLieu'])->middleware('auth:sanctum');
 Route::post('/khach-hang/sua', [KhachHangController::class, 'Sua'])->middleware('auth:sanctum');
 Route::post("khach-hang/doi-mat-khau-tcn", [KhachHangController::class, 'doipassTcn'])->middleware('auth:sanctum');
 Route::post("khach-hang/them-pet", [KhachHangController::class, 'themPet'])->middleware('auth:sanctum');
 Route::post("khach-hang/update-pet", [KhachHangController::class, 'updatePet'])->middleware('auth:sanctum');
 Route::post("khach-hang/xoa-pet", [KhachHangController::class, 'xoaPet'])->middleware('auth:sanctum');
+Route::get('/pets/{id_kh}', [PetController::class, 'showPetsByUserId'])->middleware('auth:sanctum');
+
 
 //admin Pet routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:7'])->group(function () {
@@ -101,7 +104,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:7'])->group(function () {
     Route::post('/sua-pet', [PetController::class, 'Sua']);
     Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
     Route::get('/load-pet', [PetController::class, 'Load']);
-    Route::get('/pets/{id_kh}', [PetController::class, 'showPetsByUserId']);
+
 });
 
 // admin Luong routes
@@ -124,19 +127,20 @@ Route::post("/xoa-luong",[LuongController::class,'xoaLuong']);
 // admin NhanVien routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:5'])->group(function () {
     Route::post("nhan-vien/them", [NhanVienController::class, 'them']);
-    Route::get("nhan-vien/load", [NhanVienController::class, 'load']);
     Route::post("nhan-vien/doi-TT", [NhanVienController::class, 'doi']);
     Route::post("nhan-vien/update", [NhanVienController::class, 'update']);
     Route::post("nhan-vien/xoa", [NhanVienController::class, 'delete']);
     Route::post('/nhan-vien/tim-kiem', [NhanVienController::class, 'timkiem']);
-    Route::get('/nhan-vien/load-chi-tiet/{id}', [NhanVienController::class, 'LoadDataChiTiet']);
 });
+
+//client nhan vien routes
+Route::get('/nhan-vien/load-chi-tiet/{id}', [NhanVienController::class, 'LoadDataChiTiet']);
+Route::get("nhan-vien/load", [NhanVienController::class, 'load']);
 
 // dang nhap nhan vien routes
 Route::get('/nhan-vien/kiem-tra-dang-nhap', [NhanVienController::class, 'checkLogin']);
 Route::get('/nhan-vien/dang-xuat', [NhanVienController::class, 'dangXuat']);
 Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
-Route::get('/NhanVien/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
 
 // admin DanhGia routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
@@ -209,21 +213,29 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
 });
 //bac si routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
-    Route::get("/don-thuoc/load-thuoc",[DonThuocController::class,'loadThuoc']);  
+    Route::get("/don-thuoc/load-thuoc",[DonThuocController::class,'loadThuoc']);
+    Route::get('/ho-so-benh-an/chi-tiet/{id}', [HoSoBenhAnController::class, 'chiTiet']);  
     Route::get("ho-so-benh-an/load",[HoSoBenhAnController::class,'load']);  
     Route::post("ho-so-benh-an/doi-TT",[HoSoBenhAnController::class,'doi']);
     Route::post("ho-so-benh-an/update",[HoSoBenhAnController::class,'update']);
     Route::post("ho-so-benh-an/xoa",[HoSoBenhAnController::class,'delete']);
-    Route::post("ho-so-benh-an/tim-kiem",[HoSoBenhAnController::class,'timkiem']);
-    Route::post("ho-so-benh-an/them",[HoSoBenhAnController::class,'them']);
+    Route::post("ho-so-benh-an/tim-kiem",[HoSoBenhAnController::class,'search']);
     Route::get('/don-thuoc/load-thuoc', [DonThuocController::class, 'loadThuoc']);
     Route::post('/don-thuoc/them', [DonThuocController::class, 'them']);
     Route::get('/don-thuoc/load', [DonThuocController::class, 'load']);
+    Route::get('/don-thuoc/danh-sach', [DonThuocController::class, 'getAll']);
     Route::post('/don-thuoc/xoa', [DonThuocController::class, 'xoa']);
     Route::get('/khach-hang/load', [KhachHangController::class, 'load']);
     Route::get('/nhan-vien/load-bac-si', [NhanVienController::class, 'loadBacSi']);
+    Route::get('/pet/load', [PetController::class, 'Load']);
+    Route::get('don-thuoc/chi-tiet/{id}', [DonThuocController::class, 'chiTiet']);
+    Route::get('/don-thuoc/chi-tiet-in/{id}', [DonThuocController::class, 'getChiTietInDon']);
+    Route::get('/don-thuoc/khach-hang-dang-dieu-tri', [DonThuocController::class, 'loadKhachHangDangDieuTri']);
+    Route::post('/don-thuoc/toggle-tinh-trang', [DonThuocController::class, 'toggleTinhTrang']);
+    Route::post('/don-thuoc/tim-kiem', [DonThuocController::class, 'timKiem']);
 });
 // Route kiểm tra quyền
+Route::get('/phan-quyen/kiem-tra-quyen/{id}', [PhanQuyenController::class, 'kiemTraQuyen']);
 
 //client lich hen routes
 Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
@@ -233,5 +245,15 @@ Route::post("lich-hen/update",[LichHenPetController::class,'update']);
 Route::post("lich-hen/del",[LichHenPetController::class,'delete']);
 Route::get("lich/load",[LichHenController::class,'load']);
 
-Route::middleware('auth:sanctum')->get('/user/info', [KhachHangController::class, 'info']);
+Route::get('/ho-so-benh-an/loc-theo-bac-si/{id}', [HoSoBenhAnController::class, 'locTheoBacSi']);
+
+// Chatbot routes
+Route::post('/chatbot/chat', [ChatbotController::class, 'query']);
+Route::post('/chatbot/ask', [ChatbotController::class, 'ask']); // Legacy endpoint
+Route::get('/chatbot/suggest-services', [ChatbotController::class, 'suggestServices']);
+Route::get('/chatbot/get-available-slots', [ChatbotController::class, 'getAvailableSlots']);
+Route::get('/chatbot/get-service-reviews/{serviceId}', [ChatbotController::class, 'getServiceReviews']);
+
+
+
 

@@ -13,14 +13,8 @@ return new class extends Migration
     {
         Schema::create('don_thuocs', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_hsba');
-            $table->string('ten_nv');
-            $table->date('ngay_kham');
-            $table->string('chuan_doan');
-            $table->integer('id_thuoc');
-            $table->integer('so_luong');
-            $table->string('lieu_luong');
-            $table->integer('tinh_trang')->default(0);
+            $table->string('id_hsba');
+            $table->date('ngay_ke_don');
             $table->timestamps();
         });
     }

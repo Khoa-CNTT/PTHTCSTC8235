@@ -118,6 +118,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
+
     public function doipassTcn(DoiMatKhauRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
@@ -153,7 +154,8 @@ class KhachHangController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         return response()->json([
-            'data' => $user
+            'status' => 1,
+            "data" => $user
         ]);
     }
     public function KiemTraDN()
@@ -229,50 +231,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function kichHoat(Request $request)
-    {
-        $check = KhachHang::where('hash_active', $request->id_khach_hang)
-            ->first();
-        if ($check) {
-            if ($check->is_active == 0) {
-                $check->is_active = 1;
-                $check->save();
-                return response()->json([
-                    "status" => 1,
-                    "message" => "kích hoạt thành công"
-                ]);
-            } else {
-                return response()->json([
-                    "status" => 2,
-                    "message" => "Tài khoản đã được kích hoạt trước đó"
-                ]);
-            }
-        } else {
-            return response()->json([
-                "status" => 0,
-                "message" => "Kích hoạt không thành công"
-            ]);
-        }
-    }
-    public function info(Request $request)
-    {
-        $user = Auth::guard('sanctum')->user();
 
-        if (!$user) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Bạn cần đăng nhập'
-            ], 401);
-        }
-
-        return response()->json([
-            'id' => $user->id,
-            'ho_va_ten' => $user->ho_va_ten,
-            'email' => $user->email,
-            'so_dien_thoai' => $user->so_dien_thoai,
-            'ngay_sinh' => $user->ngay_sinh,
-        ]);
-    }
     public function Sua(Request $request)
     {
         KhachHang::find($request->id)->update($request->all());
