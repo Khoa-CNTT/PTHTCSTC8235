@@ -58,6 +58,34 @@ class KhachHangSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now()
             ],
+            [
+                'id' => 4,
+                'ho_va_ten' => 'Nguyễn Công Đoàn',
+                'email' => 'doancarat@gmail.com',
+                'password' => bcrypt('123456'),
+                'so_dien_thoai' => '0368047839',
+                'ngay_sinh' => '2003-05-08',
+                'is_active' => 1,
+                'is_block' => 0,
+                'hash_active' => Str::random(40),
+                'hash_reset' => Str::random(40),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id' => 5,
+                'ho_va_ten' => 'Pham Ha',
+                'email' => 'phamthithuha3112@gmail.com',
+                'password' => bcrypt('123456'),
+                'so_dien_thoai' => '0964810993',
+                'ngay_sinh' => '2003-10-04',
+                'is_active' => 1,
+                'is_block' => 0,
+                'hash_active' => Str::random(40),
+                'hash_reset' => Str::random(40),
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
         ]);
     }
 }

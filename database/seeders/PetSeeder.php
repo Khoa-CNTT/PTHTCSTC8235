@@ -81,6 +81,28 @@ class PetSeeder extends Seeder
                 'can_nang' => '30',
                 'tinh_trang' => 1,
             ],
+            [
+                'id' => 7,
+                'id_kh' => 4,
+                'ten_pet' => 'Hanni',
+                'chung_loai' => 0,
+                'gioi_tinh' => 1,
+                'tuoi' => '20',
+                'hinh_anh' => 'https://thaka.bing.com/th/id/OIP.NLohwCzr94_N6leoL4NckAHaJ3?pid=ImgDet&w=474&h=631&rs=1',
+                'can_nang' => '54',
+                'tinh_trang' => 1,
+            ],
+            [
+                'id' => 8,
+                'id_kh' => 4,
+                'ten_pet' => 'Mỹ Diệu',
+                'chung_loai' => 1,
+                'gioi_tinh' => 1,
+                'tuoi' => '2',
+                'hinh_anh' => 'https://kenh14cdn.com/203336854389633024/2023/3/6/photo-13-1678089401776337463298.jpeg',
+                'can_nang' => '5',
+                'tinh_trang' => 1,
+            ],
         ]);
     }
 }

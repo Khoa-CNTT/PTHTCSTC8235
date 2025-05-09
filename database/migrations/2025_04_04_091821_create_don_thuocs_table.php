@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('don_thuocs', function (Blueprint $table) {
             $table->id();
-            $table->string('id_hsba');
             $table->date('ngay_ke_don');
             $table->timestamps();
         });

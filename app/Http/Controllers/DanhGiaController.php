@@ -19,6 +19,20 @@ class DanhGiaController extends Controller
         ]);
     }
 
+    public function load2()
+{
+    $data = DanhGia::join('khach_hangs', 'khach_hangs.id', '=', 'danh_gias.id_kh')
+        ->select('danh_gias.*', 'khach_hangs.ho_va_ten')
+        ->where('danh_gias.tinh_trang', 1)
+        ->orderBy('danh_gias.ngay_tao', 'desc')
+        ->get();
+
+    return response()->json([
+        'status' => true,
+        'data' => $data
+    ]);
+}
+
     public function timkiem(Request $request)
     {
         $noi_dung = '%' . $request->noi_dung . '%';
@@ -72,4 +86,22 @@ class DanhGiaController extends Controller
             "message" => "Thêm mới đánh giá thành công",
         ]);
     }
+    public function them2(Request $request)
+{
+    $data = $request->all();
+
+    if (empty($data['id_kh'])) {
+        return response()->json([
+            'status' => 0,
+            'message' => 'Bạn cần đăng nhập để gửi đánh giá',
+        ], 400); // Bad Request
+    }
+
+    DanhGia::create($data);
+
+    return response()->json([
+        'status' => 1,
+        'message' => 'Thêm mới đánh giá thành công',
+    ]);
+}
 }

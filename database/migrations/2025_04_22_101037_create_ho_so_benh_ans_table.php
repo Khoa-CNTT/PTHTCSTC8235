@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('ho_so_benh_ans', function (Blueprint $table) {
             $table->id();
             $table->integer("id_nv");
-            $table->date("ngay_kham");
+            $table->integer("id_don_thuoc")->nullable();
             $table->string("chuan_doan")->nullable();
-            $table->integer("id_pet");
+            $table->integer("id_lich_hen_pet");
             $table->integer('tinh_trang')->default(0);
             $table->timestamps();
         });

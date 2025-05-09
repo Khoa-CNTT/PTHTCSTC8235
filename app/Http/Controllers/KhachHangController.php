@@ -184,6 +184,7 @@ class KhachHangController extends Controller
                 'status' => 1,
                 'token' => $user->createToken('token')->plainTextToken,
                 'message' => 'Đăng nhập thành công ',
+                'id_khach_hang' => $user->id,
 
             ]);
         } else {
@@ -232,6 +233,25 @@ class KhachHangController extends Controller
         }
     }
 
+    public function info(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn cần đăng nhập'
+            ], 401);
+        }
+
+        return response()->json([
+            'id' => $user->id,
+            'ho_va_ten' => $user->ho_va_ten,
+            'email' => $user->email,
+            'so_dien_thoai' => $user->so_dien_thoai,
+            'ngay_sinh' => $user->ngay_sinh,
+        ]);
+    }
     public function Sua(Request $request)
     {
         KhachHang::find($request->id)->update($request->all());
@@ -266,6 +286,7 @@ class KhachHangController extends Controller
             'message' => 'Thêm thú cưng thành công'
         ]);
     }
+
     public function updatePet(Request $request)
     {
         $user = Auth::guard('sanctum')->user();

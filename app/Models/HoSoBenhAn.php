@@ -13,8 +13,8 @@ class HoSoBenhAn extends Model
 
     protected $fillable = [
         'id_nv',
-        'id_pet',
-        'ngay_kham',
+        'id_lich_hen_pet',
+        'id_don_thuoc',
         'chuan_doan',
         'tinh_trang'
     ];
