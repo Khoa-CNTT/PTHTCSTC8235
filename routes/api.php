@@ -215,7 +215,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
     Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
     Route::get("lich/load", [LichHenController::class, 'load']);
 });
-route::middlware(['auth:sanctum','kiemtra.quyen:13'])->group(function(){
+route::middleware(['auth:sanctum','kiemtra.quyen:13'])->group(function(){
     Route::get("hoa-don/load", [HoaDonController::class, 'load']);
     Route::get('hoa-don/danh-sach', [HoaDonController::class, 'danhSach']);
     Route::get('hoa-don/chi-tiet/{id}', [HoaDonController::class, 'chiTiet']);
