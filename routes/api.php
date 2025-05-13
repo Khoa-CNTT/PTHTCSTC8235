@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -215,7 +216,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
     Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
     Route::get("lich/load", [LichHenController::class, 'load']);
 });
-route::middlware(['auth:sanctum','kiemtra.quyen:13'])->group(function(){
+route::middleware(['auth:sanctum','kiemtra.quyen:13'])->group(function(){
     Route::get("hoa-don/load", [HoaDonController::class, 'load']);
     Route::get('hoa-don/danh-sach', [HoaDonController::class, 'danhSach']);
     Route::get('hoa-don/chi-tiet/{id}', [HoaDonController::class, 'chiTiet']);
@@ -266,11 +267,12 @@ Route::get("lich/load",[LichHenController::class,'load']);
 Route::get('/ho-so-benh-an/loc-theo-bac-si/{id}', [HoSoBenhAnController::class, 'locTheoBacSi']);
 
 // Chatbot routes
-Route::post('/chatbot/chat', [ChatbotController::class, 'query']);
-Route::post('/chatbot/ask', [ChatbotController::class, 'ask']); // Legacy endpoint
+Route::post('/chatbot/chat', [ChatbotController::class, 'chat']);
+Route::post('/chatbot/ask', [ChatbotController::class, 'query']);
 Route::get('/chatbot/suggest-services', [ChatbotController::class, 'suggestServices']);
 Route::get('/chatbot/get-available-slots', [ChatbotController::class, 'getAvailableSlots']);
 Route::get('/chatbot/get-service-reviews/{serviceId}', [ChatbotController::class, 'getServiceReviews']);
+Route::get('/doctors', [ChatbotController::class, 'getDoctorsWithSchedule']);
 
 
 //client lich hen routes
@@ -286,4 +288,15 @@ Route::get("gio/load", [LichHenController::class, 'load']);
 Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
 Route::post("gio/update", [LichHenController::class, 'update']);
 Route::post("gio/del", [LichHenController::class, 'delete']);
+
+// VNPay Payment Routes
+
+// Route tạo URL thanh toán VNPay
+Route::post('/vnpay-payment', [PaymentController::class, 'createVnpayPayment']);
+
+// Route callback từ VNPay
+Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
+
+// Route kiểm tra trạng thái thanh toán
+Route::get('/check-payment-status', [PaymentController::class, 'checkPaymentStatus']);
 
