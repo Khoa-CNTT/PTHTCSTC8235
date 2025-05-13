@@ -10,9 +10,8 @@ class HoaDonChiTiet extends Model
     protected $fillable = [
         'id_hoadon',
         'id_ct_don_thuoc',
-        'id_nv',
+        'id_lich_hen_pet',
         'id_dvct',
-        'ngay_tt',
         'tien_kham'
     ];
 }

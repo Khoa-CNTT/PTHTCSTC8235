@@ -187,8 +187,14 @@ class PhieuNhapController extends Controller
             ];
             // lấy giá bán cao nhất
             $thuoc = Thuoc::find($ct->id_thuoc);
-            if ($thuoc && $ct->gia_ban > $thuoc->gia_ban) {
-                $thuoc->update(['gia_ban' => $ct->gia_ban]);
+            if ($thuoc) {
+                $giaBanMoi = $ct->gia_ban;
+
+                // Nếu giá hiện tại chưa có hoặc thấp hơn thì cập nhật
+                if (is_null($thuoc->gia_ban) || $thuoc->gia_ban < $giaBanMoi) {
+                    $thuoc->gia_ban = $giaBanMoi;
+                    $thuoc->save();
+                }
             }
         }
 

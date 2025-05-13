@@ -103,6 +103,17 @@ class PetSeeder extends Seeder
                 'can_nang' => '5',
                 'tinh_trang' => 1,
             ],
+            [
+                'id' => 9,
+                'id_kh' => 5,
+                'ten_pet' => 'Diamond',
+                'chung_loai' => 1,
+                'gioi_tinh' => 1,
+                'tuoi' => '2',
+                'hinh_anh' => 'https://kenh14cdn.com/203336854389633024/2023/3/6/photo-13-1678089401776337463298.jpeg',
+                'can_nang' => '5',
+                'tinh_trang' => 1,
+            ],
         ]);
     }
 }

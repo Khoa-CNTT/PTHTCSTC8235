@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ThemLichHenRequest;
 use App\Models\DichVu;
 use App\Models\LichHenPet;
+use App\Models\NhanVien;
 use App\Models\pet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,12 +35,59 @@ class LichHenPetController extends Controller
             )
             ->orderBy('lich_hen_pets.ngay', 'asc')
             ->get();
-
+                
         return response()->json([
             'status' => true,
             'data' => $ds
         ]);
     }
+    public function ganBacSiTuDong($id_lich)
+    {
+        // Lấy dòng lịch hẹn pet
+        $lich = DB::table('lich_hen_pets')
+            ->where('id', $id_lich)
+            ->first();
+
+        if (!$lich) {
+            return response()->json(['status' => false, 'message' => 'Không tìm thấy lịch']);
+        }
+
+        $ngay = $lich->ngay;
+        $gio = $lich->gio;
+
+        // B1: Lấy danh sách bác sĩ (dựa vào id_chucvu = 1 là bác sĩ
+        $bac_si = DB::table('nhan_viens')
+            ->where('id_chucvu', 1)
+            ->get();
+
+        // B2: Lọc bác sĩ chưa có lịch trong cùng khung giờ
+        $bac_si_hop_le = $bac_si->filter(function ($b) use ($ngay, $gio) {
+            return DB::table('lich_hen_pets')
+                ->where('ngay', $ngay)
+                ->where('gio', $gio)
+                ->where('id_nv', $b->id)
+                ->count() == 0;
+        });
+
+        if ($bac_si_hop_le->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'Không còn bác sĩ nào trống khung giờ này']);
+        }
+
+        // B3: Ưu tiên bác sĩ ít lịch nhất
+        $bac_si_chon = $bac_si_hop_le->map(function ($b) {
+            $so_luot = DB::table('lich_hen_pets')->where('id_nv', $b->id)->count();
+            return ['id' => $b->id, 'so_luot' => $so_luot];
+        })->sortBy('so_luot')->first();
+
+        // B4: Gán bác sĩ vào lịch hẹn
+        DB::table('lich_hen_pets')->where('id', $id_lich)->update([
+            'id_nv' => $bac_si_chon['id']
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'Đã gán bác sĩ thành công']);
+    }
+
+
     public function them(Request $request)
     {
         $dichVu = DichVu::find($request->id_dv);
@@ -111,6 +159,10 @@ class LichHenPetController extends Controller
             'gio' => $request->gio,
             'tien_coc' => $tienCoc,
         ]);
+        // Gán bác sĩ tự động sau khi tạo lịch hẹn
+        if (in_array($dichVu->id_loaidv, [1, 4])) {
+            $this->ganBacSiTuDong($lichHen->id);
+        }
 
         return response()->json([
             'status' => 1,
@@ -133,13 +185,90 @@ class LichHenPetController extends Controller
             'data' => $slots
         ]);
     }
+    public function changeandCreateBill(Request $request)
+    {
+        $lichHen = DB::table('lich_hen_pets')->where('id', $request->id)->first();
+
+        if (!$lichHen) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không tìm thấy lịch hẹn'
+            ]);
+        }
+
+        // Cập nhật trạng thái lịch hẹn thành đã điều trị
+        DB::table('lich_hen_pets')->where('id', $lichHen->id)->update([
+            'tinh_trang' => 1,
+            'updated_at' => now()
+        ]);
+
+        // Tạo hóa đơn
+        $idHoaDon = DB::table('hoa_dons')->insertGetId([
+            'id_lich_pet'        => $lichHen->id,
+            'id_kh'              => $lichHen->id_kh,
+            'id_nv'              => $lichHen->id_nv ?? 1,
+            'id_pet'             => $lichHen->id_pet,
+            'phuong_thuc'        => 1,
+            'tinh_trang'         => 0,
+            'ngay_xuat_hoa_don'  => now(),
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        // Lấy id đơn thuốc từ hồ sơ bệnh án
+        $hsba = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $lichHen->id)->first();
+        $idDonThuoc = $hsba->id_don_thuoc ?? null;
+
+        if ($idDonThuoc) {
+            // Nếu có đơn thuốc
+            $donThuocChiTiets = DB::table('don_thuoc_chi_tiets')->where('id_don_thuoc', $idDonThuoc)->get();
+
+            foreach ($donThuocChiTiets as $ct) {
+                DB::table('hoa_don_chi_tiets')->insert([
+                    'id_hoadon'         => $idHoaDon,
+                    'id_ct_don_thuoc'   => $ct->id,
+                    'id_lich_hen_pet'   => $lichHen->id,
+                    'tien_kham'         => 0,
+                    'created_at'        => now(),
+                    'updated_at'        => now(),
+                ]);
+            }
+        } else {
+            // Nếu không có đơn thuốc vẫn tạo hóa đơn chi tiết
+            DB::table('hoa_don_chi_tiets')->insert([
+                'id_hoadon'         => $idHoaDon,
+                'id_ct_don_thuoc'   => null,
+                'id_lich_hen_pet'   => $lichHen->id,
+                'tien_kham'         => 0,
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Xác nhận điều trị và tạo hóa đơn + chi tiết thành công'
+        ]);
+    }
+
+
     public function load()
     {
-        $data = LichHenPet::join('pets', 'pets.id', '=', 'lich_hen_pets.id_pet')
-            ->join('khach_hangs', 'khach_hangs.id', '=', 'lich_hen_pets.id_kh')
-            ->join('lich_hens', 'lich_hens.id', '=', 'lich_hen_pets.id_lich')
-            ->select('lich_hen_pets.*', 'pets.ten_pet', 'khach_hangs.ho_va_ten', 'lich_hen_pets.id_lich')
+        $data = DB::table('lich_hen_pets as lhp')
+            ->join('dich_vus as dv', 'lhp.id_dv', '=', 'dv.id')
+            ->join('khach_hangs as kh', 'lhp.id_kh', '=', 'kh.id')
+            ->join('pets as p', 'lhp.id_pet', '=', 'p.id')
+            ->leftJoin('nhan_viens as nv', 'lhp.id_nv', '=', 'nv.id')
+            ->select(
+                'lhp.*',
+                'dv.ten_dv',
+                'kh.ho_va_ten',
+                'p.ten_pet',
+                'nv.ten_nv'
+            )
+            ->orderByDesc('lhp.id')
             ->get();
+
         return response()->json([
             "data" => $data
         ]);
@@ -154,21 +283,6 @@ class LichHenPetController extends Controller
             "message" => "Cập nhật lịch hẹn thành công"
         ]);
     }
-    public function doi(Request $request)
-    {
-        $data = LichHenPet::find($request->id);
-        if ($data->tinh_trang == 1) {
-            $data->tinh_trang = 0;
-            $data->save();
-        } else {
-            $data->tinh_trang = 1;
-            $data->save();
-        }
-        return response()->json([
-            "status" => 1,
-            "message" => "Đổi trạng thái thành công"
-        ]);
-    }
     public function delete(Request $request)
     {
         LichHenPet::where('id', $request->id)->delete();
@@ -177,5 +291,4 @@ class LichHenPetController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
-    
 }

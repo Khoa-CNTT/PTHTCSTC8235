@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('lich_hen_pets', function (Blueprint $table) {
             $table->id();
-            $table->string('id_lich');
-            $table->string('id_kh');
-            $table->string('id_dv');
-            $table->string('id_pet');
+            $table->integer('id_lich');
+            $table->integer('id_dv');
+            $table->integer('id_kh');
+            $table->integer('id_pet');
             $table->date('ngay');
             $table->string('gio');
-            $table->string('id_nv')->nullable();
-            $table->string('tinh_trang')->default(0);
-            $table->string('tien_coc')->nullable();
+            $table->integer('id_nv')->nullable();
+            $table->integer('tinh_trang')->default(0);
+            $table->integer('tien_coc')->nullable();
             $table->timestamps();
         });
     }

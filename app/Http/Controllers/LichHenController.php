@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LichHen;
 use App\Models\KhachHang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class LichHenController extends Controller
 {
