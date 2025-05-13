@@ -23,40 +23,50 @@ class NhaCungCapController extends Controller
     }
     public function them(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
-            $data = $request->all();
+        // $user = Auth::guard('sanctum')->user();
+        // $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+        //     ->where('id_chuc_nang', $this->id_chuc_nang)
+        //     ->first();
+        // if ($check) {
+        //     $data = $request->all();
+        //     NhaCungCap::create($data);
+        //     return response()->json([
+        //         'status' => '1',
+        //         "message" => "Thêm mới nhà cung cấp thành công",
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         'status' => '0',
+        //         "message" => "Bạn không có quyền thêm nhà cung cấp",
+        //     ]);
+        // }
+        $data = $request->all();
             NhaCungCap::create($data);
             return response()->json([
                 'status' => '1',
                 "message" => "Thêm mới nhà cung cấp thành công",
             ]);
-        } else {
-            return response()->json([
-                'status' => '0',
-                "message" => "Bạn không có quyền thêm nhà cung cấp",
-            ]);
-        }
     }
     public function load()
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
-            $data = NhaCungCap::get();
+        // $user = Auth::guard('sanctum')->user();
+        // $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+        //     ->where('id_chuc_nang', $this->id_chuc_nang)
+        //     ->first();
+        // if ($check) {
+        //     $data = NhaCungCap::get();
+        //     return response()->json([
+        //         "data" => $data
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         "message" => 'Bạn không có truy cập vào chức năng này',
+        //     ]);
+        // }
+        $data = NhaCungCap::get();
             return response()->json([
                 "data" => $data
             ]);
-        } else {
-            return response()->json([
-                "message" => 'Bạn không có truy cập vào chức năng này',
-            ]);
-        }
     }
     public function update(Request $request)
     {
@@ -79,12 +89,29 @@ class NhaCungCapController extends Controller
     }
     public function doi(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
-            ->where('id_chuc_nang', $this->id_chuc_nang)
-            ->first();
-        if ($check) {
-            $data = NhaCungCap::find($request->id);
+        // $user = Auth::guard('sanctum')->user();
+        // $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+        //     ->where('id_chuc_nang', $this->id_chuc_nang)
+        //     ->first();
+        // if ($check) {
+        //     $data = NhaCungCap::find($request->id);
+        //     if ($data->tinh_trang == 1) {
+        //         $data->tinh_trang = 0;
+        //         $data->save();
+        //     } else {
+        //         $data->tinh_trang = 1;
+        //         $data->save();
+        //     }
+        //     return response()->json([
+        //         "status" => '1',
+        //         "message" => "Đổi trạng thái nhà cung cấp thành công"
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         "message" => 'Bạn không có quyền đổi trạng thái nhà cung cấp',
+        //     ]);
+        // }
+        $data = NhaCungCap::find($request->id);
             if ($data->tinh_trang == 1) {
                 $data->tinh_trang = 0;
                 $data->save();
@@ -96,11 +123,6 @@ class NhaCungCapController extends Controller
                 "status" => '1',
                 "message" => "Đổi trạng thái nhà cung cấp thành công"
             ]);
-        } else {
-            return response()->json([
-                "message" => 'Bạn không có quyền đổi trạng thái nhà cung cấp',
-            ]);
-        }
     }
     public function delete(Request $request)
     {
