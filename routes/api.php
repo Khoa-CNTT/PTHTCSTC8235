@@ -99,7 +99,12 @@ Route::post("khach-hang/update-pet", [KhachHangController::class, 'updatePet'])-
 Route::post("khach-hang/xoa-pet", [KhachHangController::class, 'xoaPet'])->middleware('auth:sanctum');
 Route::get('/pets/{id_kh}', [PetController::class, 'showPetsByUserId'])->middleware('auth:sanctum');
 
-
+//client lich hen routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
+    Route::get('/lich-hen/danh-sach-lich-hen', [LichHenPetController::class, 'danhSachLichHen']);
+    Route::post('/vnpay/tao-url-thanh-toan', [PaymentController::class, 'createVnpayPayment']);
+});
 //admin Pet routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:7'])->group(function () {
     Route::post('/them-pet', [PetController::class, 'Them']);
@@ -256,8 +261,8 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
 // Route kiểm tra quyền
 Route::get('/phan-quyen/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
 
-//client lich hen routes
-Route::middleware('auth:api')->post('/lich-hen/them', [LichHenPetController::class, 'them']);
+
+
 Route::get("lich-hen/load",[LichHenPetController::class,'load']);
 Route::post("lich-hen/doi",[LichHenPetController::class,'doi']);
 Route::post("lich-hen/update",[LichHenPetController::class,'update']);
@@ -289,14 +294,4 @@ Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
 Route::post("gio/update", [LichHenController::class, 'update']);
 Route::post("gio/del", [LichHenController::class, 'delete']);
 
-// VNPay Payment Routes
-
-// Route tạo URL thanh toán VNPay
-Route::post('/vnpay-payment', [PaymentController::class, 'createVnpayPayment']);
-
-// Route callback từ VNPay
-Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
-
-// Route kiểm tra trạng thái thanh toán
-Route::get('/check-payment-status', [PaymentController::class, 'checkPaymentStatus']);
 
