@@ -73,16 +73,27 @@ class ChatbotController extends Controller
             // Lưu lịch sử
             $interaction = $this->storeChatHistory($userId, $question, $response);
             
+            // Kiểm tra nếu có yêu cầu đăng nhập trực tiếp
+            if (is_array($response) && isset($response['direct_navigation'])) {
                 return response()->json([
                     'success' => true,
-                'message' => $response,
+                    'message' => $response['message'],
+                    'navigation_buttons' => $navigationButtons,
+                    'interaction_id' => $interaction->id,
+                    'direct_navigation' => $response['direct_navigation']
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => is_array($response) ? $response['message'] : $response,
                 'navigation_buttons' => $navigationButtons,
                 'interaction_id' => $interaction->id
             ]);
             
         } catch (Exception $e) {
             Log::error('Chatbot error: ' . $e->getMessage());
-                return response()->json([
+            return response()->json([
                 'success' => false,
                 'message' => 'Xin lỗi, tôi đang gặp vấn đề. Vui lòng thử lại sau.'
             ]);
@@ -491,7 +502,7 @@ class ChatbotController extends Controller
         
         // Thêm prompt hệ thống
         $context[] = [
-            'role' => 'system',
+            'role' => 'model',
             'parts' => [
                 ['text' => "Bạn là trợ lý ảo phòng khám thú y PetCare. Hãy tiếp tục hội thoại dựa trên lịch sử bên dưới. Nếu người dùng trả lời ngắn, hãy hiểu đó là phản hồi cho câu hỏi trước. Hãy trả lời bằng tiếng Việt, ngắn gọn, thân thiện, dễ hiểu, sử dụng ngôn ngữ tự nhiên như người Việt Nam. Có thể dùng emoji nếu phù hợp. Nếu không chắc chắn, hãy khuyên khách liên hệ bác sĩ."]
             ]
@@ -500,7 +511,7 @@ class ChatbotController extends Controller
         // Thêm lịch sử hội thoại
         foreach ($history as $item) {
             $context[] = [
-                'role' => $item['role'] === 'bot' ? 'system' : 'user',
+                'role' => $item['role'] === 'bot' ? 'model' : 'user',
                 'parts' => [
                     ['text' => $item['content']]
                 ]
@@ -551,6 +562,27 @@ class ChatbotController extends Controller
             'context' => []
         ];
 
+        // 1. Ưu tiên lấy pattern từ database
+        try {
+            $patterns = \App\Models\ChatbotPattern::orderByDesc('confidence')->orderByDesc('updated_at')->get();
+            foreach ($patterns as $pattern) {
+                if (preg_match('/' . $pattern->pattern . '/ui', $questionLower, $matches)) {
+                    $analysis['intent'] = $pattern->intent;
+                    if (!empty($pattern->entities)) {
+                        $analysis['entities'] = $pattern->entities;
+                    }
+                    // Nếu pattern có group, lấy entity động
+                    if (isset($matches[1])) {
+                        $analysis['entities']['matched'] = $matches[1];
+                    }
+                    return $analysis;
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error loading chatbot patterns: ' . $e->getMessage());
+        }
+
+        // 2. Nếu không khớp pattern nào, fallback về logic cũ (giữ nguyên phần code hard-code của bạn ở đây)
         // Phân tích ý định
         if (preg_match('/(giá|phí|chi phí|bao nhiêu tiền)/ui', $questionLower)) {
             $analysis['intent'] = 'price';
@@ -591,6 +623,14 @@ class ChatbotController extends Controller
                 $analysis['entities']['target_page'] = 'price';
             }
         }
+        // Thêm nhận diện intent logout
+        elseif (preg_match('/(đăng xuất|logout|thoát tài khoản|sign out)/ui', $questionLower)) {
+            $analysis['intent'] = 'logout';
+        }
+        // Thêm nhận diện xác nhận điều hướng
+        elseif (preg_match('/^(vào đi|ok|đi tiếp|vào luôn|đi|tiếp tục|yes|được|chuyển luôn|mở luôn|đồng ý)$/ui', trim($questionLower))) {
+            $analysis['intent'] = 'confirm_navigation';
+        }
 
         // Phân tích thực thể
         if (preg_match('/(chó|mèo|thú cưng)/ui', $questionLower, $matches)) {
@@ -604,50 +644,242 @@ class ChatbotController extends Controller
     }
 
     private function getContextualResponse($question, $analysis, $history) {
-        // Kiểm tra câu hỏi tương tự trong lịch sử
-        $similarQuestion = $this->findSimilarQuestion($question, $history);
-        if ($similarQuestion) {
-            return $similarQuestion['response'];
-        }
-
-        // Xử lý yêu cầu điều hướng trực tiếp
-        if ($analysis['intent'] === 'navigation') {
-            $targetPage = $analysis['entities']['target_page'] ?? '';
-            
-            switch ($targetPage) {
-                case 'service':
-                    return "Bạn có thể xem các dịch vụ của chúng tôi ở trang Dịch vụ. Tôi đã tạo nút điều hướng bên dưới để bạn có thể truy cập nhanh.";
-                case 'login':
-                    return "Bạn có thể đăng nhập vào tài khoản của mình ở trang Đăng nhập. Tôi đã tạo nút điều hướng bên dưới để bạn truy cập nhanh.";
-                case 'doctor':
-                    return "Bạn có thể xem thông tin về các bác sĩ của chúng tôi ở trang Bác sĩ. Tôi đã tạo nút điều hướng bên dưới để bạn truy cập nhanh.";
-                case 'booking':
-                    return "Bạn có thể đặt lịch khám cho thú cưng ở trang Đặt lịch. Tôi đã tạo nút điều hướng bên dưới để bạn truy cập nhanh.";
-                case 'price':
-                    return "Bạn có thể xem bảng giá dịch vụ ở trang Bảng giá. Tôi đã tạo nút điều hướng bên dưới để bạn truy cập nhanh.";
-                case 'home':
-                    return "Bạn có thể quay về trang chủ bằng nút điều hướng bên dưới.";
-                default:
-                    // Không tìm thấy trang cụ thể, vẫn tạo nút điều hướng
-                    return null;
+        // Chỉ kiểm tra hội thoại cũ nếu intent không phải là điều hướng
+        $navigationIntents = [
+            'navigation', 'service', 'doctor', 'login', 'booking', 'price', 'home', 'emergency', 'logout', 'confirm_navigation'
+        ];
+        if (!in_array($analysis['intent'], $navigationIntents)) {
+            $similarQuestion = $this->findSimilarQuestion($question, $history);
+            if ($similarQuestion) {
+                return $similarQuestion['response'];
             }
         }
 
-        // Xử lý theo ý định
+        // Xử lý các intent điều hướng đều trả về direct_navigation ngay lập tức
         switch ($analysis['intent']) {
-            case 'price':
-                return $this->getPriceInfo($analysis['entities'] ?? []);
-            case 'booking':
-                return $this->getBookingInfo($analysis['entities'] ?? []);
-            case 'doctor':
-                return $this->getDoctorInfo();
-            case 'service':
-                if (isset($analysis['entities']['direct_navigation']) && $analysis['entities']['direct_navigation']) {
-                    return "Bạn có thể xem các dịch vụ của chúng tôi ở trang Dịch vụ. Tôi đã tạo nút điều hướng bên dưới để bạn có thể truy cập nhanh.";
+            case 'navigation':
+                $targetPage = $analysis['entities']['target_page'] ?? '';
+                switch ($targetPage) {
+                    case 'service':
+                        $resp = [
+                            'success' => true,
+                            'message' => "Đã sẵn sàng! Mình sẽ đưa bạn đến trang chọn dịch vụ ngay nhé. Nếu bạn muốn xem thêm dịch vụ khác, hãy hỏi mình bất cứ lúc nào 🐾",
+                            'direct_navigation' => '/client/xem-dich-vu',
+                            'navigation_buttons' => [
+                                [
+                                    'text' => 'Chọn dịch vụ ngay',
+                                    'route' => '/client/xem-dich-vu',
+                                    'icon' => '✅'
+                                ]
+                            ]
+                        ];
+                        break;
+                    case 'login':
+                        $resp = [
+                            'success' => true,
+                            'message' => "Bạn cần đăng nhập để tiếp tục. Mình sẽ chuyển bạn đến trang đăng nhập nhé!",
+                            'direct_navigation' => '/client/dang-nhap-dang-ky',
+                            'navigation_buttons' => [
+                                [
+                                    'text' => 'Đăng nhập ngay',
+                                    'route' => '/client/dang-nhap-dang-ky',
+                                    'icon' => '🔑'
+                                ]
+                            ]
+                        ];
+                        break;
+                    case 'doctor':
+                        $resp = [
+                            'success' => true,
+                            'message' => "Mình sẽ đưa bạn đến trang danh sách bác sĩ nhé! Nếu cần tư vấn thêm về bác sĩ nào, bạn cứ hỏi mình nha 👨‍⚕️",
+                            'direct_navigation' => '/client/xem-bs/0',
+                            'navigation_buttons' => [
+                                [
+                                    'text' => 'Xem danh sách bác sĩ',
+                                    'route' => '/client/xem-bs/0',
+                                    'icon' => '👨‍⚕️'
+                                ]
+                            ]
+                        ];
+                        break;
+                    case 'booking':
+                        $resp = [
+                            'success' => true,
+                            'message' => "Bạn muốn đặt lịch khám cho thú cưng? Mình sẽ chuyển bạn đến trang đặt lịch ngay nhé! 📅",
+                            'direct_navigation' => '/client/dat-lich',
+                            'navigation_buttons' => [
+                                [
+                                    'text' => 'Đặt lịch khám',
+                                    'route' => '/client/dat-lich',
+                                    'icon' => '📅'
+                                ]
+                            ]
+                        ];
+                        break;
+                    case 'price':
+                        $resp = [
+                            'success' => true,
+                            'message' => "Bạn muốn xem bảng giá dịch vụ? Mình sẽ chuyển bạn đến trang bảng giá ngay nhé! 💰",
+                            'direct_navigation' => '/client/bang-gia',
+                            'navigation_buttons' => [
+                                [
+                                    'text' => 'Xem bảng giá',
+                                    'route' => '/client/bang-gia',
+                                    'icon' => '💰'
+                                ]
+                            ]
+                        ];
+                        break;
+                    case 'home':
+                        $resp = [
+                            'success' => true,
+                            'message' => "Mình sẽ đưa bạn về trang chủ nhé! Nếu cần hỗ trợ gì thêm, bạn cứ hỏi mình nha 🏠",
+                            'direct_navigation' => '/',
+                            'navigation_buttons' => [
+                                [
+                                    'text' => 'Trang chủ',
+                                    'route' => '/',
+                                    'icon' => '🏠'
+                                ]
+                            ]
+                        ];
+                        break;
+                    default:
+                        $resp = null;
                 }
-                return $this->getServiceInfo($analysis['entities']['service'] ?? null);
+                if ($resp && isset($resp['direct_navigation'])) {
+                    session(['last_navigation_intent' => $resp['direct_navigation']]);
+                }
+                return $resp;
+            case 'service':
+                // Luôn trả về direct_navigation cho intent service
+                $resp = [
+                    'success' => true,
+                    'message' => "Đã sẵn sàng! Mình sẽ đưa bạn đến trang chọn dịch vụ ngay nhé. Nếu bạn muốn xem thêm dịch vụ khác, hãy hỏi mình bất cứ lúc nào 🐾",
+                    'direct_navigation' => '/client/xem-dich-vu',
+                    'navigation_buttons' => [
+                        [
+                            'text' => 'Chọn dịch vụ ngay',
+                            'route' => '/client/xem-dich-vu',
+                            'icon' => '✅'
+                        ]
+                    ]
+                ];
+                session(['last_navigation_intent' => '/client/xem-dich-vu']);
+                return $resp;
+            case 'doctor':
+                $resp = [
+                    'success' => true,
+                    'message' => "Mình sẽ đưa bạn đến trang danh sách bác sĩ nhé! Nếu cần tư vấn thêm về bác sĩ nào, bạn cứ hỏi mình nha 👨‍⚕️",
+                    'direct_navigation' => '/client/xem-bs/0',
+                    'navigation_buttons' => [
+                        [
+                            'text' => 'Xem danh sách bác sĩ',
+                            'route' => '/client/xem-bs/0',
+                            'icon' => '👨‍⚕️'
+                        ]
+                    ]
+                ];
+                session(['last_navigation_intent' => '/client/xem-bs/0']);
+                return $resp;
+            case 'login':
+                $resp = [
+                    'success' => true,
+                    'message' => "Bạn cần đăng nhập để tiếp tục. Mình sẽ chuyển bạn đến trang đăng nhập nhé!",
+                    'direct_navigation' => '/client/dang-nhap-dang-ky',
+                    'navigation_buttons' => [
+                        [
+                            'text' => 'Đăng nhập ngay',
+                            'route' => '/client/dang-nhap-dang-ky',
+                            'icon' => '🔑'
+                        ]
+                    ]
+                ];
+                session(['last_navigation_intent' => '/client/dang-nhap-dang-ky']);
+                return $resp;
+            case 'booking':
+                $resp = [
+                    'success' => true,
+                    'message' => "Bạn muốn đặt lịch khám cho thú cưng? Mình sẽ chuyển bạn đến trang đặt lịch ngay nhé! 📅",
+                    'direct_navigation' => '/client/dat-lich',
+                    'navigation_buttons' => [
+                        [
+                            'text' => 'Đặt lịch khám',
+                            'route' => '/client/dat-lich',
+                            'icon' => '📅'
+                        ]
+                    ]
+                ];
+                session(['last_navigation_intent' => '/client/dat-lich']);
+                return $resp;
+            case 'price':
+                $resp = [
+                    'success' => true,
+                    'message' => "Bạn muốn xem bảng giá dịch vụ? Mình sẽ chuyển bạn đến trang bảng giá ngay nhé! 💰",
+                    'direct_navigation' => '/client/bang-gia',
+                    'navigation_buttons' => [
+                        [
+                            'text' => 'Xem bảng giá',
+                            'route' => '/client/bang-gia',
+                            'icon' => '💰'
+                        ]
+                    ]
+                ];
+                session(['last_navigation_intent' => '/client/bang-gia']);
+                return $resp;
+            case 'home':
+                $resp = [
+                    'success' => true,
+                    'message' => "Mình sẽ đưa bạn về trang chủ nhé! Nếu cần hỗ trợ gì thêm, bạn cứ hỏi mình nha 🏠",
+                    'direct_navigation' => '/',
+                    'navigation_buttons' => [
+                        [
+                            'text' => 'Trang chủ',
+                            'route' => '/',
+                            'icon' => '🏠'
+                        ]
+                    ]
+                ];
+                session(['last_navigation_intent' => '/']);
+                return $resp;
             case 'emergency':
                 return $this->getEmergencyInfo();
+            case 'logout':
+                // Trả về chỉ dẫn cho FE gọi API logout và nút Đăng nhập lại
+                return [
+                    'success' => true,
+                    'message' => 'Mình đã đăng xuất tài khoản của bạn khỏi hệ thống rồi ạ. 😊',
+                    'direct_action' => 'logout',
+                    'navigation_buttons' => [
+                        [
+                            'text' => 'Đăng nhập lại',
+                            'route' => '/client/dang-nhap-dang-ky',
+                            'icon' => '🔑'
+                        ]
+                    ]
+                ];
+            case 'confirm_navigation':
+                $lastNav = session('last_navigation_intent');
+                if (!$lastNav) {
+                    // Tìm trong history hội thoại gần nhất có direct_navigation
+                    foreach (array_reverse($history) as $item) {
+                        if (isset($item['direct_navigation'])) {
+                            $lastNav = $item['direct_navigation'];
+                            break;
+                        }
+                    }
+                }
+                if ($lastNav) {
+                    return [
+                        'success' => true,
+                        'message' => 'Đang chuyển bạn đến trang bạn vừa yêu cầu nhé! Nếu cần hỗ trợ gì thêm, bạn cứ hỏi mình nha 😊',
+                        'direct_navigation' => $lastNav
+                    ];
+                }
+                return [
+                    'success' => true,
+                    'message' => 'Bạn muốn vào trang nào? Hãy nói rõ hơn nhé!'
+                ];
             default:
                 return null;
         }
@@ -696,7 +928,7 @@ class ChatbotController extends Controller
         $message .= "• Đặt lịch theo bác sĩ yêu thích\n";
         $message .= "• Đặt lịch dịch vụ tiêm chủng\n";
         $message .= "• Đặt lịch dịch vụ spa/chăm sóc\n\n";
-        $message .= "Bạn muốn đặt lịch cho dịch vụ nào? ��";
+        $message .= "Bạn muốn đặt lịch cho dịch vụ nào? 🐾";
         
         return $message;
     }
@@ -718,8 +950,8 @@ class ChatbotController extends Controller
         
         // Kiểm tra xem có phải là yêu cầu điều hướng trực tiếp không
         $directNavigationPatterns = [
-            '/(vào|đi tới|mở|xem|chuyển tới) trang (.*?)( |$)/ui',
-            '/(vào|đi tới|mở|xem|chuyển tới) (.*?)( |$)/ui'
+            '/(vào trang|đi tới|mở|xem|chuyển tới) trang (.*?)( |$)/ui',
+            '/(vào trang|đi tới|mở|xem|chuyển tới) (.*?)( |$)/ui'
         ];
         
         foreach ($directNavigationPatterns as $pattern) {
@@ -813,115 +1045,115 @@ class ChatbotController extends Controller
             // Danh sách từ khóa và route
             $navigationMap = [
                 'đăng nhập' => [
-                    'keywords' => ['đăng nhập', 'login', 'sign in', 'signin', 'vào tài khoản', 'vào trang đăng nhập', 'đăng nhập khách hàng'],
+                    'keywords' => ['đăng nhập', 'login', 'sign in', 'signin', 'vào tài khoản', 'vào trang đăng nhập', 'đăng nhập khách hàng', 'đăng nhập vào hệ thống', 'đăng nhập vào website', 'đăng nhập vào trang web', 'đăng nhập vào petcare', 'đăng nhập vào phòng khám'],
                     'text' => 'Đăng nhập',
                     'route' => '/client/dang-nhap-dang-ky',
                     'icon' => '🔑'
                 ],
                 'đăng ký' => [
-                    'keywords' => ['đăng ký', 'tạo tài khoản', 'tạo account', 'sign up', 'signup', 'register', 'chưa có tài khoản'],
+                    'keywords' => ['đăng ký', 'tạo tài khoản', 'tạo account', 'sign up', 'signup', 'register', 'chưa có tài khoản', 'đăng ký mới', 'đăng ký thành viên', 'đăng ký khách hàng', 'đăng ký vào hệ thống', 'đăng ký vào website', 'đăng ký vào trang web', 'đăng ký vào petcare', 'đăng ký vào phòng khám'],
                     'text' => 'Đăng ký tài khoản',
                     'route' => '/client/dang-nhap-dang-ky',
                     'icon' => '📝'
                 ],
                 'bác sĩ' => [
-                    'keywords' => ['bác sĩ', 'y tá', 'nhân viên', 'đội ngũ', 'chuyên gia'],
+                    'keywords' => ['bác sĩ', 'y tá', 'nhân viên', 'đội ngũ', 'chuyên gia', 'bác sĩ thú y', 'y tá thú y', 'nhân viên thú y', 'đội ngũ bác sĩ', 'đội ngũ y tá', 'đội ngũ nhân viên', 'chuyên gia thú y', 'bác sĩ giỏi', 'bác sĩ có kinh nghiệm', 'bác sĩ chuyên môn cao'],
                     'text' => 'Danh sách bác sĩ',
                     'route' => '/client/xem-bs/0', // ID 0 sẽ hiển thị tất cả bác sĩ
                     'icon' => '👨‍⚕️'
                 ],
                 'dịch vụ' => [
-                    'keywords' => ['dịch vụ', 'chăm sóc', 'cung cấp'],
+                    'keywords' => ['dịch vụ', 'chăm sóc', 'cung cấp', 'dịch vụ thú y', 'dịch vụ chăm sóc', 'dịch vụ khám bệnh', 'dịch vụ tiêm phòng', 'dịch vụ spa', 'dịch vụ phẫu thuật', 'dịch vụ cắt tỉa', 'dịch vụ tắm rửa', 'dịch vụ vệ sinh', 'dịch vụ chữa bệnh', 'dịch vụ điều trị'],
                     'text' => 'Xem dịch vụ',
                     'route' => '/client/xem-dich-vu',
                     'icon' => '🐾'
                 ],
                 'chọn dịch vụ' => [
-                    'keywords' => ['chọn dịch vụ', 'đăng ký dịch vụ'],
+                    'keywords' => ['chọn dịch vụ', 'đăng ký dịch vụ', 'đặt dịch vụ', 'mua dịch vụ', 'sử dụng dịch vụ', 'dùng dịch vụ', 'thuê dịch vụ', 'đăng ký khám', 'đăng ký tiêm', 'đăng ký spa', 'đăng ký phẫu thuật', 'đăng ký cắt tỉa', 'đăng ký tắm rửa', 'đăng ký vệ sinh'],
                     'text' => 'Chọn dịch vụ',
                     'route' => '/client/chon-dich-vu',
                     'icon' => '✅'
                 ],
                 'đặt lịch' => [
-                    'keywords' => ['đặt lịch', 'hẹn', 'khám', 'lịch hẹn', 'đăng ký khám', 'kiểm tra'],
+                    'keywords' => ['đặt lịch', 'hẹn', 'khám', 'lịch hẹn', 'đăng ký khám', 'kiểm tra', 'đặt lịch khám', 'đặt lịch hẹn', 'đặt lịch kiểm tra', 'đặt lịch tư vấn', 'đặt lịch thăm khám', 'đặt lịch điều trị', 'đặt lịch chữa bệnh', 'đặt lịch chăm sóc'],
                     'text' => 'Đặt lịch khám',
                     'route' => '/client/dat-lich',
                     'icon' => '📅'
                 ],
                 'đặt lịch bác sĩ' => [
-                    'keywords' => ['đặt lịch bác sĩ', 'đặt lịch theo bác sĩ', 'chọn bác sĩ khám'],
+                    'keywords' => ['đặt lịch bác sĩ', 'đặt lịch theo bác sĩ', 'chọn bác sĩ khám', 'hẹn bác sĩ', 'khám bác sĩ', 'đặt lịch với bác sĩ', 'đặt lịch khám bác sĩ', 'đặt lịch hẹn bác sĩ', 'đặt lịch kiểm tra bác sĩ', 'đặt lịch tư vấn bác sĩ', 'đặt lịch thăm khám bác sĩ', 'đặt lịch điều trị bác sĩ'],
                     'text' => 'Đặt lịch theo bác sĩ',
                     'route' => '/client/dat-lich-theo-bac-si',
                     'icon' => '👨‍⚕️'
                 ],
                 'đặt lịch tiêm chủng' => [
-                    'keywords' => ['tiêm chủng', 'tiêm phòng', 'vaccine', 'tiêm ngừa'],
+                    'keywords' => ['tiêm chủng', 'tiêm phòng', 'vaccine', 'tiêm ngừa', 'đặt lịch tiêm', 'đặt lịch tiêm chủng', 'đặt lịch tiêm phòng', 'đặt lịch vaccine', 'đặt lịch tiêm ngừa', 'hẹn tiêm', 'hẹn tiêm chủng', 'hẹn tiêm phòng', 'hẹn vaccine', 'hẹn tiêm ngừa'],
                     'text' => 'Đặt lịch tiêm chủng',
                     'route' => '/client/dat-lich-tiem-chung',
                     'icon' => '💉'
                 ],
                 'đặt lịch spa' => [
-                    'keywords' => ['spa', 'tắm', 'cắt lông', 'cắt móng', 'chăm sóc'],
+                    'keywords' => ['spa', 'tắm', 'cắt lông', 'cắt móng', 'chăm sóc', 'đặt lịch spa', 'đặt lịch tắm', 'đặt lịch cắt lông', 'đặt lịch cắt móng', 'đặt lịch chăm sóc', 'hẹn spa', 'hẹn tắm', 'hẹn cắt lông', 'hẹn cắt móng', 'hẹn chăm sóc'],
                     'text' => 'Đặt lịch chăm sóc/Spa',
                     'route' => '/client/dat-lich-cham-soc',
                     'icon' => '✂️'
                 ],
                 'hồ sơ' => [
-                    'keywords' => ['hồ sơ', 'profile', 'thông tin cá nhân', 'thông tin của tôi', 'tài khoản của tôi'],
+                    'keywords' => ['hồ sơ', 'profile', 'thông tin cá nhân', 'thông tin của tôi', 'tài khoản của tôi', 'thông tin khách hàng', 'thông tin thành viên', 'thông tin người dùng', 'thông tin đăng ký', 'thông tin đăng nhập', 'thông tin liên hệ', 'thông tin cá nhân của tôi', 'thông tin tài khoản của tôi'],
                     'text' => 'Thông tin cá nhân',
                     'route' => '/client/thong-tin-ca-nhan',
                     'icon' => '👤'
                 ],
                 'thú cưng' => [
-                    'keywords' => ['thú cưng', 'pet', 'chó', 'mèo', 'thú cưng của tôi', 'thêm thú cưng'],
+                    'keywords' => ['thú cưng', 'pet', 'chó', 'mèo', 'thú cưng của tôi', 'thêm thú cưng', 'quản lý thú cưng', 'thông tin thú cưng', 'hồ sơ thú cưng', 'thú cưng đã đăng ký', 'thú cưng đã khám', 'thú cưng đã tiêm', 'thú cưng đã spa'],
                     'text' => 'Quản lý thú cưng',
                     'route' => '/client/pet',
                     'icon' => '🐶'
                 ],
                 'giá' => [
-                    'keywords' => ['giá', 'chi phí', 'bảng giá', 'phí dịch vụ', 'tiền', 'thanh toán', 'bao nhiêu tiền'],
+                    'keywords' => ['giá', 'chi phí', 'bảng giá', 'phí dịch vụ', 'tiền', 'thanh toán', 'bao nhiêu tiền', 'giá khám', 'giá tiêm', 'giá spa', 'giá phẫu thuật', 'giá cắt tỉa', 'giá tắm rửa', 'giá vệ sinh'],
                     'text' => 'Bảng giá dịch vụ',
                     'route' => '/client/bang-gia',
                     'icon' => '💰'
                 ],
                 'thanh toán' => [
-                    'keywords' => ['thanh toán', 'trả tiền', 'đóng tiền', 'hóa đơn'],
+                    'keywords' => ['thanh toán', 'trả tiền', 'đóng tiền', 'hóa đơn', 'thanh toán dịch vụ', 'thanh toán khám', 'thanh toán tiêm', 'thanh toán spa', 'thanh toán phẫu thuật', 'thanh toán cắt tỉa', 'thanh toán tắm rửa', 'thanh toán vệ sinh', 'thanh toán chữa bệnh', 'thanh toán điều trị'],
                     'text' => 'Thanh toán',
                     'route' => '/client/thanh-toan',
                     'icon' => '💳'
                 ],
                 'giới thiệu' => [
-                    'keywords' => ['giới thiệu', 'về chúng tôi', 'thông tin'],
+                    'keywords' => ['giới thiệu', 'về chúng tôi', 'thông tin', 'giới thiệu phòng khám', 'giới thiệu dịch vụ', 'giới thiệu bác sĩ', 'giới thiệu nhân viên', 'giới thiệu cơ sở', 'giới thiệu trang web', 'giới thiệu website', 'giới thiệu petcare', 'giới thiệu thú y', 'giới thiệu chăm sóc', 'giới thiệu điều trị'],
                     'text' => 'Giới thiệu',
                     'route' => '/client/gioi-thieu',
                     'icon' => '📋'
                 ],
                 'đánh giá' => [
-                    'keywords' => ['đánh giá', 'review', 'feedback', 'phản hồi'],
+                    'keywords' => ['đánh giá', 'review', 'feedback', 'phản hồi', 'đánh giá dịch vụ', 'đánh giá khám', 'đánh giá tiêm', 'đánh giá spa', 'đánh giá phẫu thuật', 'đánh giá cắt tỉa', 'đánh giá tắm rửa', 'đánh giá vệ sinh', 'đánh giá chữa bệnh', 'đánh giá điều trị'],
                     'text' => 'Đánh giá',
                     'route' => '/client/danh-gia',
                     'icon' => '⭐'
                 ],
                 'trang chủ' => [
-                    'keywords' => ['trang chủ', 'home', 'màn hình chính', 'bắt đầu', 'chính', 'trang đầu'],
+                    'keywords' => ['trang chủ', 'home', 'màn hình chính', 'bắt đầu', 'chính', 'trang đầu', 'trang chính', 'trang mặc định', 'trang mở đầu', 'trang khởi đầu', 'trang bắt đầu', 'trang đầu tiên', 'trang chính thức', 'trang mặc định'],
                     'text' => 'Trang chủ',
                     'route' => '/',
                     'icon' => '🏠'
                 ],
                 'lịch sử khám' => [
-                    'keywords' => ['lịch sử khám', 'lịch sử', 'đã khám', 'kết quả khám', 'hồ sơ khám'],
+                    'keywords' => ['lịch sử khám', 'lịch sử', 'đã khám', 'kết quả khám', 'hồ sơ khám', 'lịch sử điều trị', 'lịch sử chữa bệnh', 'lịch sử tiêm', 'lịch sử spa', 'lịch sử phẫu thuật', 'lịch sử cắt tỉa', 'lịch sử tắm rửa', 'lịch sử vệ sinh', 'lịch sử chăm sóc'],
                     'text' => 'Lịch sử khám',
                     'route' => '/client/lich-su-kham',
                     'icon' => '📋'
                 ],
                 'tin tức' => [
-                    'keywords' => ['tin tức', 'bài viết', 'blog', 'kiến thức', 'thông tin', 'mẹo'],
+                    'keywords' => ['tin tức', 'bài viết', 'blog', 'kiến thức', 'thông tin', 'mẹo', 'tin tức thú y', 'bài viết thú y', 'blog thú y', 'kiến thức thú y', 'thông tin thú y', 'mẹo thú y', 'tin tức chăm sóc', 'bài viết chăm sóc'],
                     'text' => 'Tin tức & Bài viết',
                     'route' => '/client/tin-tuc',
                     'icon' => '📰'
                 ],
                 'liên hệ' => [
-                    'keywords' => ['liên hệ', 'địa chỉ', 'số điện thoại', 'email', 'phòng khám', 'bản đồ', 'vị trí'],
+                    'keywords' => ['liên hệ', 'địa chỉ', 'số điện thoại', 'email', 'phòng khám', 'bản đồ', 'vị trí', 'liên hệ phòng khám', 'địa chỉ phòng khám', 'số điện thoại phòng khám', 'email phòng khám', 'phòng khám ở đâu', 'bản đồ phòng khám', 'vị trí phòng khám'],
                     'text' => 'Liên hệ',
                     'route' => '/client/lien-he',
                     'icon' => '📞'
@@ -961,8 +1193,8 @@ class ChatbotController extends Controller
             }
         }
 
-        // Nếu vẫn không tìm thấy nút nào, thêm nút trang chủ
-        if (empty($buttons)) {
+        // Nếu vẫn không tìm thấy nút nào phù hợp, chỉ khi không phải các intent điều hướng phổ biến mới thêm Trang chủ
+        if (empty($buttons) && $this->shouldShowHomeButton($questionLower)) {
             $buttons[] = [
                 'text' => 'Trang chủ',
                 'route' => '/',
@@ -971,6 +1203,17 @@ class ChatbotController extends Controller
         }
 
         return $buttons;
+    }
+
+    // Thêm hàm kiểm tra có nên show nút Trang chủ không
+    private function shouldShowHomeButton($questionLower) {
+        $notShowKeywords = [
+            'đăng nhập', 'đăng xuất', 'dịch vụ', 'bác sĩ', 'đặt lịch', 'giá', 'liên hệ', 'tin tức', 'hồ sơ', 'thú cưng'
+        ];
+        foreach ($notShowKeywords as $kw) {
+            if (mb_strpos($questionLower, $kw) !== false) return false;
+        }
+        return true;
     }
 
     // Hàm xử lý chức năng chatbot
@@ -1024,5 +1267,17 @@ class ChatbotController extends Controller
                 'isError' => true
             ], 500);
         }
+    }
+
+    // API logout cho chatbot
+    public function logout(Request $request)
+    {
+        \Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return response()->json([
+            'success' => true,
+            'message' => 'Bạn đã đăng xuất thành công!'
+        ]);
     }
 } 
