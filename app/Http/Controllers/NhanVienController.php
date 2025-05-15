@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatNhanVienRequest;
+use App\Http\Requests\DangNhapRequest;
+use App\Http\Requests\ThemNhanVienRequest;
 use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +25,7 @@ class NhanVienController extends Controller
             'data' => $data
         ]);
     }
-    public function them(Request $request)
+    public function them(ThemNhanVienRequest $request)
     {
         $data = $request->all();
         $data['password'] = bcrypt($request->password);
@@ -59,7 +62,7 @@ class NhanVienController extends Controller
             'message' => 'Đăng xuất không thành công'
         ]);
     }
-    public function update(Request $request)
+    public function update(CapNhatNhanVienRequest $request)
     {
         $data = $request->all();
         NhanVien::find($request->id)->update($data);
@@ -92,7 +95,7 @@ class NhanVienController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
-    public function dangNhap(Request $request)
+    public function dangNhap(DangNhapRequest $request)
     {
         $check = Auth::guard('nhan_vien')->attempt([
             'email' => $request->email,

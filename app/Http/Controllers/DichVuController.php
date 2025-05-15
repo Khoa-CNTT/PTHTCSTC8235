@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatDichVuRequest;
+use App\Http\Requests\ThemDichVuRequest;
 use App\Models\DichVu;
 use App\Models\NhanVien;
 use App\Models\PhanQuyen;
@@ -13,8 +15,10 @@ use Illuminate\Support\Facades\DB;
 class DichVuController extends Controller
 {
 
-    public function them(Request $request)
+    private $id_chuc_nang = 4;
+    public function them(ThemDichVuRequest $request)
     {
+
             $data = $request->all();
             DichVu::create($data);
             return response()->json([
@@ -89,7 +93,7 @@ class DichVuController extends Controller
             'data' => $data
         ]);
     }
-    public function update(Request $request)
+    public function update(CapNhatDichVuRequest $request)
     {
 
             $data = $request->all();

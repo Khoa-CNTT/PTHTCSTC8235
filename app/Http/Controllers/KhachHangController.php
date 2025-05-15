@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatPetKhachHangRequest;
+use App\Http\Requests\CapNhatThongTinCaNhanRequest;
 use App\Http\Requests\DoiMatKhauRequest;
+use App\Http\Requests\DangKyRequest;
+use App\Http\Requests\DangNhapKhachHangRequest;
+use App\Http\Requests\DangNhapRequest;
+use App\Http\Requests\ThemPetKhachHangRequest;
 use App\Models\KhachHang;
 use App\Models\pet;
 use Illuminate\Http\Request;
@@ -32,7 +38,7 @@ class KhachHangController extends Controller
             'data' => $data
         ]);
     }
-    public function dangKy(Request $request)
+    public function dangKy(DangKyRequest $request)
     {
         $hash_active = Str::uuid();
         $a = $request->all();
@@ -174,7 +180,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function dangNhap(Request $request)
+    public function dangNhap(DangNhapKhachHangRequest $request)
     {
         $check = Auth::guard('khach_hang')->attempt(['email' => $request->email, 'password' => $request->pass]);
 
@@ -252,7 +258,7 @@ class KhachHangController extends Controller
             'ngay_sinh' => $user->ngay_sinh,
         ]);
     }
-    public function Sua(Request $request)
+    public function Sua(CapNhatThongTinCaNhanRequest $request)
     {
         KhachHang::find($request->id)->update($request->all());
         return response()->json([
@@ -260,7 +266,7 @@ class KhachHangController extends Controller
             'message' => 'Sửa thông tin thành công :3'
         ]);
     }
-    public function themPet(Request $request)
+    public function themPet(ThemPetKhachHangRequest $request)
     {
         $user = Auth::guard('sanctum')->user(); // Lấy user đang đăng nhập
 
@@ -287,7 +293,7 @@ class KhachHangController extends Controller
         ]);
     }
 
-    public function updatePet(Request $request)
+    public function updatePet(CapNhatPetKhachHangRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if (!$user || !$user instanceof \App\Models\KhachHang) {

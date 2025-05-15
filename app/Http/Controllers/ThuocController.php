@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SuaThuocRequest;
+use App\Http\Requests\ThemThuocRequest;
 use App\Models\Thuoc;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +21,7 @@ class ThuocController extends Controller
             'data' => $data
         ]);
     }
-    public function them(Request $request)
+    public function them(ThemThuocRequest $request)
     {
         $data = $request->all();
         Thuoc::create($data);
@@ -48,7 +50,7 @@ class ThuocController extends Controller
             'data' => $data
         ]);
     }
-    public function update(Request $request)
+    public function update(SuaThuocRequest $request)
     {
         $data = $request->all();
         Thuoc::find($request->id)->update($data);
