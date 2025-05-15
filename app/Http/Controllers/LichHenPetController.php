@@ -35,7 +35,7 @@ class LichHenPetController extends Controller
             )
             ->orderBy('lich_hen_pets.ngay', 'asc')
             ->get();
-                
+
         return response()->json([
             'status' => true,
             'data' => $ds
@@ -204,7 +204,6 @@ class LichHenPetController extends Controller
 
         // Tạo hóa đơn
         $idHoaDon = DB::table('hoa_dons')->insertGetId([
-            'id_lich_pet'        => $lichHen->id,
             'id_kh'              => $lichHen->id_kh,
             'id_nv'              => $lichHen->id_nv ?? 1,
             'id_pet'             => $lichHen->id_pet,

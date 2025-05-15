@@ -99,12 +99,7 @@ Route::post("khach-hang/update-pet", [KhachHangController::class, 'updatePet'])-
 Route::post("khach-hang/xoa-pet", [KhachHangController::class, 'xoaPet'])->middleware('auth:sanctum');
 Route::get('/pets/{id_kh}', [PetController::class, 'showPetsByUserId'])->middleware('auth:sanctum');
 
-//client lich hen routes
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
-    Route::get('/lich-hen/danh-sach-lich-hen', [LichHenPetController::class, 'danhSachLichHen']);
-    Route::post('/vnpay/tao-url-thanh-toan', [PaymentController::class, 'createVnpayPayment']);
-});
+
 //admin Pet routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:7'])->group(function () {
     Route::post('/them-pet', [PetController::class, 'Them']);

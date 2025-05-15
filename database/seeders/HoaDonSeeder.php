@@ -9,7 +9,7 @@ class HoaDonSeeder extends Seeder
 {
     public function run(): void
     {
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 100; $i++) {
             // 1. Lấy lịch hẹn có khách + có dịch vụ
             $lichHen = DB::table('lich_hen_pets')
                 ->whereNotNull('id_kh')
