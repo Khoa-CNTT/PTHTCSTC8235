@@ -25,7 +25,7 @@ class LichHenSeeder extends Seeder
                 'ngay' => '2025-05-08',
                 'gio' => '09:00 - 10:00',
                 'id_nv' => 1,
-                'tinh_trang' => 'Chờ duyệt',
+                'tinh_trang' => '0',
                 'tien_coc' => 75000,
             ],
             [
@@ -36,7 +36,7 @@ class LichHenSeeder extends Seeder
                 'ngay' => '2025-05-09',
                 'gio' => '10:00 - 11:00',
                 'id_nv' => 2,
-                'tinh_trang' => 'Đã duyệt',
+                'tinh_trang' => '1',
                 'tien_coc' => 100000,
             ],
             [
@@ -47,7 +47,7 @@ class LichHenSeeder extends Seeder
                 'ngay' => '2025-05-10',
                 'gio' => '13:00 - 14:00',
                 'id_nv' => 1,
-                'tinh_trang' => 'Đã khám',
+                'tinh_trang' => '0',
                 'tien_coc' => 80000,
             ],
             [
@@ -58,7 +58,7 @@ class LichHenSeeder extends Seeder
                 'ngay' => '2025-05-11',
                 'gio' => '15:00 - 16:00',
                 'id_nv' => 3,
-                'tinh_trang' => 'Huỷ',
+                'tinh_trang' => '1',
                 'tien_coc' => 50000,
             ],
             [
@@ -69,7 +69,7 @@ class LichHenSeeder extends Seeder
                 'ngay' => '2025-05-12',
                 'gio' => '08:00 - 09:00',
                 'id_nv' => 2,
-                'tinh_trang' => 'Chờ duyệt',
+                'tinh_trang' => '0',
                 'tien_coc' => 120000,
             ],
             [
@@ -80,7 +80,18 @@ class LichHenSeeder extends Seeder
                 'ngay' => '2025-05-13',
                 'gio' => '14:00 - 15:00',
                 'id_nv' => 1,
-                'tinh_trang' => 'Đã khám',
+                'tinh_trang' => '1',
+                'tien_coc' => 95000,
+            ],
+            [
+                'id_lich' => 7,
+                'id_kh' => 2,
+                'id_dv' => 2,
+                'id_pet' => 2,
+                'ngay' => '2025-05-14',
+                'gio' => '14:00 - 15:00',
+                'id_nv' => 1,
+                'tinh_trang' => '0',
                 'tien_coc' => 95000,
             ],
         ]);}

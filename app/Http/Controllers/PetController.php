@@ -12,13 +12,13 @@ class PetController extends Controller
     public function Load()
     {
         try {
-        $data = pet::join('khach_hangs', 'khach_hangs.id', '=', 'pets.id_kh')
-            ->select('pets.*', 'khach_hangs.ho_va_ten')
-            ->get();
-        return response()->json([
+            $data = pet::join('khach_hangs', 'khach_hangs.id', '=', 'pets.id_kh')
+                ->select('pets.*', 'khach_hangs.ho_va_ten')
+                ->get();
+            return response()->json([
                 "status" => true,
-            "data" => $data
-        ]);
+                "data" => $data
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 "status" => false,
@@ -74,8 +74,8 @@ class PetController extends Controller
         }
 
         $pets = Pet::where('id_kh', $id)
-        ->select('id', 'ten_pet', 'gioi_tinh', 'tuoi', 'can_nang', 'hinh_anh', 'chung_loai')
-        ->get();
+            ->select('id', 'ten_pet', 'gioi_tinh', 'tuoi', 'can_nang', 'hinh_anh', 'chung_loai')
+            ->get();
         return response()->json(['pets' => $pets], 200);
     }
 }

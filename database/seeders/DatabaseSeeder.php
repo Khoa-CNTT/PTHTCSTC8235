@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             PetSeeder::class,
             HoSoBenhAnSeeder::class,
             PhanQuyenSeeder::class,
+            HoaDonSeeder::class,
         ]);
 
         // Thêm chức vụ
@@ -56,7 +57,7 @@ class DatabaseSeeder extends Seeder
         DB::table('nhan_viens')->insert([
             [
                 'ten_nv' => 'Nguyễn Văn A',
-                'gioi_tinh' => 1,
+                'gioi_tinh' => '0',
                 'email' => 'nguyenvana@example.com',
                 'tien_kham' => 200000,
                 'password' => Hash::make('password'),
@@ -69,7 +70,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'ten_nv' => 'Trần Thị B',
-                'gioi_tinh' => 0,
+                'gioi_tinh' => '1',
                 'email' => 'tranthib@example.com',
                 'tien_kham' => 180000,
                 'password' => Hash::make('password'),

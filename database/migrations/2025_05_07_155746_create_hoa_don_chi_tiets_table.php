@@ -15,9 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('id_hoadon');
             $table->integer('id_ct_don_thuoc')->nullable();
-            $table->integer('id_nv');
-            $table->integer('id_dvct')->nullable();
-            $table->date('ngay_tt');
+            $table->integer('id_lich_hen_pet')->nullable();
             $table->decimal('tien_kham')->nullable();
             $table->timestamps();
         });

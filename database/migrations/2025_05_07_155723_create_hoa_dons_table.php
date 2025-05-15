@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::create('hoa_dons', function (Blueprint $table) {
             $table->id();
             $table->integer('id_kh');
-            $table->integer('id_nv');
-            $table->integer('id_pet');
-            $table->integer('id_lich_pet');
-            $table->integer('phuong_thuc')->default('0');
+            $table->integer('id_nv')->nullable();
+            $table->integer('phuong_thuc')->default(0);
             $table->date('ngay_xuat_hoa_don');
-            $table->integer('tinh_trang')->default('0');
+            $table->integer('tinh_trang')->default(0);
             $table->timestamps();
         });
     }

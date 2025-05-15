@@ -121,36 +121,68 @@ class HoSoBenhAnController extends Controller
                 ]);
             }
 
-            // Cập nhật tình trạng và chẩn đoán nếu có
+            // Cập nhật chẩn đoán & tình trạng
             if ($request->has('tinh_trang') && !$request->has('chuan_doan')) {
                 $ho_so_benh_an->tinh_trang = $request->tinh_trang;
             } else {
                 $ho_so_benh_an->chuan_doan = $request->chuan_doan;
                 $ho_so_benh_an->tinh_trang = $request->tinh_trang;
             }
-
             $ho_so_benh_an->save();
 
-            // Nếu trạng thái là "đã khỏi" (0) => cập nhật lịch hẹn + tạo hóa đơn
+            // Nếu tình trạng là "đã khỏi" => tạo hóa đơn + chi tiết
             if ($ho_so_benh_an->tinh_trang == 0) {
                 $lich = LichHenPet::find($ho_so_benh_an->id_lich_hen_pet);
 
                 if ($lich) {
+                    // Cập nhật lịch hẹn đã điều trị
                     $lich->tinh_trang = 1;
                     $lich->save();
 
-                    // Kiểm tra nếu chưa có hóa đơn
+                    // Nếu chưa có hóa đơn
                     $daCoHoaDon = DB::table('hoa_dons')->where('id_lich_pet', $lich->id)->exists();
                     if (!$daCoHoaDon) {
-                        DB::table('hoa_dons')->insert([
-                            'id_kh' => $lich->id_kh,
-                            'id_pet' => $lich->id_pet,
-                            'id_lich_pet' => $lich->id,
-                            'phuong_thuc' => 1,
-                            'ngay_xuat_hoa_don' => now(),
-                            'created_at' => now(),
-                            'updated_at' => now(),
+                        $idHoaDon = DB::table('hoa_dons')->insertGetId([
+                            'id_kh'              => $lich->id_kh,
+                            'id_pet'             => $lich->id_pet,
+                            'id_nv'              => $lich->id_nv ?? 1,
+                            'id_lich_pet'        => $lich->id,
+                            'phuong_thuc'        => 1,
+                            'tinh_trang'         => 0,
+                            'ngay_xuat_hoa_don'  => now(),
+                            'created_at'         => now(),
+                            'updated_at'         => now(),
                         ]);
+
+                        // Lấy đơn thuốc nếu có
+                        $idDonThuoc = $ho_so_benh_an->id_don_thuoc;
+
+                        if ($idDonThuoc) {
+                            $chiTietThuocs = DB::table('don_thuoc_chi_tiets')
+                                ->where('id_don_thuoc', $idDonThuoc)
+                                ->get();
+
+                            foreach ($chiTietThuocs as $thuoc) {
+                                DB::table('hoa_don_chi_tiets')->insert([
+                                    'id_hoadon'        => $idHoaDon,
+                                    'id_lich_hen_pet'  => $lich->id,
+                                    'id_ct_don_thuoc'  => $thuoc->id,
+                                    'tien_kham'        => 0,
+                                    'created_at'       => now(),
+                                    'updated_at'       => now(),
+                                ]);
+                            }
+                        } else {
+                            // Không có đơn thuốc cũng tạo dòng chi tiết để cập nhật tiền dịch vụ, tiền khám, cọc
+                            DB::table('hoa_don_chi_tiets')->insert([
+                                'id_hoadon'        => $idHoaDon,
+                                'id_lich_hen_pet'  => $lich->id,
+                                'id_ct_don_thuoc'  => null,
+                                'tien_kham'        => 0,
+                                'created_at'       => now(),
+                                'updated_at'       => now(),
+                            ]);
+                        }
                     }
                 }
             }
@@ -168,7 +200,6 @@ class HoSoBenhAnController extends Controller
     }
 
 
-
     public function delete(Request $request)
     {
         try {
@@ -182,21 +213,21 @@ class HoSoBenhAnController extends Controller
                 ]);
             }
 
-            // Delete related prescriptions and their details
-            $don_thuocs = DonThuoc::where('id_hsba', $ho_so_benh_an->id)->get();
-            foreach ($don_thuocs as $don_thuoc) {
-                DonThuocChiTiet::where('id_don_thuoc', $don_thuoc->id)->delete();
-                $don_thuoc->delete();
+            // Lấy id đơn thuốc từ hồ sơ bệnh án
+            $don_thuoc_id = $ho_so_benh_an->id_don_thuoc;
+
+            if ($don_thuoc_id) {
+                DonThuocChiTiet::where('id_don_thuoc', $don_thuoc_id)->delete();
+                DonThuoc::where('id', $don_thuoc_id)->delete();
             }
 
-            // Delete the medical record
             $ho_so_benh_an->delete();
 
             DB::commit();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Xóa hồ sơ bệnh án và các đơn thuốc liên quan thành công'
+                'message' => 'Xóa hồ sơ bệnh án và đơn thuốc thành công'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -206,6 +237,7 @@ class HoSoBenhAnController extends Controller
             ]);
         }
     }
+
 
     public function search(Request $request)
     {
