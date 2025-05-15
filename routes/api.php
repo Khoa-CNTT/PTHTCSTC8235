@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\DoanhThuController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -222,6 +223,7 @@ route::middleware(['auth:sanctum','kiemtra.quyen:13'])->group(function(){
     Route::post('/hoa-don/thanh-toan', [HoaDonController::class, 'thanhToan']);
     Route::post('hoa-don/update', [HoaDonController::class, 'update']);
     Route::post('hoa-don/xoa', [HoaDonController::class, 'xoa']);
+    Route::get('/hoa-don/in/{id}', [HoaDonController::class, 'inHoaDon']);
 });
 //bac si routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
@@ -288,3 +290,4 @@ Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
 Route::post("gio/update", [LichHenController::class, 'update']);
 Route::post("gio/del", [LichHenController::class, 'delete']);
 
+Route::get('/bao-cao-doanh-thu', [DoanhThuController::class, 'doanhThuTheoThoiGian']);

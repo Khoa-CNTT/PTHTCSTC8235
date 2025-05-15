@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->integer('id_kh');
             $table->integer('id_nv')->nullable();
-            $table->integer('id_pet');
-            $table->integer('id_lich_pet');
             $table->integer('phuong_thuc')->default(0);
             $table->date('ngay_xuat_hoa_don');
             $table->integer('tinh_trang')->default(0);

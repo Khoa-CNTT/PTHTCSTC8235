@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             PetSeeder::class,
             HoSoBenhAnSeeder::class,
             PhanQuyenSeeder::class,
+            HoaDonSeeder::class,
         ]);
 
         // Thêm chức vụ

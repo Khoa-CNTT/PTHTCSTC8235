@@ -83,6 +83,17 @@ class LichHenSeeder extends Seeder
                 'tinh_trang' => '1',
                 'tien_coc' => 95000,
             ],
+            [
+                'id_lich' => 7,
+                'id_kh' => 2,
+                'id_dv' => 2,
+                'id_pet' => 2,
+                'ngay' => '2025-05-14',
+                'gio' => '14:00 - 15:00',
+                'id_nv' => 1,
+                'tinh_trang' => '0',
+                'tien_coc' => 95000,
+            ],
         ]);}
 
     }
