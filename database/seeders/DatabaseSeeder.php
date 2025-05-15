@@ -35,53 +35,8 @@ class DatabaseSeeder extends Seeder
             PetSeeder::class,
             HoSoBenhAnSeeder::class,
             PhanQuyenSeeder::class,
+            LichHenSeeder::class,
             HoaDonSeeder::class,
-        ]);
-
-        // Thêm chức vụ
-        DB::table('chuc_vus')->insert([
-            [
-                'ten_chuc_vu' => 'Bác sĩ',
-                'tinh_trang' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'ten_chuc_vu' => 'Y tá',
-                'tinh_trang' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
-
-        // Thêm bác sĩ
-        DB::table('nhan_viens')->insert([
-            [
-                'ten_nv' => 'Nguyễn Văn A',
-                'gioi_tinh' => '0',
-                'email' => 'nguyenvana@example.com',
-                'tien_kham' => 200000,
-                'password' => Hash::make('password'),
-                'mo_ta' => 'Bác sĩ thú y có kinh nghiệm 5 năm',
-                'hinh_anh' => 'default.jpg',
-                'tinh_trang' => 1,
-                'id_chucvu' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'ten_nv' => 'Trần Thị B',
-                'gioi_tinh' => '1',
-                'email' => 'tranthib@example.com',
-                'tien_kham' => 180000,
-                'password' => Hash::make('password'),
-                'mo_ta' => 'Bác sĩ thú y có kinh nghiệm 3 năm',
-                'hinh_anh' => 'default.jpg',
-                'tinh_trang' => 1,
-                'id_chucvu' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
         ]);
     }
 }

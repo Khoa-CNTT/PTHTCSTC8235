@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SuaPetRequest;
+use App\Http\Requests\ThemPetRequest;
 use App\Models\KhachHang;
 use App\Models\pet;
 use Illuminate\Http\Request;
@@ -50,7 +52,7 @@ class PetController extends Controller
             'message' => 'Xoá pet thành công'
         ]);
     }
-    public function Sua(Request $request)
+    public function Sua(SuaPetRequest $request)
     {
         pet::find($request->id)->update($request->all());
         return response()->json([
@@ -58,7 +60,7 @@ class PetController extends Controller
             'message' => 'Sửa thông tin pet thành công :3'
         ]);
     }
-    public function Them(Request $request)
+    public function Them(ThemPetRequest $request)
     {
         pet::create($request->all());
         return response()->json([

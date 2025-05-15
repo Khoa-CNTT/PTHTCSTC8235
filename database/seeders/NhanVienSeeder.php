@@ -107,7 +107,7 @@ class NhanVienSeeder extends Seeder
             [
                 'id' => 7,
                 'ten_nv' => 'Lê Tuấn Kiệt',
-                'gioi_tinh' => 0,
+                'gioi_tinh' => 1,
                 'password' => Hash::make('123456'),
                 'hinh_anh' => 'https://white-coat-manila.s3-ap-southeast-1.amazonaws.com/images/shop/products/1607933918578suititupmanila-3-pocket-movetech-scrub-top-preorder/1607933918719color1-i0_cerulean-3pocket-scrubtop-01jpg.jpeg',
                 'email' => 'tuan.kiet@gmail.com',
@@ -121,7 +121,7 @@ class NhanVienSeeder extends Seeder
             [
                 'id' => 8,
                 'ten_nv' => 'admin',
-                'gioi_tinh' => 0,
+                'gioi_tinh' => 1,
                 'password' => Hash::make('123456'),
                 'hinh_anh' => 'https://white-coat-manila.s3-ap-southeast-1.amazonaws.com/images/shop/products/1607933918578suititupmanila-3-pocket-movetech-scrub-top-preorder/1607933918719color1-i0_cerulean-3pocket-scrubtop-01jpg.jpeg',
                 'email' => 'admin@gmail.com',
