@@ -290,4 +290,6 @@ Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
 Route::post("gio/update", [LichHenController::class, 'update']);
 Route::post("gio/del", [LichHenController::class, 'delete']);
 
-Route::get('/bao-cao-doanh-thu', [DoanhThuController::class, 'doanhThuTheoThoiGian']);
+Route::get('/doanh-thu/tong-hop', [DoanhThuController::class, 'tongHop']);
+Route::get('/doanh-thu/da-thanh-toan', [DoanhThuController::class, 'hoaDonDaThanhToan']);
+

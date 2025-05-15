@@ -15,6 +15,9 @@ class HoaDonController extends Controller
         $ds = DB::table('hoa_dons')
             ->leftJoin('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
             ->leftJoin('lich_hen_pets', 'hoa_don_chi_tiets.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+            ->leftJoin('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
+            ->leftJoin('don_thuoc_chi_tiets', 'hoa_don_chi_tiets.id_ct_don_thuoc', '=', 'don_thuoc_chi_tiets.id')
+            ->leftJoin('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
             ->leftJoin('khach_hangs', 'lich_hen_pets.id_kh', '=', 'khach_hangs.id')
             ->leftJoin('nhan_viens', 'hoa_dons.id_nv', '=', 'nhan_viens.id')
             ->select(
@@ -23,8 +26,11 @@ class HoaDonController extends Controller
                 'hoa_dons.phuong_thuc',
                 'hoa_dons.tinh_trang',
                 'hoa_dons.id_nv',
-                'ten_nv',
-                'ho_va_ten',
+                'nhan_viens.ten_nv',
+                'khach_hangs.ho_va_ten',
+                DB::raw('COALESCE(dich_vus.gia, 0) as tien_dich_vu'),
+                DB::raw('COALESCE(lich_hen_pets.tien_coc, 0) as tien_coc'),
+                DB::raw('COALESCE(don_thuoc_chi_tiets.so_luong * thuocs.gia_ban, 0) as tien_thuoc')
             )
             ->groupBy(
                 'hoa_dons.id',
@@ -32,8 +38,13 @@ class HoaDonController extends Controller
                 'hoa_dons.phuong_thuc',
                 'hoa_dons.tinh_trang',
                 'hoa_dons.id_nv',
-                'ten_nv',
-                'ho_va_ten'
+                'nhan_viens.ten_nv',
+                'khach_hangs.ho_va_ten',
+                'hoa_don_chi_tiets.tien_kham',
+                'dich_vus.gia',
+                'lich_hen_pets.tien_coc',
+                'don_thuoc_chi_tiets.so_luong',
+                'thuocs.gia_ban'
             )
             ->orderBy('hoa_dons.ngay_xuat_hoa_don', 'desc')
             ->get();
