@@ -296,5 +296,7 @@ route::middleware(['auth:sanctum','kiemtra.quyen:18'])->group(function(){
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:14'])->group(function () {
     Route::get('/doanh-thu/tong-hop', [DoanhThuController::class, 'tongHop']);
     Route::get('/doanh-thu/bieu-do', [DoanhThuController::class, 'bieuDo']);
-    Route::get('/doanh-thu/da-thanh-toan', [DoanhThuController::class, 'hoaDonDaThanhToan']);
 });
+
+// Add the route for loading pets by customer
+Route::get('/pet/load-by-customer/{id}', [HoSoBenhAnController::class, 'loadByCustomer']);

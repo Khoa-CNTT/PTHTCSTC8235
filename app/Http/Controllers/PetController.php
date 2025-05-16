@@ -80,4 +80,5 @@ class PetController extends Controller
             ->get();
         return response()->json(['pets' => $pets], 200);
     }
+
 }

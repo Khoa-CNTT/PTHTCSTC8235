@@ -163,17 +163,17 @@ class LichHenPetController extends Controller
             'tien_coc' => $tienCoc,
             'payment_id' => $request->payment_id ?? null,
         ]);
-        
+
         // Gán bác sĩ tự động sau khi tạo lịch hẹn
         if (in_array($dichVu->id_loaidv, [1, 4])) {
             $this->ganBacSiTuDong($lichHen->id);
         }
-        
+
         // Lấy thông tin khách hàng và thú cưng để gửi email
         try {
             $khachHang = KhachHang::find($request->id_kh);
             $pet = Pet::find($request->id_pet);
-            
+
             if ($khachHang && $khachHang->email) {
                 // Chuẩn bị dữ liệu cho email
                 $emailData = [
@@ -187,13 +187,13 @@ class LichHenPetController extends Controller
                     'tien_coc' => $tienCoc,
                     'payment_id' => $request->payment_id ?? 'Không có',
                 ];
-                
+
                 // Gửi email xác nhận
                 Mail::to($khachHang->email)->send(new XacNhanLichHenMail($emailData));
             }
         } catch (\Exception $e) {
             // Log lỗi nhưng vẫn tiếp tục xử lý
-            \Log::error('Lỗi gửi email: ' . $e->getMessage());
+            
         }
 
         return response()->json([
