@@ -307,4 +307,57 @@ class HoSoBenhAnController extends Controller
             ]);
         }
     }
+
+    public function them(Request $request)
+    {
+        try {
+            // Validate input data
+            $request->validate([
+                'id_nv' => 'required',
+                'id_pet' => 'required',
+                'id_kh' => 'required',
+                'chuan_doan' => 'required|string',
+                'tinh_trang' => 'required|in:0,1'
+            ]);
+
+            DB::beginTransaction();
+
+            // Create a new appointment record if needed
+            $lichHenId = DB::table('lich_hen_pets')->insertGetId([
+                'id_pet' => $request->id_pet,
+                'id_kh' => $request->id_kh,
+                'id_nv' => $request->id_nv,
+                'id_slot' => 1, // Default slot
+                'tinh_trang' => 0,
+                'ngay' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Create the medical record
+            $hoSoBenhAn = HoSoBenhAn::create([
+                'id_lich_hen_pet' => $lichHenId,
+                'id_nv' => $request->id_nv,
+                'tinh_trang' => $request->tinh_trang,
+                'chuan_doan' => $request->chuan_doan,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Thêm hồ sơ bệnh án thành công',
+                'id' => $hoSoBenhAn->id
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
