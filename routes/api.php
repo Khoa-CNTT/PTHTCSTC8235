@@ -78,7 +78,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:9'])->group(function () {
 
 // admin KhachHang routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:6'])->group(function () {
-    Route::get("/khach-hang/load", [KhachHangController::class, 'load']);
+    Route::get("/khach-hang/loadkh-ql-kh", [KhachHangController::class, 'load']);
     Route::post('/khach-hang/tim-kiem', [KhachHangController::class, 'timkiem']);
 });
 
@@ -106,6 +106,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:7'])->group(function () {
     Route::post('/xoa-pet', [PetController::class, 'Xoa']);
     Route::post('/sua-pet', [PetController::class, 'Sua']);
     Route::post('/thay-doi-tt-pet', [PetController::class, 'Doitt']);
+    Route::get("/khach-hang/loadkh-ql-pet", [KhachHangController::class, 'load']);
     Route::get('/load-pet', [PetController::class, 'Load']);
 });
 
@@ -147,7 +148,7 @@ Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
 
 // admin DanhGia routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
-    Route::get("khach-hang/load", [KhachHangController::class, 'load']);
+    Route::get("khach-hang/loadkh-ql-dgia", [KhachHangController::class, 'load']);
     Route::post("danh-gia/them", [DanhGiaController::class, 'them']);
     Route::get("danh-gia/load", [DanhGiaController::class, 'load']);
     Route::post("danh-gia/doi-TT", [DanhGiaController::class, 'doi']);
