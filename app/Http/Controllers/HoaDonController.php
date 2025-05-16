@@ -60,16 +60,13 @@ class HoaDonController extends Controller
             ->leftJoin('nhan_viens', 'hoa_dons.id_nv', '=', 'nhan_viens.id')
             ->leftJoin('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
             ->leftJoin('lich_hen_pets', 'hoa_don_chi_tiets.id_lich_hen_pet', '=', 'lich_hen_pets.id')
-            ->leftJoin('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
-            ->leftJoin('khach_hangs', 'pets.id_kh', '=', 'khach_hangs.id')
+            ->leftJoin('khach_hangs', '=', 'khach_hangs.id')
             ->where('hoa_dons.id', $id)
             ->select(
                 'hoa_dons.id as ma_hoa_don',
                 'hoa_dons.ngay_xuat_hoa_don',
                 'hoa_dons.phuong_thuc',
                 'ten_nv',
-                'ho_va_ten as ten_khach_hang',
-                'pets.ten_pet',
                 DB::raw('SUM(hoa_don_chi_tiets.tien_kham) as tong_kham')
             )
             ->groupBy(
@@ -78,7 +75,6 @@ class HoaDonController extends Controller
                 'hoa_dons.phuong_thuc',
                 'ten_nv',
                 'ho_va_ten',
-                'pets.ten_pet'
             )
             ->first();
 
