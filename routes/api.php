@@ -224,6 +224,7 @@ route::middleware(['auth:sanctum', 'kiemtra.quyen:13'])->group(function () {
     Route::post('hoa-don/update', [HoaDonController::class, 'update']);
     Route::post('hoa-don/xoa', [HoaDonController::class, 'xoa']);
     Route::get('/hoa-don/in/{id}', [HoaDonController::class, 'inHoaDon']);
+    Route::post('hoa-don/them', [HoaDonController::class, 'them']);
 });
 //bac si routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
@@ -283,12 +284,14 @@ Route::get("lich/load", [LichHenController::class, 'load']);
 Route::get('/lich-hen/thong-tin-slot', [LichHenPetController::class, 'thongTinSlot']);
 Route::post('/lich-hen/them', [LichHenPetController::class, 'them']);
 
+route::middleware(['auth:sanctum','kiemtra.quyen:18'])->group(function(){
+    Route::post("gio/them", [LichHenController::class, 'them']);
+    Route::get("gio/load", [LichHenController::class, 'load']);
+    Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
+    Route::post("gio/update", [LichHenController::class, 'update']);
+    Route::post("gio/del", [LichHenController::class, 'delete']);
+});
 
-Route::post("gio/them", [LichHenController::class, 'them']);
-Route::get("gio/load", [LichHenController::class, 'load']);
-Route::post("gio/doi-TT", [LichHenController::class, 'doi']);
-Route::post("gio/update", [LichHenController::class, 'update']);
-Route::post("gio/del", [LichHenController::class, 'delete']);
 
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:14'])->group(function () {
     Route::get('/doanh-thu/tong-hop', [DoanhThuController::class, 'tongHop']);

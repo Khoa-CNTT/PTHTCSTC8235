@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ThemLichHenRequest;
+use App\Mail\XacNhanLichHenMail;
 use App\Models\DichVu;
+use App\Models\KhachHang;
 use App\Models\LichHenPet;
 use App\Models\NhanVien;
 use App\Models\pet;
@@ -11,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class LichHenPetController extends Controller
 {
@@ -158,10 +161,39 @@ class LichHenPetController extends Controller
             'ngay' => $request->ngay,
             'gio' => $request->gio,
             'tien_coc' => $tienCoc,
+            'payment_id' => $request->payment_id ?? null,
         ]);
+        
         // Gán bác sĩ tự động sau khi tạo lịch hẹn
         if (in_array($dichVu->id_loaidv, [1, 4])) {
             $this->ganBacSiTuDong($lichHen->id);
+        }
+        
+        // Lấy thông tin khách hàng và thú cưng để gửi email
+        try {
+            $khachHang = KhachHang::find($request->id_kh);
+            $pet = Pet::find($request->id_pet);
+            
+            if ($khachHang && $khachHang->email) {
+                // Chuẩn bị dữ liệu cho email
+                $emailData = [
+                    'ten_khach_hang' => $khachHang->ho_va_ten,
+                    'ten_dv' => $dichVu->ten_dv,
+                    'gio' => $request->gio,
+                    'ngay' => $request->ngay,
+                    'id_pet' => $request->id_pet,
+                    'ten_pet' => $pet ? $pet->ten_pet : 'Không xác định',
+                    'gia' => $dichVu->gia,
+                    'tien_coc' => $tienCoc,
+                    'payment_id' => $request->payment_id ?? 'Không có',
+                ];
+                
+                // Gửi email xác nhận
+                Mail::to($khachHang->email)->send(new XacNhanLichHenMail($emailData));
+            }
+        } catch (\Exception $e) {
+            // Log lỗi nhưng vẫn tiếp tục xử lý
+            \Log::error('Lỗi gửi email: ' . $e->getMessage());
         }
 
         return response()->json([

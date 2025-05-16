@@ -5,156 +5,110 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class HoaDonSeeder extends Seeder
 {
     public function run(): void
     {
-        // Tạo hóa đơn từ ngày 15/6/2024 đến hiện tại
-        $startMonth = 6; // Tháng 6
-        $startYear = 2024;
-        $startDay = 15; // Bắt đầu từ ngày 15/6/2024
-        $endDate = now(); // Ngày hiện tại
+        // Clear existing data first
+        DB::table('hoa_don_chi_tiets')->delete();
+        DB::table('hoa_dons')->delete();
 
-        $currentMonth = Carbon::create($startYear, $startMonth, $startDay);
-        
-        // Lặp qua các tháng từ 6/2024 đến hiện tại
-        while ($currentMonth->lte($endDate)) {
-            $year = $currentMonth->year;
-            $month = $currentMonth->month;
-            
-            // Bỏ qua tháng 6/2024 nếu ngày nhỏ hơn 15 (cho tháng đầu tiên)
-            if ($year == $startYear && $month == $startMonth && $currentMonth->day < $startDay) {
-                // Chuyển sang tháng tiếp theo
-                $currentMonth->addMonth();
-                continue;
-            }
-            
-            // Tạo 3 hóa đơn cho mỗi tháng
-            $soHoaDon = 3;
-            
-            for ($i = 1; $i <= $soHoaDon; $i++) {
-                // Tình trạng thanh toán:
-                // - Các hóa đơn ở tháng 5/2025 có tình trạng = 0 (chưa thanh toán)
-                // - Tất cả hóa đơn khác đều có tình trạng = 1 (đã thanh toán)
-                $tinhTrang = 1; // Mặc định đã thanh toán
-                if ($year == 2025 && $month == 5) {
-                    $tinhTrang = 0; // Chưa thanh toán cho tháng 5/2025
-                }
-                
-                $this->taoHoaDon($year, $month, $tinhTrang, $i);
-            }
-            
-            // Chuyển sang tháng tiếp theo
-            $currentMonth->addMonth();
+        // Get all the possible IDs for relationships
+        $lichHenIds = DB::table('lich_hen_pets')->pluck('id')->toArray();
+        $nhanVienIds = DB::table('nhan_viens')->where('id_chucvu', 2)->pluck('id')->toArray();
+        $khachHangIds = DB::table('khach_hangs')->pluck('id')->toArray();
+
+        // Get actual prescription detail IDs with their medication information
+        $donThuocChiTiets = DB::table('don_thuoc_chi_tiets as dt')
+            ->join('thuocs as t', 'dt.id_thuoc', '=', 't.id')
+            ->select('dt.id', 'dt.id_don_thuoc', 'dt.so_luong', 't.gia_ban', 't.ten_thuoc')
+            ->get();
+
+        if ($donThuocChiTiets->isEmpty()) {
+            // If no prescription details exist, run the DonThuocSeeder first
+            $this->call(DonThuocSeeder::class);
+
+            // Then get the prescription details again
+            $donThuocChiTiets = DB::table('don_thuoc_chi_tiets as dt')
+                ->join('thuocs as t', 'dt.id_thuoc', '=', 't.id')
+                ->select('dt.id', 'dt.id_don_thuoc', 'dt.so_luong', 't.gia_ban', 't.ten_thuoc')
+                ->get();
+        }
+
+        $donThuocChiTietIds = $donThuocChiTiets->pluck('id')->toArray();
+
+        // Create invoices with varied data
+        $totalInvoices = 30;
+        $unpaidInvoices = 10; // Exactly 10 unpaid invoices
+        $paidInvoices = $totalInvoices - $unpaidInvoices;
+
+        // Create paid invoices first
+        for ($i = 1; $i <= $paidInvoices; $i++) {
+            $this->createInvoice(true, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds);
+        }
+
+        // Now create exactly 10 unpaid invoices
+        for ($i = 1; $i <= $unpaidInvoices; $i++) {
+            $this->createInvoice(false, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds);
         }
     }
 
-    private function taoHoaDon($year, $month, $tinhTrang, $soThuTu)
+    /**
+     * Create a single invoice with its details
+     */
+    private function createInvoice($isPaid, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds)
     {
-        // 1. Lấy lịch hẹn có khách + có dịch vụ
-        $lichHen = DB::table('lich_hen_pets')
-            ->whereNotNull('id_kh')
-            ->whereNotNull('id_dv')
-            ->inRandomOrder()
-            ->first();
+        // Randomize invoice data
+        $idNV = $nhanVienIds[array_rand($nhanVienIds)];
+        $idKH = !empty($khachHangIds) ? $khachHangIds[array_rand($khachHangIds)] : 1;
+        $paymentMethod = rand(0, 1); // 0: Cash, 1: Card/Transfer
+        $status = $isPaid ? 1 : 0; // Paid or unpaid based on parameter
 
-        if (!$lichHen) return;
-
-        // 2. Lấy thuốc
-        $thuoc = DB::table('thuocs')->where('gia_ban', '>', 0)->inRandomOrder()->first();
-        if (!$thuoc) return;
-
-        $soLuong = rand(1, 5);
-        $idDonThuoc = DB::table('don_thuocs')->insertGetId([
-            'ngay_ke_don' => now()->subDays(rand(0, 10)),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        
-        // 3. Tạo dòng chi tiết đơn thuốc
-        DB::table('don_thuoc_chi_tiets')->insert([
-            'id_thuoc' => $thuoc->id,
-            'id_don_thuoc' => $idDonThuoc,
-            'so_luong' => $soLuong,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $idCtDonThuoc = DB::getPdo()->lastInsertId();
-
-        // 4. Chọn nhân viên thu ngân và khách hàng (đảm bảo có khách hàng)
-        $idNV = DB::table('nhan_viens')->where('id_chucvu', 2)->inRandomOrder()->value('id');
-        
-        // Danh sách khách hàng có sẵn để đảm bảo có tên đầy đủ
-        $danhSachKhachHang = [
-            ['id' => 1, 'ten' => 'Nguyen Thi A'],
-            ['id' => 2, 'ten' => 'Tran Minh B'],
-            ['id' => 3, 'ten' => 'Le Thanh C'],
-            ['id' => 4, 'ten' => 'Pham Van D'],
-            ['id' => 5, 'ten' => 'Hoang Thi E'],
-            ['id' => 6, 'ten' => 'Nguyen Cong Doan'],
-        ];
-        
-        // Trước tiên, thử tìm trong CSDL
-        $khachHang = DB::table('khach_hangs')
-            ->whereRaw("TRIM(ten_kh) != ''") // Đảm bảo tên không rỗng sau khi loại bỏ khoảng trắng
-            ->whereNotNull('ten_kh') // Đảm bảo có tên khách hàng
-            ->inRandomOrder()
-            ->first();
-            
-        if (!$khachHang) {
-            // Nếu không tìm thấy khách hàng phù hợp, tạo hoặc sử dụng khách hàng cố định
-            $khachHangCoDinh = $danhSachKhachHang[array_rand($danhSachKhachHang)];
-            
-            // Kiểm tra xem ID khách hàng có tồn tại không
-            $khachHangTonTai = DB::table('khach_hangs')->where('id', $khachHangCoDinh['id'])->first();
-            
-            if ($khachHangTonTai) {
-                // Nếu tồn tại, sử dụng id đó
-                $idKH = $khachHangTonTai->id;
-            } else {
-                // Nếu không, thêm mới khách hàng
-                $idKH = DB::table('khach_hangs')->insertGetId([
-                    'id' => $khachHangCoDinh['id'],
-                    'ten_kh' => $khachHangCoDinh['ten'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+        // For unpaid invoices, use more recent dates
+        if ($isPaid) {
+            $date = Carbon::now()->subDays(rand(5, 30));
         } else {
-            $idKH = $khachHang->id;
+            $date = Carbon::now()->subDays(rand(0, 4));
         }
-        
-        // Tạo ngày trong tháng - phân bố đều trong tháng
-        $daysInMonth = Carbon::createFromDate($year, $month)->daysInMonth;
-        
-        // Phân bố ngày theo thứ tự của hóa đơn trong tháng
-        $dayRangeStart = 1 + (int)(($soThuTu - 1) * $daysInMonth / 3); // Chia cho 3 vì có 3 hóa đơn
-        $dayRangeEnd = (int)($soThuTu * $daysInMonth / 3);
-        $randomDay = rand($dayRangeStart, $dayRangeEnd);
-        
-        $randomDate = Carbon::create($year, $month, $randomDay);
-        
-        // 5. Tạo hóa đơn
+
+        // Insert invoice - ensure each invoice has a valid customer ID
         $hoaDonId = DB::table('hoa_dons')->insertGetId([
             'id_nv' => $idNV,
             'id_kh' => $idKH,
-            'phuong_thuc' => rand(0, 1), // 0: tiền mặt, 1: chuyển khoản
-            'ngay_xuat_hoa_don' => $randomDate,
-            'tinh_trang' => $tinhTrang, // Áp dụng tình trạng đã truyền vào
-            'created_at' => now(),
-            'updated_at' => now(),
+            'phuong_thuc' => $paymentMethod,
+            'ngay_xuat_hoa_don' => $date,
+            'tinh_trang' => $status,
+            'created_at' => $date,
+            'updated_at' => $date,
         ]);
 
-        // 6. Tạo dòng chi tiết hóa đơn
+        // Always include a lichhen
+        $idLichHen = !empty($lichHenIds) ? $lichHenIds[array_rand($lichHenIds)] : null;
+        $tienKham = rand(50000, 200000);
+
         DB::table('hoa_don_chi_tiets')->insert([
             'id_hoadon' => $hoaDonId,
-            'id_lich_hen_pet' => $lichHen->id,
-            'id_ct_don_thuoc' => $idCtDonThuoc,
-            'tien_kham' => rand(50000, 100000),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'id_lich_hen_pet' => $idLichHen,
+            'id_ct_don_thuoc' => null,
+            'tien_kham' => $tienKham,
+            'created_at' => $date,
+            'updated_at' => $date,
         ]);
+
+        // Always include a prescription detail for each invoice (to ensure medication cost shows up)
+        if (!empty($donThuocChiTietIds)) {
+            $idDonThuoc = $donThuocChiTietIds[array_rand($donThuocChiTietIds)];
+
+            DB::table('hoa_don_chi_tiets')->insert([
+                'id_hoadon' => $hoaDonId,
+                'id_lich_hen_pet' => null,
+                'id_ct_don_thuoc' => $idDonThuoc,
+                'tien_kham' => 0, // No examination fee for prescription item
+                'created_at' => $date,
+                'updated_at' => $date,
+            ]);
+        }
     }
 }
