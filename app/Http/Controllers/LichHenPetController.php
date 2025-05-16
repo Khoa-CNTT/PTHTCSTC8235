@@ -290,4 +290,15 @@ class LichHenPetController extends Controller
             "message" => "Xóa thành công"
         ]);
     }
+        public function loadd(){
+        $data = LichHenPet::join('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
+                    ->join('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
+                    ->join('khach_hangs', 'lich_hen_pets.id_kh', '=', 'khach_hangs.id')
+                    ->join('nhan_viens', 'lich_hen_pets.id_nv', '=', 'nhan_viens.id')
+                    ->select('lich_hen_pets.*', 'pets.ten_pet', 'dich_vus.ten_dv', 'dich_vus.gia', 'khach_hangs.ho_va_ten', 'nhan_viens.ten_nv')
+                    ->get();
+        return response()->json([
+            "data"=> $data
+        ]);
+    }
 }
