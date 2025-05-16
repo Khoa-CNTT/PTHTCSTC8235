@@ -174,7 +174,8 @@ class LichHenPetController extends Controller
             $khachHang = KhachHang::find($request->id_kh);
             $pet = Pet::find($request->id_pet);
             
-            if ($khachHang && $khachHang->email) {
+            // Chỉ gửi email nếu khách hàng có email và request có flag send_email và payment_method là PayPal
+            if ($khachHang && $khachHang->email && $request->has('send_email') && $request->send_email && $request->payment_method === 'paypal') {
                 // Chuẩn bị dữ liệu cho email
                 $emailData = [
                     'ten_khach_hang' => $khachHang->ho_va_ten,
@@ -187,6 +188,11 @@ class LichHenPetController extends Controller
                     'tien_coc' => $tienCoc,
                     'payment_id' => $request->payment_id ?? 'Không có',
                 ];
+                
+                // Thêm chi tiết thanh toán nếu có
+                if ($request->has('payment_details')) {
+                    $emailData['payment_details'] = $request->payment_details;
+                }
                 
                 // Gửi email xác nhận
                 Mail::to($khachHang->email)->send(new XacNhanLichHenMail($emailData));
