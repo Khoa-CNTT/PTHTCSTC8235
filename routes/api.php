@@ -157,12 +157,13 @@ Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
     Route::get("khach-hang/loadkh-ql-dgia", [KhachHangController::class, 'load']);
     Route::post("danh-gia/them", [DanhGiaController::class, 'them']);
-    Route::get("danh-gia/load", [DanhGiaController::class, 'load']);
-    Route::post("danh-gia/doi-TT", [DanhGiaController::class, 'doi']);
-    Route::post("danh-gia/xoa", [DanhGiaController::class, 'delete']);
+    Route::get("/danh-gia/load", [DanhGiaController::class, 'load']);
+    Route::post("/danh-gia/doi-TT", [DanhGiaController::class, 'doi']);
+    Route::post("/danh-gia/xoa", [DanhGiaController::class, 'delete']);
     Route::post('/danh-gia/tim-kiem', [DanhGiaController::class, 'timkiem']);
 });
-Route::get("danh-gia/load2", [DanhGiaController::class, 'load2']);
+//client danh gia
+Route::get("/danh-gia/load2", [DanhGiaController::class, 'load2']);
 Route::post("danh-gia/them2", [DanhGiaController::class, 'them2']);
 Route::get("khach-hang/load", [KhachHangController::class, 'load']);
 
@@ -223,9 +224,13 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
     Route::post("lich-hen/update", [LichHenPetController::class, 'update']);
     Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
     Route::get("lich-hen/load", [LichHenController::class, 'load']);
+    Route::post("lich-hen/tim-kiem", [LichHenPetController::class, 'timKiem']);
+    Route::post("lich-hen/loc-theo-ngay", [LichHenPetController::class, 'locTheoNgay']);
+    Route::post("lich-hen/loc-theo-trang-thai", [LichHenPetController::class, 'locTheoTrangThai']);
 });
 route::middleware(['auth:sanctum', 'kiemtra.quyen:13'])->group(function () {
     Route::get("hoa-don/load", [HoaDonController::class, 'load']);
+    Route::get('/khach-hang/loadkh-hoadon', [KhachHangController::class, 'load']);
     Route::get('hoa-don/danh-sach', [HoaDonController::class, 'danhSach']);
     Route::get('hoa-don/chi-tiet-tien/{id}', [HoaDonController::class, 'chiTietTien']);
     Route::post('/hoa-don/thanh-toan', [HoaDonController::class, 'thanhToan']);

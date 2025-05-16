@@ -80,9 +80,13 @@ class PhanQuyenSeeder extends Seeder
                 'id_chuc_nang' => 16, // Phân Quyền
             ],
             [
+                'id_chuc_vu' => 3,
+                'id_chuc_nang' => 18, // Phân Quyền
+            ],
+            [
                 'id_chuc_vu' => 1,
                 'id_chuc_nang' => 17, // Kê đơn thuốc
             ],
         ]);
     }
-} 
+}
