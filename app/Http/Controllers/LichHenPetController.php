@@ -83,7 +83,7 @@ class LichHenPetController extends Controller
         })->sortBy('so_luot')->first();
 
         // B4: Gán bác sĩ vào lịch hẹn
-        DB::table('lich_hen_pets')->where('id', $id_lich)->update([
+DB::table('lich_hen_pets')->where('id', $id_lich)->update([
             'id_nv' => $bac_si_chon['id']
         ]);
 
@@ -104,7 +104,6 @@ class LichHenPetController extends Controller
 
         $tienCoc = $dichVu->gia * 0.25;
 
-        // Kiểm tra ngày hợp lệ
         $ngayDat = Carbon::parse($request->ngay)->timezone('Asia/Ho_Chi_Minh')->startOfDay();
         $homNay = Carbon::now('Asia/Ho_Chi_Minh')->startOfDay();
 
@@ -173,8 +172,9 @@ class LichHenPetController extends Controller
         try {
             $khachHang = KhachHang::find($request->id_kh);
             $pet = Pet::find($request->id_pet);
-
-            if ($khachHang && $khachHang->email) {
+            
+            // Chỉ gửi email nếu khách hàng có email và request có flag send_email và payment_method là PayPal
+            if ($khachHang && $khachHang->email && $request->has('send_email') && $request->send_email && $request->payment_method === 'paypal') {
                 // Chuẩn bị dữ liệu cho email
                 $emailData = [
                     'ten_khach_hang' => $khachHang->ho_va_ten,
@@ -187,7 +187,12 @@ class LichHenPetController extends Controller
                     'tien_coc' => $tienCoc,
                     'payment_id' => $request->payment_id ?? 'Không có',
                 ];
-
+                
+                // Thêm chi tiết thanh toán nếu có
+                if ($request->has('payment_details')) {
+                    $emailData['payment_details'] = $request->payment_details;
+                }
+                
                 // Gửi email xác nhận
                 Mail::to($khachHang->email)->send(new XacNhanLichHenMail($emailData));
             }
@@ -195,6 +200,7 @@ class LichHenPetController extends Controller
             // Log lỗi nhưng vẫn tiếp tục xử lý
             
         }
+
 
         return response()->json([
             'status' => 1,
@@ -247,7 +253,7 @@ class LichHenPetController extends Controller
         ]);
 
         // Lấy id đơn thuốc từ hồ sơ bệnh án
-        $hsba = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $lichHen->id)->first();
+$hsba = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $lichHen->id)->first();
         $idDonThuoc = $hsba->id_don_thuoc ?? null;
 
         if ($idDonThuoc) {
@@ -295,7 +301,8 @@ class LichHenPetController extends Controller
                 'dv.ten_dv',
                 'kh.ho_va_ten',
                 'p.ten_pet',
-                'nv.ten_nv'
+                'nv.ten_nv',
+                'dv.gia'
             )
             ->orderByDesc('lhp.id')
             ->get();
@@ -321,5 +328,24 @@ class LichHenPetController extends Controller
             "status" => '1',
             "message" => "Xóa thành công"
         ]);
+    }
+    public function showCalsByUserId($id)
+    {
+        $user = KhachHang::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+        $lichhenpets = DB::table('lich_hen_pets')
+        ->join('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
+        ->join('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
+        ->where('lich_hen_pets.id_kh', $id)
+        ->select(
+            'lich_hen_pets.*',
+            'dich_vus.ten_dv',
+            'dich_vus.gia',
+            'pets.ten_pet',
+        )
+        ->get();
+        return response()->json(['pets' => $lichhenpets], 200);
     }
 }

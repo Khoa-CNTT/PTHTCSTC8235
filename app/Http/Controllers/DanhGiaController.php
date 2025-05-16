@@ -103,6 +103,6 @@ class DanhGiaController extends Controller
         return response()->json([
             'status' => 1,
             'message' => 'Thêm mới đánh giá thành công',
-        ]);
+]);
     }
 }
