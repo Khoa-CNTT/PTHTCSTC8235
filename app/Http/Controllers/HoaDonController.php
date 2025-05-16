@@ -174,14 +174,14 @@ class HoaDonController extends Controller
 
         // Tính tiền đơn thuốc - phương pháp 1: Trực tiếp từ chi tiết đơn thuốc
         $tienDonThuoc = 0;
-        
+
         // Tìm tất cả các chi tiết đơn thuốc liên quan đến hóa đơn này
         $donThuocChiTiets = DB::table('hoa_don_chi_tiets')
             ->where('id_hoadon', $id)
             ->whereNotNull('id_ct_don_thuoc')
             ->pluck('id_ct_don_thuoc')
             ->toArray();
-            
+
         if (!empty($donThuocChiTiets)) {
             // Truy vấn giá tiền thuốc từ chi tiết đơn thuốc
             $tienDonThuoc = DB::table('don_thuoc_chi_tiets as dt')
@@ -190,14 +190,14 @@ class HoaDonController extends Controller
                 ->selectRaw('SUM(dt.so_luong * t.gia_ban) as tong')
                 ->value('tong') ?? 0;
         }
-        
+
         // Phương pháp 2: Tìm qua hồ sơ bệnh án nếu phương pháp 1 không tìm thấy
         if ($tienDonThuoc == 0 && $idLichHen) {
             // Lấy id_don_thuoc từ ho_so_benh_ans
             $idDonThuoc = DB::table('ho_so_benh_ans')
                 ->where('id_lich_hen_pet', $idLichHen)
                 ->value('id_don_thuoc');
-                
+
             if ($idDonThuoc) {
                 $tienDonThuoc = DB::table('don_thuoc_chi_tiets as ct')
                     ->join('thuocs as t', 'ct.id_thuoc', '=', 't.id')
@@ -219,14 +219,14 @@ class HoaDonController extends Controller
                 ->where('tinh_trang', 1)
                 ->inRandomOrder()
                 ->first();
-                
+
             if ($defaultDichVu) {
                 $tienDichVu = $defaultDichVu->gia;
             } else {
                 $tienDichVu = 200000; // Default value
             }
         }
-        
+
         // Set default value for medication if not found but needed
         if ($tienDonThuoc == 0 && rand(0, 1) == 1) {
             // Generate a random medication cost
@@ -349,7 +349,7 @@ class HoaDonController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'status' => false,
                 'message' => 'Lỗi: ' . $e->getMessage()

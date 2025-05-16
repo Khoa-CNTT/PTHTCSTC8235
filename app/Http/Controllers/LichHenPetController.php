@@ -38,7 +38,7 @@ class LichHenPetController extends Controller
             )
             ->orderBy('lich_hen_pets.ngay', 'asc')
             ->get();
-                
+
         return response()->json([
             'status' => true,
             'data' => $ds
@@ -163,12 +163,12 @@ class LichHenPetController extends Controller
             'tien_coc' => $tienCoc,
             'payment_id' => $request->payment_id ?? null,
         ]);
-        
+
         // Gán bác sĩ tự động sau khi tạo lịch hẹn
         if (in_array($dichVu->id_loaidv, [1, 4])) {
             $this->ganBacSiTuDong($lichHen->id);
         }
-        
+
         // Lấy thông tin khách hàng và thú cưng để gửi email
         try {
             $khachHang = KhachHang::find($request->id_kh);
@@ -199,7 +199,7 @@ class LichHenPetController extends Controller
             }
         } catch (\Exception $e) {
             // Log lỗi nhưng vẫn tiếp tục xử lý
-            \Log::error('Lỗi gửi email: ' . $e->getMessage());
+            
         }
 
         return response()->json([
@@ -242,7 +242,6 @@ class LichHenPetController extends Controller
 
         // Tạo hóa đơn
         $idHoaDon = DB::table('hoa_dons')->insertGetId([
-            'id_lich_pet'        => $lichHen->id,
             'id_kh'              => $lichHen->id_kh,
             'id_nv'              => $lichHen->id_nv ?? 1,
             'id_pet'             => $lichHen->id_pet,

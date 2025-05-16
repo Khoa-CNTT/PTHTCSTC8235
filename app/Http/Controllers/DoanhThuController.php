@@ -4,63 +4,207 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DoanhThuController extends Controller
 {
-    public function doanhThuTheoThoiGian(Request $request)
+    public function tongHop(Request $request)
     {
-        $query = DB::table('hoa_dons')
+        Log::info('GỌI API /doanh-thu/tong-hop', [$request->all()]);
+        $year = $request->query('year');
+        $month = $request->query('month');
+
+        // Doanh thu dịch vụ
+        $queryDichVu = DB::table('hoa_dons')
             ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
-            ->where('hoa_dons.tinh_trang', 1);
+            ->join('lich_hen_pets', 'hoa_don_chi_tiets.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+            ->join('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
+            ->whereNull('hoa_don_chi_tiets.id_ct_don_thuoc') // Chỉ lấy các bản ghi không có don_thuoc_chi_tiet
+            ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year);
 
-        // Lọc theo tháng nếu có
-        if ($request->has('thang') && $request->thang > 0) {
-            $query->whereMonth('hoa_dons.ngay_xuat_hoa_don', $request->thang);
+        if ($month && $month > 0) {
+            $queryDichVu->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month);
         }
 
-        // Lọc theo khoảng ngày nếu có
-        if ($request->filled('tu_ngay') && $request->filled('den_ngay')) {
-            $query->whereBetween('hoa_dons.ngay_xuat_hoa_don', [$request->tu_ngay, $request->den_ngay]);
+        $dataDichVu = $queryDichVu
+            ->selectRaw('
+                SUM(hoa_don_chi_tiets.tien_kham) as tong_kham,
+                SUM(dich_vus.gia) as tong_dich_vu,
+                COUNT(DISTINCT hoa_dons.id) as tong_hoa_don
+            ')
+            ->first();
+
+        // Doanh thu thuốc
+        $queryThuoc = DB::table('hoa_dons')
+            ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+            ->join('don_thuoc_chi_tiets', 'hoa_don_chi_tiets.id_ct_don_thuoc', '=', 'don_thuoc_chi_tiets.id')
+            ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+            ->whereNotNull('hoa_don_chi_tiets.id_ct_don_thuoc') // Chỉ lấy các bản ghi có don_thuoc_chi_tiet
+            ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year);
+            
+        if ($month && $month > 0) {
+            $queryThuoc->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month);
         }
 
-        $hoaDons = $query->select(
-            'hoa_dons.id',
-            'hoa_dons.ngay_xuat_hoa_don',
-            'hoa_dons.phuong_thuc',
-            'hoa_dons.id_nv',
-            'hoa_don_chi_tiets.tien_kham',
-            'hoa_don_chi_tiets.id_lich_hen_pet'
-        )->get();
-
-        // Tính doanh thu theo hóa đơn
-        $ketQua = $hoaDons->map(function ($hd) {
-            // Lấy dịch vụ & cọc
-            $dv = DB::table('lich_hen_pets')->where('id', $hd->id_lich_hen_pet)->first();
-            $giaDv = $dv?->id_dv ? DB::table('dich_vus')->where('id', $dv->id_dv)->value('gia') ?? 0 : 0;
-            $tienCoc = $dv->tien_coc ?? 0;
-
-            // Lấy tiền thuốc
-            $idDonThuoc = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $hd->id_lich_hen_pet)->value('id_don_thuoc');
-            $tienThuoc = $idDonThuoc ? DB::table('don_thuoc_chi_tiets as ct')
-                ->join('thuocs as t', 'ct.id_thuoc', '=', 't.id')
-                ->where('ct.id_don_thuoc', $idDonThuoc)
-                ->selectRaw('SUM(ct.so_luong * t.gia_ban) as tong')
-                ->value('tong') ?? 0 : 0;
-
-            return [
-                'id' => $hd->id,
-                'ngay' => $hd->ngay_xuat_hoa_don,
-                'tien_kham' => $hd->tien_kham ?? 0,
-                'doanh_thu_dich_vu' => $giaDv,
-                'doanh_thu_thuoc' => $tienThuoc,
-                'tien_coc' => $tienCoc,
-                'tong_doanh_thu' => ($hd->tien_kham ?? 0) + $giaDv + $tienThuoc - $tienCoc,
-            ];
-        });
+        $dataThuoc = $queryThuoc
+            ->selectRaw('SUM(don_thuoc_chi_tiets.so_luong * thuocs.gia_ban) as tong_thuoc')
+            ->first();
 
         return response()->json([
-            'status' => true,
-            'data' => $ketQua
+            'tong_tien' => ($dataDichVu->tong_dich_vu ?? 0) + ($dataThuoc->tong_thuoc ?? 0),
+            'tong_dich_vu' => $dataDichVu->tong_dich_vu ?? 0,
+            'tong_thuoc' => $dataThuoc->tong_thuoc ?? 0,
+            'tong_hoa_don' => $dataDichVu->tong_hoa_don ?? 0,
         ]);
+    }
+
+    public function bieuDo(Request $request)
+    {
+        $year = $request->query('year');
+        $month = $request->query('month');
+
+        // TRƯỜNG HỢP 1: LỌC THEO THÁNG
+        if ($month && $month > 0) {
+            // Doanh thu dịch vụ trong tháng
+            $dataDichVu = DB::table('hoa_dons')
+                ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+                ->join('lich_hen_pets', 'hoa_don_chi_tiets.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+                ->join('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
+                ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
+                ->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month)
+                ->whereNull('hoa_don_chi_tiets.id_ct_don_thuoc')
+                ->selectRaw('
+                    MONTH(hoa_dons.ngay_xuat_hoa_don) as thang,
+                    SUM(dich_vus.gia) as tong_dich_vu,
+                    COUNT(DISTINCT hoa_dons.id) as so_hoa_don
+                ')
+                ->groupBy('thang')
+                ->first();
+
+            // Doanh thu thuốc trong tháng 
+            $dataThuoc = DB::table('hoa_dons')
+                ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+                ->join('don_thuoc_chi_tiets', 'hoa_don_chi_tiets.id_ct_don_thuoc', '=', 'don_thuoc_chi_tiets.id')
+                ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+                ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
+                ->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month)
+                ->whereNotNull('hoa_don_chi_tiets.id_ct_don_thuoc')
+                ->selectRaw('
+                    MONTH(hoa_dons.ngay_xuat_hoa_don) as thang,
+                    SUM(don_thuoc_chi_tiets.so_luong * thuocs.gia_ban) as tong_thuoc
+                ')
+                ->groupBy('thang')
+                ->first();
+
+            // Tổng số hóa đơn không phân biệt loại
+            $soHoaDon = DB::table('hoa_dons')
+                ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
+                ->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month)
+                ->count();
+
+            $result = [
+                [
+                    'thang' => $month,
+                    'tong_dich_vu' => $dataDichVu->tong_dich_vu ?? 0,
+                    'tong_thuoc' => $dataThuoc->tong_thuoc ?? 0,
+                    'so_hoa_don' => $soHoaDon
+                ]
+            ];
+
+            return response()->json($result);
+        }
+        
+        // TRƯỜNG HỢP 2: THỐNG KÊ THEO CẢ NĂM, NHÓM THEO THÁNG
+        else {
+            // Dịch vụ
+            $dataDichVu = DB::table('hoa_dons')
+                ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+                ->join('lich_hen_pets', 'hoa_don_chi_tiets.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+                ->join('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
+                ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
+                ->whereNull('hoa_don_chi_tiets.id_ct_don_thuoc')
+                ->groupBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
+                ->orderBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
+                ->selectRaw('
+                    MONTH(hoa_dons.ngay_xuat_hoa_don) as thang,
+                    SUM(dich_vus.gia) as tong_dich_vu
+                ')
+                ->get();
+
+            // Thuốc
+            $dataThuoc = DB::table('hoa_dons')
+                ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+                ->join('don_thuoc_chi_tiets', 'hoa_don_chi_tiets.id_ct_don_thuoc', '=', 'don_thuoc_chi_tiets.id')
+                ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+                ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
+                ->whereNotNull('hoa_don_chi_tiets.id_ct_don_thuoc')
+                ->groupBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
+                ->orderBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
+                ->selectRaw('
+                    MONTH(hoa_dons.ngay_xuat_hoa_don) as thang,
+                    SUM(don_thuoc_chi_tiets.so_luong * thuocs.gia_ban) as tong_thuoc
+                ')
+                ->get();
+                
+            // Số hóa đơn theo tháng
+            $dataHoaDon = DB::table('hoa_dons')
+                ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
+                ->groupBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
+                ->orderBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
+                ->selectRaw('
+                    MONTH(hoa_dons.ngay_xuat_hoa_don) as thang,
+                    COUNT(id) as so_hoa_don
+                ')
+                ->get();
+
+            // Tạo mảng các tháng trong năm
+            $months = range(1, 12);
+            $result = [];
+            
+            foreach ($months as $month) {
+                // Tìm dữ liệu mỗi loại theo tháng
+                $dv = $dataDichVu->firstWhere('thang', $month);
+                $thuoc = $dataThuoc->firstWhere('thang', $month);
+                $hd = $dataHoaDon->firstWhere('thang', $month);
+                
+                // Thêm vào kết quả
+                $result[] = [
+                    'thang' => $month,
+                    'tong_dich_vu' => $dv ? $dv->tong_dich_vu : 0,
+                    'tong_thuoc' => $thuoc ? $thuoc->tong_thuoc : 0,
+                    'so_hoa_don' => $hd ? $hd->so_hoa_don : 0
+                ];
+            }
+
+            return response()->json($result);
+        }
+    }
+
+    public function hoaDonDaThanhToan(Request $request)
+    {
+        $year = $request->query('year');
+        $month = $request->query('month');
+
+        $query = DB::table('hoa_dons')
+            ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+            ->join('lich_hen_pets', 'hoa_don_chi_tiets.id_lich_hen_pet', '=', 'lich_hen_pets.id')
+            ->join('khach_hangs', 'lich_hen_pets.id_kh', '=', 'khach_hangs.id')
+            ->leftJoin('nhan_viens', 'hoa_dons.id_nv', '=', 'nhan_viens.id')
+            ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year);
+
+        if ($month && $month > 0) {
+            $query->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month);
+        }
+
+        $ds = $query->select(
+            'hoa_dons.id as ma_hd',
+            'khach_hangs.ho_va_ten as ten_khach',
+            DB::raw('DATE_FORMAT(hoa_dons.ngay_xuat_hoa_don, "%d/%m/%Y") as ngay_tt'),
+            'hoa_dons.tong_tien',
+            'nhan_viens.ten_nv',
+            'hoa_dons.ghi_chu'
+        )->get();
+
+        return response()->json($ds);
     }
 }
