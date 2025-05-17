@@ -154,7 +154,7 @@ Route::post('/nhan-vien/dang-nhap', [NhanVienController::class, 'dangNhap']);
 
 // admin DanhGia routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
-    Route::get("khach-hang/load", [KhachHangController::class, 'load']);
+    Route::get("khach-hang/loadkha", [KhachHangController::class, 'load']);
     Route::post("danh-gia/them", [DanhGiaController::class, 'them']);
     Route::get("danh-gia/load", [DanhGiaController::class, 'load']);
     Route::post("danh-gia/doi-TT", [DanhGiaController::class, 'doi']);
@@ -163,7 +163,6 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
 });
 Route::get("danh-gia/load2", [DanhGiaController::class, 'load2']);
 Route::post("danh-gia/them2", [DanhGiaController::class, 'them2']);
-Route::get("khach-hang/load", [KhachHangController::class, 'load']);
 
 // admin Kho routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {

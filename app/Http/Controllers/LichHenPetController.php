@@ -83,7 +83,7 @@ class LichHenPetController extends Controller
         })->sortBy('so_luot')->first();
 
         // B4: Gán bác sĩ vào lịch hẹn
-DB::table('lich_hen_pets')->where('id', $id_lich)->update([
+        DB::table('lich_hen_pets')->where('id', $id_lich)->update([
             'id_nv' => $bac_si_chon['id']
         ]);
 
@@ -191,8 +191,6 @@ DB::table('lich_hen_pets')->where('id', $id_lich)->update([
                 Mail::to($khachHang->email)->send(new XacNhanLichHenMail($emailData));
             }
         } catch (\Exception $e) {
-            // Log lỗi nhưng vẫn tiếp tục xử lý
-            
         }
 
         return response()->json([
@@ -218,68 +216,72 @@ DB::table('lich_hen_pets')->where('id', $id_lich)->update([
     }
     public function changeandCreateBill(Request $request)
     {
-        $lichHen = DB::table('lich_hen_pets')->where('id', $request->id)->first();
+        try {
+            $lichHen = DB::table('lich_hen_pets')->where('id', $request->id)->first();
 
-        if (!$lichHen) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Không tìm thấy lịch hẹn'
+            if (!$lichHen) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Không tìm thấy lịch hẹn'
+                ], 200);
+            }
+
+            // Cập nhật trạng thái lịch hẹn
+            DB::table('lich_hen_pets')->where('id', $lichHen->id)->update([
+                'tinh_trang' => 1,
+                'updated_at' => now()
             ]);
-        }
 
-        // Cập nhật trạng thái lịch hẹn thành đã điều trị
-        DB::table('lich_hen_pets')->where('id', $lichHen->id)->update([
-            'tinh_trang' => 1,
-            'updated_at' => now()
-        ]);
+            // Tạo hóa đơn
+            $idHoaDon = DB::table('hoa_dons')->insertGetId([
+                'id_kh'              => $lichHen->id_kh,
+                'id_nv'              => $lichHen->id_nv ?? 1,
+                'phuong_thuc'        => 1,
+                'tinh_trang'         => 0,
+                'ngay_xuat_hoa_don'  => now(),
+                'created_at'         => now(),
+                'updated_at'         => now(),
+            ]);
 
-        // Tạo hóa đơn
-        $idHoaDon = DB::table('hoa_dons')->insertGetId([
-            'id_kh'              => $lichHen->id_kh,
-            'id_nv'              => $lichHen->id_nv ?? 1,
-            'id_pet'             => $lichHen->id_pet,
-            'phuong_thuc'        => 1,
-            'tinh_trang'         => 0,
-            'ngay_xuat_hoa_don'  => now(),
-            'created_at'         => now(),
-            'updated_at'         => now(),
-        ]);
+            // Lấy id đơn thuốc từ hồ sơ bệnh án
+            $hsba = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $lichHen->id)->first();
+            $idDonThuoc = $hsba->id_don_thuoc ?? null;
 
-        // Lấy id đơn thuốc từ hồ sơ bệnh án
-$hsba = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $lichHen->id)->first();
-        $idDonThuoc = $hsba->id_don_thuoc ?? null;
-
-        if ($idDonThuoc) {
-            // Nếu có đơn thuốc
-            $donThuocChiTiets = DB::table('don_thuoc_chi_tiets')->where('id_don_thuoc', $idDonThuoc)->get();
-
-            foreach ($donThuocChiTiets as $ct) {
+            if ($idDonThuoc) {
+                $donThuocChiTiets = DB::table('don_thuoc_chi_tiets')->where('id_don_thuoc', $idDonThuoc)->get();
+                foreach ($donThuocChiTiets as $ct) {
+                    DB::table('hoa_don_chi_tiets')->insert([
+                        'id_hoadon'         => $idHoaDon,
+                        'id_ct_don_thuoc'   => $ct->id,
+                        'id_lich_hen_pet'   => $lichHen->id,
+                        'tien_kham'         => 0,
+                        'created_at'        => now(),
+                        'updated_at'        => now(),
+                    ]);
+                }
+            } else {
                 DB::table('hoa_don_chi_tiets')->insert([
                     'id_hoadon'         => $idHoaDon,
-                    'id_ct_don_thuoc'   => $ct->id,
+                    'id_ct_don_thuoc'   => null,
                     'id_lich_hen_pet'   => $lichHen->id,
                     'tien_kham'         => 0,
                     'created_at'        => now(),
                     'updated_at'        => now(),
                 ]);
             }
-        } else {
-            // Nếu không có đơn thuốc vẫn tạo hóa đơn chi tiết
-            DB::table('hoa_don_chi_tiets')->insert([
-                'id_hoadon'         => $idHoaDon,
-                'id_ct_don_thuoc'   => null,
-                'id_lich_hen_pet'   => $lichHen->id,
-                'tien_kham'         => 0,
-                'created_at'        => now(),
-                'updated_at'        => now(),
-            ]);
-        }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Xác nhận điều trị và tạo hóa đơn + chi tiết thành công'
-        ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Xác nhận điều trị và tạo hóa đơn + chi tiết thành công'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi máy chủ: ' . $e->getMessage()
+            ], 200);
+        }
     }
+
 
 
     public function load()
@@ -329,16 +331,16 @@ $hsba = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $lichHen->id)->fir
             return response()->json(['error' => 'User not found'], 404);
         }
         $lichhenpets = DB::table('lich_hen_pets')
-        ->join('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
-        ->join('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
-        ->where('lich_hen_pets.id_kh', $id)
-        ->select(
-            'lich_hen_pets.*',
-            'dich_vus.ten_dv',
-            'dich_vus.gia',
-            'pets.ten_pet',
-        )
-        ->get();
+            ->join('dich_vus', 'lich_hen_pets.id_dv', '=', 'dich_vus.id')
+            ->join('pets', 'lich_hen_pets.id_pet', '=', 'pets.id')
+            ->where('lich_hen_pets.id_kh', $id)
+            ->select(
+                'lich_hen_pets.*',
+                'dich_vus.ten_dv',
+                'dich_vus.gia',
+                'pets.ten_pet',
+            )
+            ->get();
         return response()->json(['pets' => $lichhenpets], 200);
     }
 }
