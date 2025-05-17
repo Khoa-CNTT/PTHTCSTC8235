@@ -8,6 +8,7 @@ use App\Models\KhachHang;
 use App\Models\DonThuoc;
 use App\Models\DonThuocChiTiet;
 use App\Models\LichHenPet;
+use App\Models\pet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
