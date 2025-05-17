@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\HoaDonRequest;
-use App\Models\HoaDonChiTiet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -323,7 +322,6 @@ class HoaDonController extends Controller
             // Thêm mới hóa đơn
             $idHoaDon = DB::table('hoa_dons')->insertGetId([
                 'id_kh' => $request->id_kh,
-                'id_pet' => $request->id_thu_cung,
                 'id_nv' => $request->id_nv,
                 'phuong_thuc' => $request->phuong_thuc,
                 'tinh_trang' => $request->tinh_trang,

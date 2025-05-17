@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('lich_hen_pets', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_lich');
-            $table->integer('id_dv');
+            $table->integer('id_lich')->nullable();
+            $table->integer('id_dv')->nullable();
             $table->integer('id_kh');
             $table->integer('id_pet');
             $table->date('ngay');
-            $table->string('gio');
+            $table->string('gio')->nullable();
             $table->integer('id_nv')->nullable();
             $table->integer('tinh_trang')->default(0);
             $table->integer('tien_coc')->nullable();
