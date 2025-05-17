@@ -165,7 +165,6 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
 //client danh gia
 Route::get("/danh-gia/load2", [DanhGiaController::class, 'load2']);
 Route::post("danh-gia/them2", [DanhGiaController::class, 'them2']);
-Route::get("khach-hang/load", [KhachHangController::class, 'load']);
 
 // admin Kho routes
 Route::middleware(['auth:sanctum', 'kiemtra.quyen:11'])->group(function () {
