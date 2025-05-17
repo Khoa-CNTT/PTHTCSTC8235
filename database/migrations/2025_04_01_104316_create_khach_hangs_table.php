@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('khach_hangs', function (Blueprint $table) {
             $table->id();
             $table->string('ho_va_ten');
-            $table->string("email");
-            $table->string("password");
+            $table->string("email")->nullable();
+            $table->string("password")->nullable();
             $table->string("so_dien_thoai");
             $table->date("ngay_sinh")->nullable();
             $table->integer("is_active")->default(0);

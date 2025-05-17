@@ -116,6 +116,7 @@ class NhanVienController extends Controller
                 'message' => 'Đăng nhập thành công',
                 'email' => $user->email,
                 'name' => $user->ten_nv,
+                'id' => $user->id,
                 'id_chucvu' => $user->id_chucvu,
                 'ten_chuc_vu' => optional($user->chuc_vu)->ten_chuc_vu,
                 'permissions' => $permissions,

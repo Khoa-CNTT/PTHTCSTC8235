@@ -8,6 +8,7 @@ use App\Models\KhachHang;
 use App\Models\DonThuoc;
 use App\Models\DonThuocChiTiet;
 use App\Models\LichHenPet;
+use App\Models\pet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +21,7 @@ class HoSoBenhAnController extends Controller
             $pets = pet::where('id_kh', $id)
                 ->select('id', 'ten_pet', 'gioi_tinh', 'tuoi', 'can_nang', 'chung_loai')
                 ->get();
-                
+
             return response()->json([
                 'status' => true,
                 'data' => $pets
