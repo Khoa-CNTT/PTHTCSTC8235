@@ -11,6 +11,7 @@ class DanhGiaController extends Controller
     {
         $data = DanhGia::join('khach_hangs', 'khach_hangs.id', '=', 'danh_gias.id_kh')
             ->select('danh_gias.*', 'khach_hangs.ho_va_ten')
+            ->orderBy('danh_gias.ngay_tao', 'desc') 
             ->get();
 
         return response()->json([
@@ -35,10 +36,13 @@ class DanhGiaController extends Controller
 
     public function timkiem(Request $request)
     {
-        $noi_dung = '%' . $request->noi_dung . '%';
+        $keyword = '%' . $request->noi_dung . '%';
 
         $data = DanhGia::join('khach_hangs', 'khach_hangs.id', '=', 'danh_gias.id_kh')
-            ->where('danh_gias.noi_dung', 'like', $noi_dung)
+            ->where(function ($query) use ($keyword) {
+                $query->where('danh_gias.noi_dung', 'like', $keyword)
+                    ->orWhere('khach_hangs.ho_va_ten', 'like', $keyword);
+            })
             ->select('danh_gias.*', 'khach_hangs.ho_va_ten')
             ->get();
 
@@ -103,6 +107,6 @@ class DanhGiaController extends Controller
         return response()->json([
             'status' => 1,
             'message' => 'Thêm mới đánh giá thành công',
-]);
+        ]);
     }
 }

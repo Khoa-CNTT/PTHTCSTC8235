@@ -32,6 +32,8 @@ class ChucNangSeeder extends Seeder
             [ 'id' => 15, 'ten_chuc_nang' => 'Quản Lý Chức Vụ' ],
             [ 'id' => 16, 'ten_chuc_nang' => 'Phân Quyền' ],
             [ 'id' => 17, 'ten_chuc_nang' => 'Chức năng bác sĩ' ],
+            [ 'id' => 18, 'ten_chuc_nang' => 'Quản lý giờ' ],
+
         ]);
     }
 }

@@ -10,9 +10,28 @@ use App\Models\DonThuocChiTiet;
 use App\Models\LichHenPet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class HoSoBenhAnController extends Controller
 {
+    public function loadByCustomer($id)
+    {
+        try {
+            $pets = pet::where('id_kh', $id)
+                ->select('id', 'ten_pet', 'gioi_tinh', 'tuoi', 'can_nang', 'chung_loai')
+                ->get();
+                
+            return response()->json([
+                'status' => true,
+                'data' => $pets
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi khi tải danh sách thú cưng: ' . $e->getMessage()
+            ]);
+        }
+    }
     public function load()
     {
         $ho_so_benh_an = DB::table('ho_so_benh_ans')
@@ -305,6 +324,120 @@ class HoSoBenhAnController extends Controller
                 'status' => false,
                 'message' => 'Lỗi: ' . $e->getMessage()
             ]);
+        }
+    }
+
+    public function them(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Check if we're using an existing customer or creating a new one
+            if ($request->is_existing_customer) {
+                // Validate input data for existing customer
+                $validator = Validator::make($request->all(), [
+                    'id_bac_si' => 'required',
+                    'id_pet' => 'required',
+                    'id_kh' => 'required',
+                    'ngay_kham' => 'required|date',
+                    'tinh_trang' => 'required|in:0,1',
+                    'chuan_doan' => 'nullable|string',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Dữ liệu không hợp lệ',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
+
+                // Create a new appointment record
+                $lichHenId = DB::table('lich_hen_pets')->insertGetId([
+                    'id_pet' => $request->id_pet,
+                    'id_kh' => $request->id_kh,
+                    'id_nv' => $request->id_bac_si,
+                    'ngay' => $request->ngay_kham,
+                    'tinh_trang' => 1, // Completed
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                // Validate input data for new customer
+                $validator = Validator::make($request->all(), [
+                    'ten_khach' => 'required|string',
+                    'sdt' => 'required|string',
+                    'ten_thu_cung' => 'required|string',
+                    'chung_loai' => 'required|in:0,1',
+                    'gioi_tinh_pet' => 'required|in:0,1',
+                    'id_bac_si' => 'required',
+                    'ngay_kham' => 'required|date',
+                    'tinh_trang' => 'required|in:0,1',
+                    'chuan_doan' => 'nullable|string',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Dữ liệu không hợp lệ',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
+
+                // Create a new customer
+                $khachHangId = DB::table('khach_hangs')->insertGetId([
+                    'ho_va_ten' => $request->ten_khach,
+                    'so_dien_thoai' => $request->sdt,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Create a new pet
+                $petId = DB::table('pets')->insertGetId([
+                    'id_kh' => $khachHangId,
+                    'ten_pet' => $request->ten_thu_cung,
+                    'chung_loai' => $request->chung_loai,
+                    'gioi_tinh' => $request->gioi_tinh_pet,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Create a new appointment record
+                $lichHenId = DB::table('lich_hen_pets')->insertGetId([
+                    'id_pet' => $petId,
+                    'id_kh' => $khachHangId,
+                    'id_nv' => $request->id_bac_si,
+                    'ngay' => $request->ngay_kham,
+                    'tinh_trang' => 1, // Completed
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Create the medical record
+            $hoSoBenhAn = HoSoBenhAn::create([
+                'id_lich_hen_pet' => $lichHenId,
+                'id_nv' => $request->is_existing_customer ? $request->id_bac_si : $request->id_bac_si,
+                'tinh_trang' => $request->tinh_trang,
+                'chuan_doan' => $request->chuan_doan,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Thêm hồ sơ bệnh án thành công',
+                'id' => $hoSoBenhAn->id
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

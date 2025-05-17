@@ -182,7 +182,7 @@ class DonThuocController extends Controller
             ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
             ->where('don_thuoc_chi_tiets.id_don_thuoc', $id)
             ->select(
-                'don_thuoc_chi_tiets.id_ctthuoc',
+                'don_thuoc_chi_tiets.id_don_thuoc',
                 'don_thuoc_chi_tiets.id_thuoc',
                 'thuocs.ten_thuoc',
                 'don_thuoc_chi_tiets.so_luong',

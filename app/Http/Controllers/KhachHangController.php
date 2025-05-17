@@ -24,7 +24,8 @@ class KhachHangController extends Controller
     {
         $data = KhachHang::get();
         return response()->json([
-            "data" => $data
+            "data" => $data,
+            'status'=>1
         ]);
     }
     public function timkiem(Request $request)

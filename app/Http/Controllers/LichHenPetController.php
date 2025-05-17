@@ -173,7 +173,8 @@ class LichHenPetController extends Controller
             $khachHang = KhachHang::find($request->id_kh);
             $pet = Pet::find($request->id_pet);
 
-            if ($khachHang && $khachHang->email) {
+            // Chỉ gửi email nếu khách hàng có email và request có flag send_email và payment_method là PayPal
+            if ($khachHang && $khachHang->email && $request->has('send_email') && $request->send_email && $request->payment_method === 'paypal') {
                 // Chuẩn bị dữ liệu cho email
                 $emailData = [
                     'ten_khach_hang' => $khachHang->ho_va_ten,
@@ -187,11 +188,19 @@ class LichHenPetController extends Controller
                     'payment_id' => $request->payment_id ?? 'Không có',
                 ];
 
+                // Thêm chi tiết thanh toán nếu có
+                if ($request->has('payment_details')) {
+                    $emailData['payment_details'] = $request->payment_details;
+                }
+
                 // Gửi email xác nhận
                 Mail::to($khachHang->email)->send(new XacNhanLichHenMail($emailData));
             }
         } catch (\Exception $e) {
+            // Log lỗi nhưng vẫn tiếp tục xử lý
+
         }
+
 
         return response()->json([
             'status' => 1,
@@ -216,6 +225,8 @@ class LichHenPetController extends Controller
     }
     public function changeandCreateBill(Request $request)
     {
+        DB::beginTransaction(); // Bắt đầu transaction
+
         try {
             $lichHen = DB::table('lich_hen_pets')->where('id', $request->id)->first();
 
@@ -223,7 +234,7 @@ class LichHenPetController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Không tìm thấy lịch hẹn'
-                ], 200);
+                ]);
             }
 
             // Cập nhật trạng thái lịch hẹn
@@ -234,51 +245,54 @@ class LichHenPetController extends Controller
 
             // Tạo hóa đơn
             $idHoaDon = DB::table('hoa_dons')->insertGetId([
-                'id_kh'              => $lichHen->id_kh,
-                'id_nv'              => $lichHen->id_nv ?? 1,
-                'phuong_thuc'        => 1,
-                'tinh_trang'         => 0,
-                'ngay_xuat_hoa_don'  => now(),
-                'created_at'         => now(),
-                'updated_at'         => now(),
+                'id_kh'             => $lichHen->id_kh,
+                'id_nv'             => $lichHen->id_nv ?? 1,
+                'phuong_thuc'       => 1,
+                'tinh_trang'        => 0,
+                'ngay_xuat_hoa_don' => now(),
+                'created_at'        => now(),
+                'updated_at'        => now(),
             ]);
 
-            // Lấy id đơn thuốc từ hồ sơ bệnh án
+            // Lấy đơn thuốc nếu có
             $hsba = DB::table('ho_so_benh_ans')->where('id_lich_hen_pet', $lichHen->id)->first();
             $idDonThuoc = $hsba->id_don_thuoc ?? null;
 
             if ($idDonThuoc) {
                 $donThuocChiTiets = DB::table('don_thuoc_chi_tiets')->where('id_don_thuoc', $idDonThuoc)->get();
+
                 foreach ($donThuocChiTiets as $ct) {
                     DB::table('hoa_don_chi_tiets')->insert([
-                        'id_hoadon'         => $idHoaDon,
-                        'id_ct_don_thuoc'   => $ct->id,
-                        'id_lich_hen_pet'   => $lichHen->id,
-                        'tien_kham'         => 0,
-                        'created_at'        => now(),
-                        'updated_at'        => now(),
+                        'id_hoadon'       => $idHoaDon,
+                        'id_ct_don_thuoc' => $ct->id,
+                        'id_lich_hen_pet' => $lichHen->id,
+                        'tien_kham'      => 0,
+                        'created_at'     => now(),
+                        'updated_at'     => now(),
                     ]);
                 }
             } else {
                 DB::table('hoa_don_chi_tiets')->insert([
-                    'id_hoadon'         => $idHoaDon,
-                    'id_ct_don_thuoc'   => null,
-                    'id_lich_hen_pet'   => $lichHen->id,
-                    'tien_kham'         => 0,
-                    'created_at'        => now(),
-                    'updated_at'        => now(),
+                    'id_hoadon'        => $idHoaDon,
+                    'id_ct_don_thuoc'  => null,
+                    'id_lich_hen_pet'  => $lichHen->id,
+                    'tien_kham'        => 0,
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
                 ]);
             }
 
+            DB::commit(); // Tất cả thành công → commit
             return response()->json([
                 'status' => true,
-                'message' => 'Xác nhận điều trị và tạo hóa đơn + chi tiết thành công'
-            ], 200);
+                'message' => 'Xác nhận điều trị và tạo hóa đơn thành công'
+            ]);
         } catch (\Exception $e) {
+            DB::rollBack(); // Nếu lỗi → rollback lại hết
             return response()->json([
                 'status' => false,
-                'message' => 'Lỗi máy chủ: ' . $e->getMessage()
-            ], 200);
+                'message' => 'Lỗi xử lý: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -342,5 +356,111 @@ class LichHenPetController extends Controller
             )
             ->get();
         return response()->json(['pets' => $lichhenpets], 200);
+    }
+
+    public function timKiem(Request $request)
+    {
+        try {
+            $noi_dung = '%' . $request->noi_dung . '%';
+
+            $data = DB::table('lich_hen_pets as lhp')
+                ->join('dich_vus as dv', 'lhp.id_dv', '=', 'dv.id')
+                ->join('khach_hangs as kh', 'lhp.id_kh', '=', 'kh.id')
+                ->join('pets as p', 'lhp.id_pet', '=', 'p.id')
+                ->leftJoin('nhan_viens as nv', 'lhp.id_nv', '=', 'nv.id')
+                ->where(function ($query) use ($noi_dung) {
+                    $query->where('dv.ten_dv', 'like', $noi_dung)
+                          ->orWhere('kh.ho_va_ten', 'like', $noi_dung)
+                          ->orWhere('p.ten_pet', 'like', $noi_dung);
+                })
+                ->select(
+                    'lhp.*',
+                    'dv.ten_dv',
+                    'kh.ho_va_ten',
+                    'p.ten_pet',
+                    'nv.ten_nv',
+                    'dv.gia'
+                )
+                ->orderByDesc('lhp.id')
+                ->get();
+
+            return response()->json([
+                "status" => true,
+                "data" => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status" => false,
+                "message" => "Lỗi khi tìm kiếm: " . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function locTheoNgay(Request $request)
+    {
+        try {
+            $ngay = $request->ngay;
+
+            $data = DB::table('lich_hen_pets as lhp')
+                ->join('dich_vus as dv', 'lhp.id_dv', '=', 'dv.id')
+                ->join('khach_hangs as kh', 'lhp.id_kh', '=', 'kh.id')
+                ->join('pets as p', 'lhp.id_pet', '=', 'p.id')
+                ->leftJoin('nhan_viens as nv', 'lhp.id_nv', '=', 'nv.id')
+                ->where('lhp.ngay', $ngay)
+                ->select(
+                    'lhp.*',
+                    'dv.ten_dv',
+                    'kh.ho_va_ten',
+                    'p.ten_pet',
+                    'nv.ten_nv',
+                    'dv.gia'
+                )
+                ->orderByDesc('lhp.id')
+                ->get();
+
+            return response()->json([
+                "status" => true,
+                "data" => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status" => false,
+                "message" => "Lỗi khi lọc theo ngày: " . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function locTheoTrangThai(Request $request)
+    {
+        try {
+            $tinh_trang = $request->tinh_trang;
+
+            $data = DB::table('lich_hen_pets as lhp')
+                ->join('dich_vus as dv', 'lhp.id_dv', '=', 'dv.id')
+                ->join('khach_hangs as kh', 'lhp.id_kh', '=', 'kh.id')
+                ->join('pets as p', 'lhp.id_pet', '=', 'p.id')
+                ->leftJoin('nhan_viens as nv', 'lhp.id_nv', '=', 'nv.id')
+                ->where('lhp.tinh_trang', $tinh_trang)
+                ->select(
+                    'lhp.*',
+                    'dv.ten_dv',
+                    'kh.ho_va_ten',
+                    'p.ten_pet',
+                    'nv.ten_nv',
+                    'dv.gia'
+                )
+                ->orderByDesc('lhp.id')
+                ->get();
+
+            return response()->json([
+                "status" => true,
+                "data" => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status" => false,
+                "message" => "Lỗi khi lọc theo trạng thái: " . $e->getMessage()
+            ]);
+        }
     }
 }
