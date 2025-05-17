@@ -19,7 +19,8 @@ class ChatbotController extends Controller
 
     public function __construct(ChatbotLearningService $learningService)
     {
-        $this->apiKey = env('GEMINI_API_KEY', '');
+        // Setting the API key directly instead of relying on env()
+        $this->apiKey = 'AIzaSyBzY4r8IwXQoQ0I9MwcG-Dk0RD8W_O6sEw';
         $this->learningService = $learningService;
     }
 
@@ -298,7 +299,12 @@ class ChatbotController extends Controller
     // Gọi Gemini API để lấy câu trả lời AI cho các câu hỏi không có trong tri thức
     private function callGeminiApiForWebSearch($question)
     {
-        $apiKey = env('GEMINI_API_KEY', '');
+        // Use the instance apiKey property instead of retrieving from env again
+        if (empty($this->apiKey)) {
+            \Log::error('Gemini API error: Missing API key');
+            return 'Xin lỗi, tôi đang gặp vấn đề khi kết nối với dịch vụ trả lời. Vui lòng thử lại sau.';
+        }
+        
         $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
         $prompt = "Bạn là trợ lý ảo phòng khám thú y PetCare. Hãy trả lời ngắn gọn, thân thiện, dễ hiểu, có thể dùng emoji nếu phù hợp. Nếu không chắc chắn, hãy khuyên khách liên hệ bác sĩ. Câu hỏi: $question";
         $data = [
@@ -314,9 +320,11 @@ class ChatbotController extends Controller
         ];
         try {
             $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'x-goog-api-key' => $this->apiKey
             ])->timeout(30)
-              ->post($url . '?key=' . $apiKey, $data);
+              ->post($url, $data);
+              
             \Log::info('Gemini API response:', ['body' => $response->body()]);
             if ($response->successful()) {
                 $responseData = $response->json();
@@ -324,6 +332,10 @@ class ChatbotController extends Controller
                     return $responseData['candidates'][0]['content']['parts'][0]['text'];
                 }
             }
+            
+            // Log the error details
+            \Log::error('Gemini API error details:', ['response' => $response->body()]);
+            
         } catch (\Exception $e) {
             \Log::error('Gemini API error: ' . $e->getMessage());
         }
@@ -397,7 +409,12 @@ class ChatbotController extends Controller
     // Hàm gọi Gemini API với context hội thoại
     private function callGeminiApiForWebSearchWithContext($question, $context)
     {
-        $apiKey = env('GEMINI_API_KEY', '');
+        // Use the instance apiKey property instead of retrieving from env again
+        if (empty($this->apiKey)) {
+            \Log::error('Gemini API error: Missing API key');
+            return 'Xin lỗi, tôi đang gặp vấn đề khi kết nối với dịch vụ trả lời. Vui lòng thử lại sau.';
+        }
+        
         $url = $this->geminiUrl;
         $data = [
             'contents' => $context,
@@ -410,9 +427,11 @@ class ChatbotController extends Controller
         ];
         try {
             $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'x-goog-api-key' => $this->apiKey
             ])->timeout(15) // Giảm timeout xuống 15 giây để phát hiện vấn đề sớm hơn
-              ->post($url . '?key=' . $apiKey, $data);
+              ->post($url, $data);
+              
             \Log::info('Gemini API request:', ['data' => $data]);
             \Log::info('Gemini API response:', ['body' => $response->body()]);
             if ($response->successful()) {
@@ -421,6 +440,10 @@ class ChatbotController extends Controller
                     return $responseData['candidates'][0]['content']['parts'][0]['text'];
                 }
             }
+            
+            // Log the error details
+            \Log::error('Gemini API error details:', ['response' => $response->body()]);
+            
             // Nếu không thành công nhưng không phải timeout
             return 'Xin lỗi, tôi đang gặp vấn đề khi tìm kiếm thông tin. Vui lòng đặt câu hỏi khác hoặc liên hệ trực tiếp với phòng khám.';
         } catch (\Exception $e) {
@@ -1279,5 +1302,40 @@ class ChatbotController extends Controller
             'success' => true,
             'message' => 'Bạn đã đăng xuất thành công!'
         ]);
+    }
+
+    public function getSuggestedQuestions()
+    {
+        try {
+            $suggestedQuestions = [
+                'Giá khám chó là bao nhiêu?',
+                'Phòng khám mở cửa mấy giờ?',
+                'Làm sao để đặt lịch khám?',
+                'Bác sĩ nào giỏi nhất?',
+                'Cần chuẩn bị gì khi đi khám?',
+                'Chi phí tiêm phòng cho mèo?',
+                'Cần tiêm phòng những bệnh gì?',
+                'Dịch vụ spa cho thú cưng gồm những gì?',
+                'Triệt sản cho thú cưng có tốt không?',
+                'Thú cưng tôi có vấn đề về da',
+                'Thú cưng tôi gặp vấn đề tiêu hóa',
+                'Tư vấn chăm sóc chó con',
+                'Tư vấn chăm sóc mèo con',
+                'Thức ăn tốt cho thú cưng là gì?',
+                'Lịch tiêm vaccine cho thú cưng'
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'data' => $suggestedQuestions
+            ]);
+            
+        } catch (Exception $e) {
+            Log::error('Get suggested questions error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi lấy danh sách câu hỏi gợi ý.'
+            ]);
+        }
     }
 } 

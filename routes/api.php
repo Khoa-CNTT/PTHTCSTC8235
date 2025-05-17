@@ -288,6 +288,7 @@ Route::get('/chatbot/suggest-services', [ChatbotController::class, 'suggestServi
 Route::get('/chatbot/get-available-slots', [ChatbotController::class, 'getAvailableSlots']);
 Route::get('/chatbot/get-service-reviews/{serviceId}', [ChatbotController::class, 'getServiceReviews']);
 Route::get('/doctors', [ChatbotController::class, 'getDoctorsWithSchedule']);
+Route::get('/chatbot/suggested-questions', [ChatbotController::class, 'getSuggestedQuestions']);
 
 
 //client lich hen routes
