@@ -135,7 +135,7 @@ class HoaDonController extends Controller
     // Lấy chi tiết hóa đơn
     public function chiTietTien($id)
     {
-        // Find the invoice in question
+        // 1. Kiểm tra hóa đơn tồn tại
         $hoaDon = DB::table('hoa_dons')->where('id', $id)->first();
         if (!$hoaDon) {
             return response()->json([
@@ -144,55 +144,42 @@ class HoaDonController extends Controller
             ], 404);
         }
 
-        // Lấy id_lich_hen_pet từ bảng hoa_don_chi_tiets
-        $idLichHen = DB::table('hoa_don_chi_tiets')
+        // 2. Lấy chi tiết hóa đơn
+        $chiTiet = DB::table('hoa_don_chi_tiets')
             ->where('id_hoadon', $id)
-            ->value('id_lich_hen_pet');
+            ->select('id_lich_hen_pet', 'id_ct_don_thuoc')
+            ->first();
 
-        // Lấy id_ct_don_thuoc từ hoa_don_chi_tiets
-        $idCtDonThuoc = DB::table('hoa_don_chi_tiets')
-            ->where('id_hoadon', $id)
-            ->value('id_ct_don_thuoc');
+        $idLichHen = $chiTiet->id_lich_hen_pet ?? null;
 
-        // Lấy id_dv và tien_coc từ bảng lich_hen_pets
-        $lichHenInfo = null;
-        if ($idLichHen) {
-            $lichHenInfo = DB::table('lich_hen_pets')
-                ->where('id', $idLichHen)
-                ->select('id_dv', 'tien_coc')
-                ->first();
-        }
+        // 3. Lấy thông tin lịch hẹn (dịch vụ và tiền cọc)
+        $lichHenInfo = $idLichHen
+            ? DB::table('lich_hen_pets')->where('id', $idLichHen)->select('id_dv', 'tien_coc')->first()
+            : null;
 
-        // Lấy giá dịch vụ từ bảng dich_vus
-        $tienDichVu = 0;
-        if ($lichHenInfo && $lichHenInfo->id_dv) {
-            $tienDichVu = DB::table('dich_vus')
-                ->where('id', $lichHenInfo->id_dv)
-                ->value('gia') ?? 0;
-        }
+        // 4. Lấy giá dịch vụ
+        $tienDichVu = $lichHenInfo?->id_dv
+            ? DB::table('dich_vus')->where('id', $lichHenInfo->id_dv)->value('gia') ?? 0
+            : 0;
 
-        // Tính tiền đơn thuốc - phương pháp 1: Trực tiếp từ chi tiết đơn thuốc
-        $tienDonThuoc = 0;
-
-        // Tìm tất cả các chi tiết đơn thuốc liên quan đến hóa đơn này
-        $donThuocChiTiets = DB::table('hoa_don_chi_tiets')
+        // 5. Tính tiền đơn thuốc (cách 1: từ id_ct_don_thuoc trong chi tiết hóa đơn)
+        $idCtDonThuocs = DB::table('hoa_don_chi_tiets')
             ->where('id_hoadon', $id)
             ->whereNotNull('id_ct_don_thuoc')
             ->pluck('id_ct_don_thuoc')
             ->toArray();
 
-        if (!empty($donThuocChiTiets)) {
-            // Truy vấn giá tiền thuốc từ chi tiết đơn thuốc
-            $tienDonThuoc = DB::table('don_thuoc_chi_tiets as dt')
-                ->join('thuocs as t', 'dt.id_thuoc', '=', 't.id')
-                ->whereIn('dt.id', $donThuocChiTiets)
-                ->selectRaw('SUM(dt.so_luong * t.gia_ban) as tong')
+        $tienDonThuoc = 0;
+        if (!empty($idCtDonThuocs)) {
+            $tienDonThuoc = DB::table('don_thuoc_chi_tiets as ct')
+                ->join('thuocs as t', 'ct.id_thuoc', '=', 't.id')
+                ->whereIn('ct.id', $idCtDonThuocs)
+                ->selectRaw('SUM(ct.so_luong * t.gia_ban) as tong')
                 ->value('tong') ?? 0;
         }
 
-        // Phương pháp 2: Tìm qua hồ sơ bệnh án nếu phương pháp 1 không tìm thấy
+        // 6. Nếu không có, tính từ hồ sơ bệnh án (cách 2)
         if ($tienDonThuoc == 0 && $idLichHen) {
-            // Lấy id_don_thuoc từ ho_so_benh_ans
             $idDonThuoc = DB::table('ho_so_benh_ans')
                 ->where('id_lich_hen_pet', $idLichHen)
                 ->value('id_don_thuoc');
@@ -206,36 +193,10 @@ class HoaDonController extends Controller
             }
         }
 
-        // Lấy tiền khám từ hóa đơn chi tiết (có thể có nhiều dòng)
+        // 7. Tính tổng tiền khám từ chi tiết hóa đơn
         $tienKham = DB::table('hoa_don_chi_tiets')
             ->where('id_hoadon', $id)
             ->sum('tien_kham') ?? 0;
-
-        // Set default value for service price if not found
-        if ($tienDichVu == 0) {
-            // Find any service price from dich_vus table
-            $defaultDichVu = DB::table('dich_vus')
-                ->where('tinh_trang', 1)
-                ->inRandomOrder()
-                ->first();
-
-            if ($defaultDichVu) {
-                $tienDichVu = $defaultDichVu->gia;
-            } else {
-                $tienDichVu = 200000; // Default value
-            }
-        }
-
-        // Set default value for medication if not found but needed
-        if ($tienDonThuoc == 0 && rand(0, 1) == 1) {
-            // Generate a random medication cost
-            $tienDonThuoc = rand(50000, 300000);
-        }
-
-        // Ensure examination fee is not zero
-        if ($tienKham == 0) {
-            $tienKham = rand(50000, 200000);
-        }
 
         return response()->json([
             'status' => true,
@@ -243,13 +204,10 @@ class HoaDonController extends Controller
                 'tien_don_thuoc'     => $tienDonThuoc,
                 'tien_dich_vu'       => $tienDichVu,
                 'tien_kham'          => $tienKham,
-                'tien_coc_dich_vu'   => $lichHenInfo->tien_coc ?? rand(30000, 100000),
+                'tien_coc_dich_vu'   => $lichHenInfo->tien_coc ?? 0,
             ]
         ]);
     }
-
-
-
 
     // Cập nhật hóa đơn
     public function update(Request $request)
