@@ -13,6 +13,9 @@ class HoaDonSeeder extends Seeder
         // Clear existing data first
         DB::table('hoa_don_chi_tiets')->delete();
         DB::table('hoa_dons')->delete();
+        
+        // Reset auto-increment to ensure consistent invoice IDs
+        DB::statement('ALTER TABLE hoa_dons AUTO_INCREMENT = 1');
 
         // Get all the possible IDs for relationships
         $lichHenIds = DB::table('lich_hen_pets')->pluck('id')->toArray();
@@ -45,19 +48,29 @@ class HoaDonSeeder extends Seeder
 
         $donThuocChiTietIds = $donThuocChiTiets->pluck('id')->toArray();
 
-        // Create invoices with varied data
-        $totalInvoices = 50;
-        $unpaidInvoices = 10; // Exactly 10 unpaid invoices
-        $paidInvoices = $totalInvoices - $unpaidInvoices;
+        // Define invoice distribution by time periods for better analysis
+        $invoiceDistribution = [
+            // For previous months, create realistic revenue patterns
+            ['period' => 'current-month', 'count' => 15, 'days_ago_max' => 30, 'days_ago_min' => 0],
+            ['period' => 'previous-month', 'count' => 15, 'days_ago_max' => 60, 'days_ago_min' => 31],
+            ['period' => 'two-months-ago', 'count' => 10, 'days_ago_max' => 90, 'days_ago_min' => 61],
+            ['period' => 'older', 'count' => 10, 'days_ago_max' => 200, 'days_ago_min' => 91]
+        ];
 
-        // Create paid invoices first
-        for ($i = 1; $i <= $paidInvoices; $i++) {
-            $this->createInvoice(true, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds);
-        }
-
-        // Now create exactly 10 unpaid invoices
-        for ($i = 1; $i <= $unpaidInvoices; $i++) {
-            $this->createInvoice(false, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds);
+        // Create invoices with varied data based on distribution
+        $currentInvoiceId = 1; // Start with ID 1
+        
+        foreach ($invoiceDistribution as $period) {
+            for ($i = 1; $i <= $period['count']; $i++) {
+                // Generate date within the specific period
+                $date = Carbon::now()->subDays(rand($period['days_ago_min'], $period['days_ago_max']));
+                
+                // For recent invoices (current month), include some unpaid ones
+                $isPaid = !($period['period'] === 'current-month' && $i <= 10);
+                
+                $this->createInvoice($currentInvoiceId, $isPaid, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds, $date);
+                $currentInvoiceId++; // Increment the ID for the next invoice
+            }
         }
     }
 
@@ -109,7 +122,7 @@ class HoaDonSeeder extends Seeder
     /**
      * Create a single invoice with its details
      */
-    private function createInvoice($isPaid, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds)
+    private function createInvoice($invoiceId, $isPaid, $nhanVienIds, $khachHangIds, $lichHenIds, $donThuocChiTietIds, $date)
     {
         // Randomize invoice data
         $idNV = $nhanVienIds[array_rand($nhanVienIds)];
@@ -117,15 +130,9 @@ class HoaDonSeeder extends Seeder
         $paymentMethod = rand(0, 1); // 0: Cash, 1: Card/Transfer
         $status = $isPaid ? 1 : 0; // Paid or unpaid based on parameter
 
-        // For unpaid invoices, use more recent dates
-        if ($isPaid) {
-            $date = Carbon::now()->subDays(rand(5, 200));
-        } else {
-            $date = Carbon::now()->subDays(rand(0, 4));
-        }
-
-        // Insert invoice - ensure each invoice has a valid customer ID
-        $hoaDonId = DB::table('hoa_dons')->insertGetId([
+        // Insert invoice with specific ID to ensure exact match with actual database
+        DB::table('hoa_dons')->insert([
+            'id' => $invoiceId, // Use the specific invoice ID
             'id_nv' => $idNV,
             'id_kh' => $idKH,
             'phuong_thuc' => $paymentMethod,
@@ -140,7 +147,7 @@ class HoaDonSeeder extends Seeder
         $tienKham = rand(50000, 200000);
 
         DB::table('hoa_don_chi_tiets')->insert([
-            'id_hoadon' => $hoaDonId,
+            'id_hoadon' => $invoiceId,
             'id_lich_hen_pet' => $idLichHen,
             'id_ct_don_thuoc' => null,
             'tien_kham' => $tienKham,
@@ -162,7 +169,7 @@ class HoaDonSeeder extends Seeder
                 $usedPrescriptions[] = $idDonThuoc;
 
                 DB::table('hoa_don_chi_tiets')->insert([
-                    'id_hoadon' => $hoaDonId,
+                    'id_hoadon' => $invoiceId,
                     'id_lich_hen_pet' => null,
                     'id_ct_don_thuoc' => $idDonThuoc,
                     'tien_kham' => 0, // No examination fee for prescription item
