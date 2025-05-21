@@ -12,11 +12,19 @@ class DonThuocController extends Controller
 {
     public function loadThuoc()
     {
-        $thuocs = Thuoc::where('tinh_trang', 1)->get();
+        $thuocs = DB::table('thuocs')
+            ->leftJoin('thuoc_khos', 'thuocs.id', '=', 'thuoc_khos.id_thuoc')
+            ->where('thuocs.tinh_trang', 1)
+            ->select(
+                'thuocs.id',
+                'thuocs.ten_thuoc',
+                DB::raw('COALESCE(thuoc_khos.so_luong_ton_kho, 0) as so_luong_ton')
+            )
+            ->get();
 
         return response()->json([
             'status' => true,
-            'thuoc' => $thuocs,
+            'thuoc' => $thuocs
         ]);
     }
 
