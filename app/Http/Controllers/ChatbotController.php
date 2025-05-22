@@ -6,22 +6,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\ChatbotLearningService;
+use App\Services\OllamaChatbotService;
 use App\Models\ChatbotInteraction;
 use App\Models\ChatbotFeedback;
 use Exception;
 
 class ChatbotController extends Controller
 {
-    private $apiKey;
-    private $geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    private $ollamaService;
     private $learningService;
     private static $conversationHistory = [];
 
-    public function __construct(ChatbotLearningService $learningService)
+    public function __construct(ChatbotLearningService $learningService, OllamaChatbotService $ollamaService)
     {
-        // Setting the API key directly instead of relying on env()
-        $this->apiKey = 'AIzaSyBzY4r8IwXQoQ0I9MwcG-Dk0RD8W_O6sEw';
         $this->learningService = $learningService;
+        $this->ollamaService = $ollamaService;
     }
 
     public function chat(Request $request)
@@ -41,7 +40,7 @@ class ChatbotController extends Controller
             }
 
             // Kiểm tra từ khóa cấm
-            if ($this->isInappropriateContent($question)) {
+            if ($this->ollamaService->isInappropriateContent($question)) {
                 $history = $this->getChatHistory($userId);
                 $history[] = ['role' => 'user', 'content' => $question];
                 if (count($history) > 10) array_shift($history);
@@ -62,10 +61,9 @@ class ChatbotController extends Controller
             // Tìm câu trả lời phù hợp
             $response = $this->getContextualResponse($question, $analysis, $history);
             
-            // Nếu không tìm thấy câu trả lời phù hợp, gọi Gemini API
+            // Nếu không tìm thấy câu trả lời phù hợp, gọi Ollama Service
             if (!$response) {
-                $context = $this->prepareContext($question, $history);
-                $response = $this->callGeminiApiForWebSearchWithContext($question, $context);
+                $response = $this->ollamaService->generateResponse($question, $history);
             }
             
             // Tạo nút điều hướng
@@ -230,60 +228,88 @@ class ChatbotController extends Controller
     {
         $q = mb_strtolower($question, 'UTF-8');
 
+        // Phân tích trước để xác định liệu có phải câu hỏi về triệu chứng hay dinh dưỡng
+        $analysis = $this->analyzeQuestion($question);
+        
+        // Nếu câu hỏi liên quan đến dinh dưỡng
+        if ($analysis['intent'] === 'nutrition') {
+            return $this->getNutritionInfo($analysis['entities'] ?? []);
+        }
+        
+        // Nếu câu hỏi liên quan đến chẩn đoán
+        if ($analysis['intent'] === 'diagnosis') {
+            return $this->getDiagnosisInfo($analysis['entities'] ?? [], $question);
+        }
+        
+        // Xử lý các trường hợp triệu chứng cụ thể khi không phải là intent rõ ràng
         // Nhận diện triệu chứng phổ biến
         if (preg_match('/(sổ mũi|sổ mui|chảy nước mũi|hắt hơi|ho|khò khè|nghẹt mũi|thở khò khè)/ui', $q)) {
-            return [
-                        'success' => true,
-                'message' => "Thú cưng của bạn có dấu hiệu về đường hô hấp như sổ mũi, ho, hắt hơi. Nguyên nhân có thể do cảm lạnh, nhiễm khuẩn, dị ứng hoặc bệnh truyền nhiễm. Bạn nên giữ ấm cho thú, vệ sinh mũi bằng nước muối sinh lý và theo dõi thêm. Nếu tình trạng kéo dài hoặc thú cưng khó thở, hãy đưa đến phòng khám thú y để được kiểm tra và điều trị kịp thời nhé! 🐶🐱"
-            ];
+            // Chuyển hướng đến phương thức getDiagnosisInfo với entity 'respiratory'
+            return $this->getDiagnosisInfo(['symptom' => 'respiratory'], $question);
         }
         // Nhận diện triệu chứng tiêu chảy, nôn, bỏ ăn
         if (preg_match('/(tiêu chảy|nôn|ói|mửa|bỏ ăn|không ăn|biếng ăn|phân lỏng|đi ngoài|bụng trướng|đầy hơi|táo bón)/ui', $q)) {
-            return [
-                        'success' => true,
-                'message' => "Thú cưng có dấu hiệu rối loạn tiêu hóa như tiêu chảy, nôn, bỏ ăn. Nguyên nhân có thể do thay đổi thức ăn, nhiễm khuẩn, ký sinh trùng hoặc dị ứng. Bạn nên cho thú cưng uống đủ nước, tạm ngưng cho ăn 1 bữa (nếu là thú trưởng thành), sau đó cho ăn thức ăn dễ tiêu. Nếu triệu chứng kéo dài trên 24h hoặc thú cưng yếu, hãy đưa đến phòng khám để được bác sĩ kiểm tra nhé! 💩🤢"
-            ];
+            // Xác định triệu chứng phổ biến nhất
+            if (preg_match('/(tiêu chảy|phân lỏng|đi ngoài)/ui', $q)) {
+                return $this->getDiagnosisInfo(['symptom' => 'diarrhea'], $question);
+            } 
+            else if (preg_match('/(nôn|ói|mửa)/ui', $q)) {
+                return $this->getDiagnosisInfo(['symptom' => 'vomit'], $question);
+            }
+            else if (preg_match('/(bỏ ăn|không ăn|biếng ăn)/ui', $q)) {
+                return $this->getDiagnosisInfo(['symptom' => 'appetite'], $question);
+            }
+            else {
+                return $this->getDiagnosisInfo(['symptom' => 'unknown'], $question);
+            }
         }
         // Nhận diện triệu chứng ngứa, rụng lông, gãi
         if (preg_match('/(ngứa|gãi|rụng lông|nấm|ghẻ|vảy|da đỏ|da khô|viêm da|mảng đỏ|mụn|nổi cục)/ui', $q)) {
-            return [
-                        'success' => true,
-                'message' => "Thú cưng bị ngứa, rụng lông hoặc có dấu hiệu da bất thường có thể do ký sinh trùng, nấm, dị ứng hoặc viêm da. Bạn nên kiểm tra kỹ vùng da bị ảnh hưởng, giữ vệ sinh sạch sẽ và tránh để thú cưng tự gãi nhiều. Không tự ý dùng thuốc khi chưa có chỉ định của bác sĩ. Nếu tình trạng không cải thiện, hãy đưa thú cưng đến phòng khám để được tư vấn và điều trị đúng cách! 🐾"
-            ];
+            return $this->getDiagnosisInfo(['symptom' => 'skin'], $question);
         }
         // Nhận diện triệu chứng đau mắt, chảy nước mắt, đỏ mắt
         if (preg_match('/(đau mắt|chảy nước mắt|mắt đỏ|mắt sưng|mắt mờ|mắt đục|ghèn|viêm mắt|mắt nhắm|không mở được mắt)/ui', $q)) {
-            return [
-                        'success' => true,
-                'message' => "Thú cưng có dấu hiệu đau mắt, chảy nước mắt, đỏ mắt có thể do viêm kết mạc, dị vật, nhiễm khuẩn hoặc chấn thương. Bạn nên vệ sinh mắt nhẹ nhàng bằng nước muối sinh lý, tránh để thú cưng cào gãi vào mắt. Nếu mắt sưng, mờ, có mủ hoặc thú cưng không mở được mắt, hãy đưa đến phòng khám để được bác sĩ kiểm tra ngay nhé! 👁️"
-            ];
+            return $this->getDiagnosisInfo(['symptom' => 'eye'], $question);
         }
         // Nhận diện triệu chứng đau tai, lắc đầu, ngứa tai
         if (preg_match('/(ngứa tai|gãi tai|lắc đầu|hôi tai|viêm tai|ráy tai|chảy mủ tai|tai đỏ|tai sưng)/ui', $q)) {
-            return [
-                        'success' => true,
-                'message' => "Thú cưng có dấu hiệu ngứa tai, lắc đầu, tai có mùi hôi hoặc chảy dịch có thể bị viêm tai do ký sinh trùng, nấm hoặc vi khuẩn. Không tự ý dùng thuốc nhỏ tai của người. Bạn nên đưa thú cưng đến phòng khám để được kiểm tra và điều trị đúng cách, tránh biến chứng nặng hơn nhé! 🦻"
-            ];
+            return $this->getDiagnosisInfo(['symptom' => 'ear'], $question);
         }
         // Nhận diện triệu chứng về tiết niệu
         if (preg_match('/(tiểu khó|đi tiểu nhiều|tiểu ra máu|không đi tiểu được|tiểu nhỏ giọt|tiểu thường xuyên|tiểu ngoài khay)/ui', $q)) {
-            return [
-                        'success' => true,
-                'message' => "Thú cưng có dấu hiệu bất thường khi đi tiểu như tiểu khó, tiểu ra máu, tiểu nhiều lần có thể do viêm đường tiết niệu, sỏi bàng quang hoặc bệnh lý thận. Đây là dấu hiệu cần được kiểm tra sớm, đặc biệt nếu thú cưng không đi tiểu được hoặc tiểu ra máu. Hãy đưa thú cưng đến phòng khám để được bác sĩ kiểm tra và điều trị kịp thời nhé! 🚾"
-            ];
+            return $this->getDiagnosisInfo(['symptom' => 'urinary'], $question);
         }
         // Nhận diện triệu chứng về xương khớp, đi khập khiễng
         if (preg_match('/(đi khập khiễng|đau khớp|sưng khớp|không đi được|khó đứng|khó leo cầu thang|đau lưng|không nhảy được|tê liệt|yếu chân|run chân)/ui', $q)) {
-            return [
-                        'success' => true,
-                'message' => "Thú cưng đi khập khiễng, đau khớp, yếu chân có thể do chấn thương, viêm khớp hoặc bệnh lý xương khớp. Bạn nên hạn chế vận động mạnh cho thú cưng, giữ ấm và theo dõi thêm. Nếu thú cưng không đi được hoặc đau nhiều, hãy đưa đến phòng khám để được chẩn đoán và điều trị phù hợp! 🦴"
-            ];
+            return $this->getDiagnosisInfo(['symptom' => 'leg'], $question);
         }
-        // Nếu không khớp triệu chứng nào, luôn gọi AI Gemini để trả lời
-        $aiResponse = $this->callGeminiApiForWebSearch($question);
+        
+        // Nhận diện câu hỏi về dinh dưỡng nếu không trùng với các pattern trên
+        if (preg_match('/(thức ăn|đồ ăn|dinh dưỡng|cho ăn|ăn gì|khẩu phần|thức ăn)/ui', $q)) {
+            // Xác định loại thú cưng
+            $entities = [];
+            if (preg_match('/(chó|dog|cún|puppies|puppy)/ui', $q)) {
+                $entities['pet_type'] = 'dog';
+            } 
+            else if (preg_match('/(mèo|cat|kitty|kitten|con meo)/ui', $q)) {
+                $entities['pet_type'] = 'cat';
+            }
+            
+            // Xác định độ tuổi
+            if (preg_match('/(con|nhỏ|sơ sinh|mới sinh|puppy|kitten)/ui', $q)) {
+                $entities['age'] = 'baby';
+            } 
+            else if (preg_match('/(già|cao tuổi|lớn tuổi|senior)/ui', $q)) {
+                $entities['age'] = 'senior';
+            }
+            
+            return $this->getNutritionInfo($entities);
+        }
+        // Nếu không khớp triệu chứng nào, gọi Ollama để trả lời
+        $aiResponse = $this->ollamaService->generateResponse($question, []);
 
         // Kiểm duyệt tự động (nếu cần)
-        if ($this->isInappropriateContent($aiResponse)) {
+        if ($this->ollamaService->isInappropriateContent($aiResponse)) {
             return [
                         'success' => true,
                 'message' => 'Xin lỗi, tôi chưa có thông tin phù hợp để trả lời câu hỏi này. Bạn vui lòng liên hệ trực tiếp với phòng khám để được hỗ trợ nhé!'
@@ -296,70 +322,7 @@ class ChatbotController extends Controller
         ];
     }
 
-    // Gọi Gemini API để lấy câu trả lời AI cho các câu hỏi không có trong tri thức
-    private function callGeminiApiForWebSearch($question)
-    {
-        // Use the instance apiKey property instead of retrieving from env again
-        if (empty($this->apiKey)) {
-            \Log::error('Gemini API error: Missing API key');
-            return 'Xin lỗi, tôi đang gặp vấn đề khi kết nối với dịch vụ trả lời. Vui lòng thử lại sau.';
-        }
-        
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-        $prompt = "Bạn là trợ lý ảo phòng khám thú y PetCare. Hãy trả lời ngắn gọn, thân thiện, dễ hiểu, có thể dùng emoji nếu phù hợp. Nếu không chắc chắn, hãy khuyên khách liên hệ bác sĩ. Câu hỏi: $question";
-        $data = [
-            "contents" => [
-                ["parts" => [["text" => $prompt]]]
-            ],
-            "generationConfig" => [
-                "temperature" => 0.7,
-                "maxOutputTokens" => 800,
-                "topP" => 0.8,
-                "topK" => 40
-            ]
-        ];
-        try {
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'x-goog-api-key' => $this->apiKey
-            ])->timeout(30)
-              ->post($url, $data);
-              
-            \Log::info('Gemini API response:', ['body' => $response->body()]);
-            if ($response->successful()) {
-                $responseData = $response->json();
-                if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
-                    return $responseData['candidates'][0]['content']['parts'][0]['text'];
-                }
-            }
-            
-            // Log the error details
-            \Log::error('Gemini API error details:', ['response' => $response->body()]);
-            
-        } catch (\Exception $e) {
-            \Log::error('Gemini API error: ' . $e->getMessage());
-        }
-        return 'Xin lỗi, tôi chưa có thông tin về vấn đề này. Bạn vui lòng liên hệ trực tiếp với phòng khám để được hỗ trợ nhé!';
-    }
 
-    // Kiểm duyệt nội dung AI trả về
-    private function isInappropriateContent($text) {
-        // Danh sách từ khóa cấm
-        $badWords = [
-            'sex', 'khiêu dâm', 'bạo lực', 'chửi', 'tục', 'phản động', 'chính trị', 
-            'đánh nhau', 'ma túy', 'cờ bạc', 'lừa đảo', 'hack', 'crack', 'xxx', '18+', 
-            'bán thuốc', 'bán hàng', 'liên hệ', 'số điện thoại', 'facebook', 'zalo', 
-            'telegram', 'viber', 'email', 'địa chỉ', 'website', 'link', 'http', 'https', 'www.'
-        ];
-        
-        $textLower = mb_strtolower($text, 'UTF-8');
-        foreach ($badWords as $word) {
-            if (mb_strpos($textLower, $word) !== false) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public function getDoctorsWithSchedule()
     {
@@ -406,55 +369,7 @@ class ChatbotController extends Controller
         }
     }
 
-    // Hàm gọi Gemini API với context hội thoại
-    private function callGeminiApiForWebSearchWithContext($question, $context)
-    {
-        // Use the instance apiKey property instead of retrieving from env again
-        if (empty($this->apiKey)) {
-            \Log::error('Gemini API error: Missing API key');
-            return 'Xin lỗi, tôi đang gặp vấn đề khi kết nối với dịch vụ trả lời. Vui lòng thử lại sau.';
-        }
-        
-        $url = $this->geminiUrl;
-        $data = [
-            'contents' => $context,
-            'generationConfig' => [
-                'temperature' => 0.7,
-                'maxOutputTokens' => 800,
-                'topP' => 0.8,
-                'topK' => 40
-            ]
-        ];
-        try {
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'x-goog-api-key' => $this->apiKey
-            ])->timeout(15) // Giảm timeout xuống 15 giây để phát hiện vấn đề sớm hơn
-              ->post($url, $data);
-              
-            \Log::info('Gemini API request:', ['data' => $data]);
-            \Log::info('Gemini API response:', ['body' => $response->body()]);
-            if ($response->successful()) {
-                $responseData = $response->json();
-                if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
-                    return $responseData['candidates'][0]['content']['parts'][0]['text'];
-                }
-            }
-            
-            // Log the error details
-            \Log::error('Gemini API error details:', ['response' => $response->body()]);
-            
-            // Nếu không thành công nhưng không phải timeout
-            return 'Xin lỗi, tôi đang gặp vấn đề khi tìm kiếm thông tin. Vui lòng đặt câu hỏi khác hoặc liên hệ trực tiếp với phòng khám.';
-        } catch (\Exception $e) {
-            \Log::error('Gemini API error: ' . $e->getMessage());
-            // Kiểm tra nếu lỗi là do timeout
-            if (strpos($e->getMessage(), 'timeout') !== false || $e instanceof \Illuminate\Http\Client\ConnectionException) {
-                return 'Hmm, câu hỏi của bạn có vẻ cần nhiều thời gian để tìm câu trả lời. Bạn có thể đặt câu hỏi ngắn hơn hoặc cụ thể hơn để tôi có thể giúp bạn nhanh chóng hơn. 😊';
-            }
-            return 'Xin lỗi, tôi chưa có thông tin về vấn đề này. Bạn vui lòng liên hệ trực tiếp với phòng khám để được hỗ trợ nhé!';
-        }
-    }
+
 
     private function getChatHistory($userId) {
         // Lấy lịch sử từ session
@@ -520,37 +435,7 @@ class ChatbotController extends Controller
         ]);
     }
 
-    private function prepareContext($question, $history) {
-        $context = [];
-        
-        // Thêm prompt hệ thống
-        $context[] = [
-            'role' => 'model',
-            'parts' => [
-                ['text' => "Bạn là trợ lý ảo phòng khám thú y PetCare. Hãy tiếp tục hội thoại dựa trên lịch sử bên dưới. Nếu người dùng trả lời ngắn, hãy hiểu đó là phản hồi cho câu hỏi trước. Hãy trả lời bằng tiếng Việt, ngắn gọn, thân thiện, dễ hiểu, sử dụng ngôn ngữ tự nhiên như người Việt Nam. Có thể dùng emoji nếu phù hợp. Nếu không chắc chắn, hãy khuyên khách liên hệ bác sĩ."]
-            ]
-        ];
-        
-        // Thêm lịch sử hội thoại
-        foreach ($history as $item) {
-            $context[] = [
-                'role' => $item['role'] === 'bot' ? 'model' : 'user',
-                'parts' => [
-                    ['text' => $item['content']]
-                ]
-            ];
-        }
-        
-        // Thêm câu hỏi hiện tại
-        $context[] = [
-            'role' => 'user',
-            'parts' => [
-                ['text' => $question]
-            ]
-        ];
-        
-        return $context;
-    }
+
 
     private function generateGuestId()
     {
@@ -623,6 +508,47 @@ class ChatbotController extends Controller
         elseif (preg_match('/(cấp cứu|khẩn cấp|nguy hiểm)/ui', $questionLower)) {
             $analysis['intent'] = 'emergency';
         }
+        // Thêm nhận diện các trường hợp liên quan đến dinh dưỡng
+        elseif (preg_match('/(dinh dưỡng|thức ăn|đồ ăn|chế độ ăn|cho ăn|uống|vitamin|thực phẩm|supplement|khẩu phần)/ui', $questionLower)) {
+            $analysis['intent'] = 'nutrition';
+            // Phân tích loại thú cưng để đưa ra lời khuyên phù hợp
+            if (preg_match('/(chó|dog|cún|puppies|puppy)/ui', $questionLower)) {
+                $analysis['entities']['pet_type'] = 'dog';
+            } elseif (preg_match('/(mèo|cat|kitty|kitten|con meo)/ui', $questionLower)) {
+                $analysis['entities']['pet_type'] = 'cat';
+            }
+            
+            // Xác định độ tuổi
+            if (preg_match('/(con|nhỏ|sơ sinh|mới sinh|puppy|kitten)/ui', $questionLower)) {
+                $analysis['entities']['age'] = 'baby';
+            } elseif (preg_match('/(già|cao tuổi|lớn tuổi|senior)/ui', $questionLower)) {
+                $analysis['entities']['age'] = 'senior';
+            }
+        }
+        // Thêm nhận diện các trường hợp liên quan đến chẩn đoán bệnh
+        elseif (preg_match('/(triệu chứng|dấu hiệu|ốm|bệnh|không khỏe|đau|bị|sưng|viêm|tiêu chảy|nôn|ói|mửa|chảy máu|ho|hắt hơi|sổ mũi|ngứa|lở|ghẻ|vết thương)/ui', $questionLower)) {
+            $analysis['intent'] = 'diagnosis';
+            // Phân tích triệu chứng để đưa ra tư vấn phù hợp
+            if (preg_match('/(tiêu chảy|đi ngoài|phân lỏng)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'diarrhea';
+            } elseif (preg_match('/(nôn|ói|mửa)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'vomit';
+            } elseif (preg_match('/(ho|hắt hơi|sổ mũi|khò khè|hắng giọng)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'respiratory';
+            } elseif (preg_match('/(ngứa|lở|ghẻ|nấm da|rụng lông|gãi)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'skin';
+            } elseif (preg_match('/(ăn ít|bỏ ăn|không ăn|biếng ăn)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'appetite';
+            } elseif (preg_match('/(khó đi tiểu|đi tiểu nhiều|tiểu ra máu|nước tiểu|bàng quang)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'urinary';
+            } elseif (preg_match('/(mắt|đỏ mắt|chảy nước mắt|ghèn)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'eye';
+            } elseif (preg_match('/(tai|ngứa tai|hôi tai|viêm tai)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'ear';
+            } elseif (preg_match('/(chân|khập khiễng|đi lại|khó đi)/ui', $questionLower)) {
+                $analysis['entities']['symptom'] = 'leg';
+            }
+        }
         elseif (preg_match('/(vào trang|đi tới|mở trang|chuyển tới)/ui', $questionLower)) {
             $analysis['intent'] = 'navigation';
             
@@ -669,7 +595,8 @@ class ChatbotController extends Controller
     private function getContextualResponse($question, $analysis, $history) {
         // Chỉ kiểm tra hội thoại cũ nếu intent không phải là điều hướng
         $navigationIntents = [
-            'navigation', 'service', 'doctor', 'login', 'booking', 'price', 'home', 'emergency', 'logout', 'confirm_navigation'
+            'navigation', 'service', 'doctor', 'login', 'booking', 'price', 'home', 'emergency', 'logout', 'confirm_navigation',
+            'nutrition', 'diagnosis' // Thêm intent mới cho dinh dưỡng và chẩn đoán
         ];
         if (!in_array($analysis['intent'], $navigationIntents)) {
             $similarQuestion = $this->findSimilarQuestion($question, $history);
@@ -836,20 +763,7 @@ class ChatbotController extends Controller
                 session(['last_navigation_intent' => '/client/dat-lich']);
                 return $resp;
             case 'price':
-                $resp = [
-                    'success' => true,
-                    'message' => "Bạn muốn xem bảng giá dịch vụ? Mình sẽ chuyển bạn đến trang bảng giá ngay nhé! 💰",
-                    'direct_navigation' => '/client/bang-gia',
-                    'navigation_buttons' => [
-                        [
-                            'text' => 'Xem bảng giá',
-                            'route' => '/client/bang-gia',
-                            'icon' => '💰'
-                        ]
-                    ]
-                ];
-                session(['last_navigation_intent' => '/client/bang-gia']);
-                return $resp;
+                return $this->getPriceInfo();
             case 'home':
                 $resp = [
                     'success' => true,
@@ -903,6 +817,15 @@ class ChatbotController extends Controller
                     'success' => true,
                     'message' => 'Bạn muốn vào trang nào? Hãy nói rõ hơn nhé!'
                 ];
+            
+            // Xử lý tư vấn dinh dưỡng
+            case 'nutrition':
+                return $this->getNutritionInfo($analysis['entities'] ?? []);
+            
+            // Xử lý chẩn đoán sơ bộ
+            case 'diagnosis':
+                return $this->getDiagnosisInfo($analysis['entities'] ?? [], $question);
+                
             default:
                 return null;
         }
@@ -964,6 +887,311 @@ class ChatbotController extends Controller
         return $message;
     }
 
+    /**
+     * Cung cấp thông tin dinh dưỡng cho thú cưng
+     * @param array $entities Thông tin phân tích từ câu hỏi
+     * @return array|string Thông tin dinh dưỡng
+     */
+    private function getNutritionInfo($entities = []) 
+    {
+        $petType = $entities['pet_type'] ?? 'general';
+        $age = $entities['age'] ?? 'adult';
+        
+        // Thông tin chung về dinh dưỡng
+        $generalInfo = "Để thú cưng của bạn có một sức khỏe tốt, chế độ dinh dưỡng cần đáp ứng đủ các nhóm dinh dưỡng thiết yếu:\n\n";
+        $generalInfo .= "• Protein (đạm): xây dựng và phục hồi cơ bắp\n";
+        $generalInfo .= "• Chất béo: cung cấp năng lượng và hỗ trợ hấp thụ vitamin\n";
+        $generalInfo .= "• Carbohydrate: năng lượng cho hoạt động hàng ngày\n";
+        $generalInfo .= "• Vitamin và khoáng chất: hỗ trợ chức năng miễn dịch và trao đổi chất\n";
+        $generalInfo .= "• Nước: luôn đảm bảo thú cưng được uống đủ nước sạch\n\n";
+        
+        $specificInfo = "";
+        
+        // Thông tin riêng cho chó
+        if ($petType == 'dog') {
+            if ($age == 'baby') {
+                $specificInfo = "Với chó con (dưới 1 tuổi):\n";
+                $specificInfo .= "• Nên cho ăn thức ăn dành riêng cho chó con với hàm lượng protein cao hơn (khoảng 25-30%)\n";
+                $specificInfo .= "• Chia nhỏ bữa ăn: 3-4 bữa/ngày cho chó dưới 3 tháng, 2-3 bữa/ngày cho chó 3-6 tháng\n";
+                $specificInfo .= "• Không nên cho ăn thức ăn người vì có thể gây rối loạn tiêu hóa\n";
+                $specificInfo .= "• Bổ sung DHA giúp phát triển não bộ và thị lực\n";
+                $specificInfo .= "• Thức ăn cần được làm mềm hoặc chọn loại phù hợp với kích thước\n";
+            } elseif ($age == 'senior') {
+                $specificInfo = "Với chó già (trên 7 tuổi):\n";
+                $specificInfo .= "• Giảm lượng calo nhưng vẫn đảm bảo đủ protein chất lượng cao\n";
+                $specificInfo .= "• Bổ sung glucosamine và chondroitin cho sức khỏe xương khớp\n";
+                $specificInfo .= "• Thức ăn dễ tiêu hóa, ít muối\n";
+                $specificInfo .= "• Thêm omega-3 giúp giảm viêm và hỗ trợ não bộ\n";
+                $specificInfo .= "• Ăn nhiều bữa nhỏ trong ngày (2-3 bữa)\n";
+            } else {
+                $specificInfo = "Với chó trưởng thành:\n";
+                $specificInfo .= "• Protein chất lượng cao từ thịt, cá, trứng (20-25% khẩu phần)\n";
+                $specificInfo .= "• Cần cân đối giữa thức ăn khô và thức ăn ướt\n";
+                $specificInfo .= "• Chia 1-2 bữa/ngày tùy kích thước giống chó\n";
+                $specificInfo .= "• Đảm bảo lượng thức ăn phù hợp với mức độ hoạt động\n";
+                $specificInfo .= "• Thực phẩm nên tránh: chocolate, nho, nho khô, hành, tỏi, cà phê, rượu\n";
+            }
+        }
+        // Thông tin riêng cho mèo
+        else if ($petType == 'cat') {
+            if ($age == 'baby') {
+                $specificInfo = "Với mèo con (dưới 1 tuổi):\n";
+                $specificInfo .= "• Cần nhiều protein (khoảng 30-40%) và chất béo để phát triển\n";
+                $specificInfo .= "• Chia 3-4 bữa nhỏ mỗi ngày\n";
+                $specificInfo .= "• Thức ăn đặc biệt cho mèo con hoặc thức ăn ướt phù hợp với răng nhỏ\n";
+                $specificInfo .= "• Bổ sung taurine - axit amin thiết yếu cho mèo\n";
+                $specificInfo .= "• Khởi đầu với thức ăn ướt, sau đó kết hợp với thức ăn khô\n";
+            } elseif ($age == 'senior') {
+                $specificInfo = "Với mèo già (trên 11 tuổi):\n";
+                $specificInfo .= "• Protein dễ tiêu hóa, ít chất béo, ít phosphor\n";
+                $specificInfo .= "• Bổ sung các axit béo omega-3 hỗ trợ khớp và não\n";
+                $specificInfo .= "• Thêm vitamin E và các chất chống oxy hóa\n";
+                $specificInfo .= "• Ăn nhiều bữa nhỏ trong ngày với thức ăn mềm\n";
+                $specificInfo .= "• Đảm bảo đủ nước vì mèo già dễ bị mất nước\n";
+            } else {
+                $specificInfo = "Với mèo trưởng thành:\n";
+                $specificInfo .= "• Protein cao (35-40%) từ thịt, cá là thiết yếu\n";
+                $specificInfo .= "• Mèo là động vật ăn thịt bắt buộc, không thể theo chế độ ăn chay\n";
+                $specificInfo .= "• Cần bổ sung taurine đầy đủ\n";
+                $specificInfo .= "• Chia 2-3 bữa nhỏ mỗi ngày\n";
+                $specificInfo .= "• Thức ăn nên tránh: sữa, chocolate, cà phê, rượu, hành, tỏi\n";
+            }
+        }
+        // Thông tin chung nếu không xác định được loại thú cưng hoặc tuổi
+        else {
+            $specificInfo = "Lời khuyên chung cho thú cưng:\n";
+            $specificInfo .= "• Sử dụng thức ăn chất lượng cao phù hợp với loài, tuổi và kích thước\n";
+            $specificInfo .= "• Chuyển đổi thức ăn mới từ từ để tránh rối loạn tiêu hóa\n";
+            $specificInfo .= "• Không cho ăn quá nhiều đồ ăn vặt và đồ thừa từ bàn ăn\n";
+            $specificInfo .= "• Tham khảo ý kiến bác sĩ thú y về chế độ ăn phù hợp\n";
+            $specificInfo .= "• Đảm bảo luôn có nước sạch\n";
+        }
+        
+        // Kết luận và kêu gọi hành động
+        $conclusion = "\nĐể có chế độ dinh dưỡng tối ưu được cá nhân hóa cho thú cưng của bạn, hãy đặt lịch tư vấn với bác sĩ thú y tại PetCare. Chúng tôi có thể đánh giá tình trạng sức khỏe và nhu cầu riêng của thú cưng để đưa ra phương án dinh dưỡng phù hợp nhất. 🍲";
+        
+        // Tạo nút điều hướng đến trang đặt lịch
+        $navigationButtons = [
+            [
+                'text' => 'Đặt lịch tư vấn dinh dưỡng',
+                'route' => '/client/dat-lich',
+                'icon' => '📅'
+            ]
+        ];
+        
+        return [
+            'success' => true,
+            'message' => $generalInfo . $specificInfo . $conclusion,
+            'navigation_buttons' => $navigationButtons
+        ];
+    }
+
+    /**
+     * Cung cấp thông tin chẩn đoán sơ bộ dựa vào triệu chứng
+     * @param array $entities Thông tin phân tích từ câu hỏi
+     * @param string $question Câu hỏi gốc của người dùng
+     * @return array|string Thông tin chẩn đoán
+     */
+    private function getDiagnosisInfo($entities = [], $question) 
+    {
+        $symptom = $entities['symptom'] ?? 'unknown';
+        $info = "";
+        $severity = "medium"; // mức độ nghiêm trọng: low, medium, high
+        
+        switch ($symptom) {
+            case 'diarrhea':
+                $info = "Tiêu chảy ở thú cưng có thể do nhiều nguyên nhân:\n\n";
+                $info .= "• Thay đổi thức ăn đột ngột\n";
+                $info .= "• Nhiễm ký sinh trùng đường ruột\n";
+                $info .= "• Ăn phải thức ăn không phù hợp hoặc có hại\n";
+                $info .= "• Nhiễm trùng đường tiêu hóa\n";
+                $info .= "• Stress hoặc lo âu\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• Nhịn ăn 12-24 giờ (chỉ áp dụng cho thú cưng trưởng thành)\n";
+                $info .= "• Đảm bảo cung cấp đủ nước để tránh mất nước\n";
+                $info .= "• Sau khi nhịn ăn, cho ăn thức ăn dễ tiêu như cơm trắng với thịt gà luộc\n";
+                $info .= "• Chia thành nhiều bữa nhỏ\n";
+                $severity = "medium";
+                break;
+                
+            case 'vomit':
+                $info = "Nôn ở thú cưng có thể do nhiều nguyên nhân:\n\n";
+                $info .= "• Ăn quá nhanh hoặc quá nhiều\n";
+                $info .= "• Dị ứng hoặc không dung nạp thức ăn\n";
+                $info .= "• Nhiễm trùng đường tiêu hóa\n";
+                $info .= "• Ăn phải dị vật\n";
+                $info .= "• Bệnh về nội tạng\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• Ngừng cho ăn trong 12 giờ\n";
+                $info .= "• Cung cấp nước nhỏ giọt và thường xuyên\n";
+                $info .= "• Sau đó cho ăn thức ăn mềm, dễ tiêu với khẩu phần nhỏ\n";
+                $severity = "medium";
+                break;
+                
+            case 'respiratory':
+                $info = "Các vấn đề về hô hấp như ho, hắt hơi, sổ mũi có thể do:\n\n";
+                $info .= "• Cảm lạnh thông thường\n";
+                $info .= "• Dị ứng mùa\n";
+                $info .= "• Nhiễm trùng đường hô hấp trên\n";
+                $info .= "• Kennel cough (đối với chó)\n";
+                $info .= "• Bệnh mèo mũi chảy nước mắt (đối với mèo)\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• Giữ thú cưng trong môi trường ấm áp, tránh gió lùa\n";
+                $info .= "• Đảm bảo không gian sống sạch sẽ, thông thoáng\n";
+                $info .= "• Làm ẩm đường thở bằng cách cho thú cưng vào phòng có máy tạo độ ẩm\n";
+                $info .= "• Vệ sinh mũi bằng nước muối sinh lý\n";
+                $severity = "medium";
+                break;
+                
+            case 'skin':
+                $info = "Các vấn đề về da như ngứa, lở, ghẻ, rụng lông có thể do:\n\n";
+                $info .= "• Viêm da dị ứng (thức ăn, môi trường)\n";
+                $info .= "• Ký sinh trùng ngoài da (ve, bọ chét, ghẻ)\n";
+                $info .= "• Nhiễm nấm da\n";
+                $info .= "• Viêm da tiết bã nhờn\n";
+                $info .= "• Tự miễn dịch\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• Tắm bằng sữa tắm dịu nhẹ dành cho thú cưng\n";
+                $info .= "• Ngăn không cho thú cưng cào gãi vùng bị ảnh hưởng\n";
+                $info .= "• Sử dụng cổ áo Elizabeth nếu cần thiết\n";
+                $info .= "• Tránh các chất kích ứng và thay đổi môi trường\n";
+                $severity = "medium";
+                break;
+                
+            case 'appetite':
+                $info = "Biếng ăn, bỏ ăn có thể do nhiều nguyên nhân:\n\n";
+                $info .= "• Stress hoặc thay đổi môi trường\n";
+                $info .= "• Vấn đề về răng miệng\n";
+                $info .= "• Rối loạn tiêu hóa\n";
+                $info .= "• Cảm nhiệt, sốt\n";
+                $info .= "• Bệnh lý tiềm ẩn\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• Thử thay đổi thức ăn hấp dẫn hơn\n";
+                $info .= "• Hâm nóng nhẹ thức ăn để tăng mùi thơm\n";
+                $info .= "• Cho ăn bằng tay để khuyến khích\n";
+                $info .= "• Kiểm tra miệng xem có vấn đề về răng không\n";
+                $severity = "medium";
+                break;
+                
+            case 'urinary':
+                $info = "Các vấn đề đường tiết niệu như khó đi tiểu, tiểu ra máu rất nguy hiểm:\n\n";
+                $info .= "• Viêm đường tiết niệu\n";
+                $info .= "• Sỏi bàng quang hoặc niệu đạo\n";
+                $info .= "• Bệnh thận\n";
+                $info .= "• Tắc nghẽn niệu đạo (đặc biệt nguy hiểm ở mèo đực)\n\n";
+                $info .= "⚠️ Đây là tình trạng KHẨN CẤP nếu thú cưng không thể đi tiểu!\n\n";
+                $info .= "Cần đưa đến bác sĩ thú y NGAY LẬP TỨC, không trì hoãn!";
+                $severity = "high";
+                break;
+                
+            case 'eye':
+                $info = "Vấn đề về mắt như đỏ, chảy nước mắt, ghèn có thể do:\n\n";
+                $info .= "• Viêm kết mạc\n";
+                $info .= "• Dị vật trong mắt\n";
+                $info .= "• Nhiễm trùng\n";
+                $info .= "• Dị ứng\n";
+                $info .= "• Chấn thương\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• Làm sạch mắt nhẹ nhàng bằng gạc sạch và nước muối sinh lý\n";
+                $info .= "• Không để thú cưng cào vào mắt\n";
+                $info .= "• Tránh sử dụng thuốc mắt người cho thú cưng\n";
+                $severity = "medium";
+                break;
+                
+            case 'ear':
+                $info = "Các vấn đề về tai như ngứa tai, hôi tai, viêm tai có thể do:\n\n";
+                $info .= "• Viêm tai ngoài\n";
+                $info .= "• Nhiễm nấm men\n";
+                $info .= "• Ve tai\n";
+                $info .= "• Tích tụ ráy tai\n";
+                $info .= "• Dị vật trong tai\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• KHÔNG tự chữa trị viêm tai tại nhà\n";
+                $info .= "• Ngăn không cho thú cưng gãi tai hoặc lắc đầu quá nhiều\n";
+                $info .= "• Không cho nước vào tai\n";
+                $info .= "• Không dùng tăm bông chọc sâu vào tai thú cưng\n";
+                $severity = "medium";
+                break;
+                
+            case 'leg':
+                $info = "Thú cưng đi khập khiễng hoặc có vấn đề về chân có thể do:\n\n";
+                $info .= "• Chấn thương: bong gân, rách dây chằng\n";
+                $info .= "• Viêm khớp\n";
+                $info .= "• Dị vật đâm vào chân/bàn chân\n";
+                $info .= "• Gãy xương\n";
+                $info .= "• Vấn đề thần kinh\n\n";
+                $info .= "Giải pháp tạm thời:\n";
+                $info .= "• Hạn chế vận động của thú cưng\n";
+                $info .= "• Kiểm tra bàn chân xem có dị vật không\n";
+                $info .= "• Chườm đá nếu có sưng tấy (15 phút mỗi lần)\n";
+                $info .= "• Không tự dùng thuốc giảm đau người cho thú cưng\n";
+                $severity = "medium";
+                break;
+                
+            default:
+                // Trường hợp không xác định được triệu chứng cụ thể
+                $response = $this->ollamaService->generateResponse($question, []);
+                if (!empty($response)) {
+                    return [
+                        'success' => true,
+                        'message' => $response . "\n\n⚠️ Lưu ý: Đây chỉ là thông tin tham khảo. Để chẩn đoán chính xác, vui lòng đưa thú cưng đến khám trực tiếp tại phòng khám PetCare.",
+                        'navigation_buttons' => [
+                            [
+                                'text' => 'Đặt lịch khám',
+                                'route' => '/client/dat-lich',
+                                'icon' => '📅'
+                            ]
+                        ]
+                    ];
+                }
+                
+                $info = "Dựa vào mô tả của bạn, chúng tôi chưa thể xác định chính xác vấn đề sức khỏe mà thú cưng của bạn đang gặp phải. Các triệu chứng có thể do nhiều nguyên nhân khác nhau và cần được bác sĩ thú y đánh giá trực tiếp.\n\n";
+                $info .= "Một số lời khuyên chung:\n";
+                $info .= "• Theo dõi sát các triệu chứng, ghi lại thời gian xuất hiện và diễn biến\n";
+                $info .= "• Kiểm tra nhiệt độ, nhịp thở và nhịp tim nếu có thể\n";
+                $info .= "• Đảm bảo thú cưng được nghỉ ngơi trong môi trường yên tĩnh\n";
+                $info .= "• Cung cấp đủ nước sạch\n";
+                $severity = "medium";
+                break;
+        }
+        
+        // Thêm lời khuyến cáo dựa trên mức độ nghiêm trọng
+        $conclusion = "\n\n";
+        
+        if ($severity === "high") {
+            $conclusion .= "⚠️ CẢNH BÁO: Đây là tình trạng CẤP CỨU cần được xử lý NGAY LẬP TỨC! Vui lòng liên hệ phòng khám PetCare theo số 0123.456.789 hoặc đưa thú cưng đến cơ sở y tế thú y gần nhất càng sớm càng tốt.";
+        } else {
+            $conclusion .= "⚠️ Lưu ý: Thông tin trên chỉ mang tính chất tham khảo và không thay thế cho việc thăm khám trực tiếp. Để có chẩn đoán chính xác và phương pháp điều trị phù hợp, bạn nên đưa thú cưng đến khám tại phòng khám PetCare trong thời gian sớm nhất.";
+        }
+        
+        // Tạo nút điều hướng phù hợp
+        $navigationButtons = [];
+        
+        if ($severity === "high") {
+            // Nút cấp cứu
+            $navigationButtons[] = [
+                'text' => '🚑 GỌI CẤP CỨU',
+                'route' => 'tel:0123456789',
+                'icon' => '🚨',
+                'description' => 'Liên hệ ngay dịch vụ cấp cứu'
+            ];
+        } 
+        
+        $navigationButtons[] = [
+            'text' => 'Đặt lịch khám',
+            'route' => '/client/dat-lich',
+            'icon' => '📅',
+            'description' => 'Đặt lịch khám cho thú cưng'
+        ];
+        
+        return [
+            'success' => true,
+            'message' => $info . $conclusion,
+            'navigation_buttons' => $navigationButtons,
+            'severity' => $severity
+        ];
+    }
+
     // Thêm phương thức mới để xác định và tạo nút điều hướng
     private function generateNavigationButtons($question)
     {
@@ -1021,11 +1249,8 @@ class ChatbotController extends Controller
                     break;
                 }
                 elseif (mb_strpos($target, 'giá') !== false || mb_strpos($target, 'price') !== false) {
-                    $buttons[] = [
-                        'text' => 'Bảng giá dịch vụ',
-                        'route' => '/client/bang-gia',
-                        'icon' => '💰'
-                    ];
+                    // Thay vì chuyển hướng đến trang bảng giá không tồn tại,
+                    // chỉ hiển thị thông tin giá trực tiếp trong chat
                     break;
                 }
                 elseif (mb_strpos($target, 'chủ') !== false || mb_strpos($target, 'home') !== false) {
@@ -1133,10 +1358,11 @@ class ChatbotController extends Controller
                     'route' => '/client/pet',
                     'icon' => '🐶'
                 ],
+                // Thông tin giá được hiển thị trực tiếp trong chat, không điều hướng đến trang riêng
                 'giá' => [
                     'keywords' => ['giá', 'chi phí', 'bảng giá', 'phí dịch vụ', 'tiền', 'thanh toán', 'bao nhiêu tiền', 'giá khám', 'giá tiêm', 'giá spa', 'giá phẫu thuật', 'giá cắt tỉa', 'giá tắm rửa', 'giá vệ sinh'],
-                    'text' => 'Bảng giá dịch vụ',
-                    'route' => '/client/bang-gia',
+                    'text' => 'Thông tin giá dịch vụ',
+                    'action' => 'getPriceInfo', // Gọi phương thức hiển thị thông tin giá
                     'icon' => '💰'
                 ],
                 'thanh toán' => [
@@ -1260,10 +1486,9 @@ class ChatbotController extends Controller
         try {
             // Lấy lịch sử hội thoại
             $history = $this->getSessionHistory($session_id);
-            $context = $this->buildConversationContext($history);
             
-            // Gọi Gemini API với context
-            $response = $this->callGeminiApiForWebSearchWithContext($question, $context);
+            // Gọi Ollama API với history
+            $response = $this->ollamaService->generateResponse($question, $history);
             
             // Kiểm tra nếu response chứa thông báo timeout hoặc lỗi
             $isErrorResponse = false;
@@ -1292,6 +1517,42 @@ class ChatbotController extends Controller
         }
     }
 
+    /**
+     * Store a message in the session history
+     *
+     * @param string $sessionId
+     * @param string $role 'user' or 'assistant'
+     * @param string $content
+     * @return void
+     */
+    private function storeMessage($sessionId, $role, $content)
+    {
+        $history = session("chatbot_session_$sessionId", []);
+        $history[] = [
+            'role' => $role,
+            'content' => $content,
+            'timestamp' => now()->timestamp
+        ];
+        
+        // Limit history to 10 messages
+        if (count($history) > 10) {
+            $history = array_slice($history, -10);
+        }
+        
+        session(["chatbot_session_$sessionId" => $history]);
+    }
+    
+    /**
+     * Get the chat history for a session
+     *
+     * @param string $sessionId
+     * @return array
+     */
+    private function getSessionHistory($sessionId)
+    {
+        return session("chatbot_session_$sessionId", []);
+    }
+
     // API logout cho chatbot
     public function logout(Request $request)
     {
@@ -1308,7 +1569,6 @@ class ChatbotController extends Controller
     {
         try {
             $suggestedQuestions = [
-                'Giá khám chó là bao nhiêu?',
                 'Phòng khám mở cửa mấy giờ?',
                 'Làm sao để đặt lịch khám?',
                 'Bác sĩ nào giỏi nhất?',
@@ -1321,13 +1581,19 @@ class ChatbotController extends Controller
                 'Thú cưng tôi gặp vấn đề tiêu hóa',
                 'Tư vấn chăm sóc chó con',
                 'Tư vấn chăm sóc mèo con',
+                'Chó tôi bị tiêu chảy, tôi nên làm gì?',
+                'Mèo tôi không ăn uống, có nguy hiểm không?',
+                'Chế độ dinh dưỡng cho chó già',
+                'Mèo con cần ăn gì để khỏe mạnh?',
                 'Thức ăn tốt cho thú cưng là gì?',
-                'Lịch tiêm vaccine cho thú cưng'
+                'Lịch tiêm vaccine cho thú cưng',
+                'Có dịch vụ chăm sóc thú cưng tại nhà không?',
+                'Thú cưng tôi ho và hắt hơi, có nghiêm trọng không?'
             ];
             
             return response()->json([
                 'success' => true,
-                'data' => $suggestedQuestions
+                'predefined_questions' => $suggestedQuestions
             ]);
             
         } catch (Exception $e) {
@@ -1336,6 +1602,82 @@ class ChatbotController extends Controller
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi lấy danh sách câu hỏi gợi ý.'
             ]);
+        }
+    }
+
+    // Hàm để gọi Ollama service với context
+    private function callOllamaWithContext($question, $context)
+    {
+        // Convert context format from our internal format to what OllamaChatbotService expects
+        $history = [];
+        foreach ($context as $message) {
+            if (isset($message['role']) && isset($message['parts'][0]['text'])) {
+                $role = $message['role'] === 'model' ? 'bot' : 'user';
+                $history[] = [
+                    'role' => $role,
+                    'content' => $message['parts'][0]['text']
+                ];
+            }
+        }
+        
+        return $this->ollamaService->generateResponse($question, $history);
+    }
+    
+    /**
+     * Check if Ollama service is running
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkOllamaStatus()
+    {
+        try {
+            $status = $this->ollamaService->checkModelInstallation();
+            
+            return response()->json([
+                'success' => $status['status'],
+                'message' => $status['message'],
+                'model' => env('OLLAMA_MODEL', 'gemma:2b')
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error checking Ollama status: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error checking Ollama status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Analyze the project structure for context
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function analyzeProject()
+    {
+        try {
+            // Static project analysis to help the chatbot understand context
+            $projectAnalysis = [
+                'success' => true,
+                'analysis' => 'PetCare là hệ thống quản lý phòng khám thú cưng với các chức năng đặt lịch, quản lý thú cưng và dịch vụ.',
+                'structure' => [
+                    'controllers' => ['ChatbotController', 'BookingController', 'ServiceController', 'PetController'],
+                    'models' => ['DichVu', 'NhanVien', 'Pet', 'LichHen', 'LichHenPet'],
+                    'features' => ['Đặt lịch khám', 'Quản lý thú cưng', 'Tư vấn AI', 'Hồ sơ bệnh án', 'Quản lý dịch vụ']
+                ],
+                'type' => 'veterinary',
+                'domain' => 'pet care',
+                'languages' => ['vi']
+            ];
+            
+            return response()->json($projectAnalysis);
+        } catch (\Exception $e) {
+            Log::error('Error analyzing project: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error analyzing project: ' . $e->getMessage()
+            ], 500);
         }
     }
 } 

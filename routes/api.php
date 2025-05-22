@@ -284,6 +284,9 @@ Route::get('/ho-so-benh-an/loc-theo-bac-si/{id}', [HoSoBenhAnController::class, 
 // Chatbot routes
 Route::post('/chatbot/chat', [ChatbotController::class, 'chat']);
 Route::post('/chatbot/ask', [ChatbotController::class, 'query']);
+Route::post('/chatbot/feedback', [ChatbotController::class, 'feedback']);
+Route::get('/admin/check-ollama', [ChatbotController::class, 'checkOllamaStatus']);
+Route::get('/chatbot/analyze-project', [ChatbotController::class, 'analyzeProject']);
 Route::get('/chatbot/suggest-services', [ChatbotController::class, 'suggestServices']);
 Route::get('/chatbot/get-available-slots', [ChatbotController::class, 'getAvailableSlots']);
 Route::get('/chatbot/get-service-reviews/{serviceId}', [ChatbotController::class, 'getServiceReviews']);
