@@ -246,7 +246,7 @@ class LichHenPetController extends Controller
             // Tạo hóa đơn
             $idHoaDon = DB::table('hoa_dons')->insertGetId([
                 'id_kh'             => $lichHen->id_kh,
-                'id_nv'             => $lichHen->id_nv ?? 1,
+                'id_nv'             => null,
                 'phuong_thuc'       => 1,
                 'tinh_trang'        => 0,
                 'ngay_xuat_hoa_don' => now(),

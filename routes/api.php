@@ -272,7 +272,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:17'])->group(function () {
     Route::get("doctor/thong-tin-bac-si", [LichHenPetController::class, 'load']);
 });
 // Route kiểm tra quyền
-Route::get('/phan-quyen/kiem-tra-quyen/{id}', [NhanVienController::class, 'kiemTraQuyen']);
+Route::get('/phan-quyen/kiem-tra-quyen/{id}', [PhanQuyenController::class, 'kiemTraQuyen']);
 
 Route::get('/pet/load', [PetController::class, 'Load']);
 

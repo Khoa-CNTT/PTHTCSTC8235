@@ -161,7 +161,7 @@ class HoSoBenhAnController extends Controller
                     $lich->save();
                     $idHoaDon = DB::table('hoa_dons')->insertGetId([
                         'id_kh'              => $lich->id_kh,
-                        'id_nv'              => $lich->id_nv ?? 1,
+                        'id_nv'              => null,
                         'phuong_thuc'        => 1,
                         'tinh_trang'         => 0,
                         'ngay_xuat_hoa_don'  => now(),

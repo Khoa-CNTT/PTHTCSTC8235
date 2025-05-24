@@ -17,29 +17,46 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
-            DichVuSeeder::class,
-            LoaiDichVuSeeder::class,
+            // Cơ bản
+            ChucVuSeeder::class,
+            ChucNangSeeder::class,
+            KhachHangSeeder::class,
+            NhanVienSeeder::class,
+            PhanQuyenSeeder::class,
+            
+            // Thuốc và kho
             KhoSeeder::class,
             NhaCungCapSeeder::class,
-            ChucVuSeeder::class,
             ThuocSeeder::class,
+            QLTonKhoSeeder::class,
+            
+            // Thú cưng
+            PetSeeder::class,
+            
+            // Dịch vụ
+            LoaiDichVuSeeder::class,
+            DichVuSeeder::class,
+            
+            // Lịch hẹn
             LichSeeder::class,
             LichHenSeeder::class,
-            DanhGiaSeeder::class,
-            LuongSeeder::class,
-            KhachHangSeeder::class,
-            NhaCungCapSeeder::class,
-            ChucNangSeeder::class,
-            QLTonKhoSeeder::class,
-            NhanVienSeeder::class,
-            PetSeeder::class,
+            
+            // Đơn thuốc
             DonThuocSeeder::class,
             DonThuocChiTietSeeder::class,
+            
+            // Hồ sơ bệnh án
             HoSoBenhAnSeeder::class,
-            PhanQuyenSeeder::class,
-            LichHenSeeder::class,
+            
+            // Hóa đơn
             HoaDonSeeder::class,
             HoaDonChiTietSeeder::class,
+            
+            // Đánh giá
+            DanhGiaSeeder::class,
+            
+            // Lương
+            LuongSeeder::class,
         ]);
     }
 }

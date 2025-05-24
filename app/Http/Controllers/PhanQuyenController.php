@@ -66,25 +66,37 @@ class PhanQuyenController extends Controller
     }
     public function kiemTraQuyen(Request $request, $id_chuc_nang)
     {
-        $user = Auth::guard('sanctum')->user();
-        if ($user && $user instanceof \App\Models\NhanVien) {
+        try {
+            $user = Auth::guard('sanctum')->user();
+            if (!$user || !($user instanceof \App\Models\NhanVien)) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn cần đăng nhập để thực hiện chức năng này'
+                ], 401);
+            }
+
             $coQuyen = PhanQuyen::where('id_chuc_vu', $user->id_chucvu)
                 ->where('id_chuc_nang', $id_chuc_nang)
                 ->exists();
+                
             if ($coQuyen) {
                 return response()->json([
                     'status' => 1,
+                    'message' => 'Bạn có quyền truy cập'
                 ]);
             } else {
                 return response()->json([
                     'status' => 0,
-                    'message' => 'Bạn không có quyền truy cập',
-                ]);
+                    'message' => 'Bạn không có quyền truy cập chức năng này'
+                ], 403);
             }
+        } catch (\Exception $e) {
+            \Log::error('Lỗi kiểm tra quyền: ' . $e->getMessage());
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi hệ thống khi kiểm tra quyền'
+            ], 500);
         }
-        return response()->json([
-            'status' => 0,
-        ]);
     }
 
 }

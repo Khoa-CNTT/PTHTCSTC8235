@@ -307,12 +307,10 @@ class HoaDonController extends Controller
             // Kiểm tra dữ liệu đầu vào
             $request->validate([
                 'id_kh' => 'required',
-                'id_thu_cung' => 'required',
-                'id_nv' => 'required',
-                'tien_don_thuoc' => 'required|numeric|min:0',
+                'tien_don_thuoc' => 'numeric|min:0',
                 'tien_dich_vu' => 'required|numeric|min:0',
-                'tien_kham' => 'required|numeric|min:0',
-                'tien_coc_dich_vu' => 'required|numeric|min:0',
+                'tien_kham' => 'numeric|min:0',
+                'tien_coc_dich_vu' => 'numeric|min:0',
                 'phuong_thuc' => 'required|in:0,1',
                 'tinh_trang' => 'required|in:0,1'
             ]);
@@ -322,7 +320,7 @@ class HoaDonController extends Controller
             // Thêm mới hóa đơn
             $idHoaDon = DB::table('hoa_dons')->insertGetId([
                 'id_kh' => $request->id_kh,
-                'id_nv' => $request->id_nv,
+                'id_nv' => $request->id_nv ?? null,
                 'phuong_thuc' => $request->phuong_thuc,
                 'tinh_trang' => $request->tinh_trang,
                 'ngay_xuat_hoa_don' => now(),
