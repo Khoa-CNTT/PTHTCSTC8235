@@ -281,18 +281,18 @@ Route::get("lich/load", [LichHenController::class, 'load']);
 
 Route::get('/ho-so-benh-an/loc-theo-bac-si/{id}', [HoSoBenhAnController::class, 'locTheoBacSi']);
 
-// Chatbot routes
-Route::post('/chatbot/chat', [ChatbotController::class, 'chat']);
-Route::post('/chatbot/ask', [ChatbotController::class, 'query']);
-Route::post('/chatbot/feedback', [ChatbotController::class, 'feedback']);
-Route::get('/admin/check-ollama', [ChatbotController::class, 'checkOllamaStatus']);
-Route::get('/chatbot/analyze-project', [ChatbotController::class, 'analyzeProject']);
-Route::get('/chatbot/suggest-services', [ChatbotController::class, 'suggestServices']);
-Route::get('/chatbot/get-available-slots', [ChatbotController::class, 'getAvailableSlots']);
-Route::get('/chatbot/get-service-reviews/{serviceId}', [ChatbotController::class, 'getServiceReviews']);
-Route::get('/doctors', [ChatbotController::class, 'getDoctorsWithSchedule']);
-Route::get('/chatbot/suggested-questions', [ChatbotController::class, 'getSuggestedQuestions']);
+// Chatbot API routes
+Route::prefix('chatbot')->group(function () {
+    Route::post('/chat', [App\Http\Controllers\ChatbotController::class, 'chat']);
+    Route::post('/feedback', [App\Http\Controllers\ChatbotController::class, 'feedback']);
+    Route::get('/suggested-questions', [App\Http\Controllers\ChatbotController::class, 'getSuggestedQuestions']);
+    Route::get('/services', [App\Http\Controllers\ChatbotController::class, 'getServicesForChatbot']);
+    Route::get('/time-slots', [App\Http\Controllers\ChatbotController::class, 'getTimeSlots']);
+    Route::post('/create-booking', [App\Http\Controllers\ChatbotController::class, 'createBooking']);
+});
 
+// Add route for getting user's pets for chatbot
+Route::middleware('auth:sanctum')->get('/khach-hang/pets', [KhachHangController::class, 'getPets']);
 
 //client lich hen routes
 Route::get("lich-hen/thong-tin-slot", [LichHenPetController::class, 'thongTinSlot']);

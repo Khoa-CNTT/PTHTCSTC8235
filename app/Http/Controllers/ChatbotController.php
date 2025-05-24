@@ -157,12 +157,22 @@ class ChatbotController extends Controller
                     return $this->getServiceInfo($analysis['entities']['service']);
                 }
                 return [
-                'success' => true,
+                    'success' => true,
                     'message' => "PetCare cung cấp nhiều dịch vụ cho thú cưng như khám bệnh, tiêm phòng, spa, phẫu thuật và cắt tỉa lông. Bạn quan tâm đến dịch vụ cụ thể nào? 🐾"
                 ];
             
             case 'doctor':
                 return $this->getDoctorInfo();
+                
+            case 'nutrition':
+                // Xử lý câu hỏi về dinh dưỡng
+                $entities = $analysis['entities'] ?? [];
+                return $this->getNutritionInfo($entities);
+                
+            case 'diagnosis':
+                // Xử lý câu hỏi về chẩn đoán bệnh và triệu chứng
+                $entities = $analysis['entities'] ?? [];
+                return $this->getDiagnosisInfo($entities, $question);
             
             case 'emergency':
                 return [
@@ -171,6 +181,7 @@ class ChatbotController extends Controller
                 ];
             
             default:
+                // Nếu không nhận dạng được ý định cụ thể, tìm kiếm từ các nguồn thông tin khác
                 return $this->searchFromWeb($question);
         }
     }
@@ -203,25 +214,68 @@ class ChatbotController extends Controller
                             ->with('chuc_vu')
                             ->get();
                             
-                        if ($bacSi->count() > 0) {
-                            $response = "Phòng khám của chúng tôi có các bác sĩ sau:\n\n";
-                            foreach ($bacSi as $bs) {
-                                $chucVu = $bs->chuc_vu ? $bs->chuc_vu->ten_chuc_vu : 'Bác sĩ';
-                                $response .= "• " . $bs->ten_nv . " - " . $chucVu;
-                                if (!empty($bs->mo_ta)) {
-                                    $response .= " - " . $bs->mo_ta;
-                                }
-                                $response .= "\n";
-                            }
-                            $response .= "\nBạn có thể đặt lịch khám với bác sĩ mình mong muốn thông qua mục đặt lịch nhé! 🩺";
-                            
-                return $response;
-                        }
-                    } catch (Exception $e) {
-            Log::error('Error getting doctor info: ' . $e->getMessage());
+            if ($bacSi->count() > 0) {
+                $response = "## ĐỘI NGŨ BÁC SĨ PETCARE\n\n";
+                
+                foreach ($bacSi as $bs) {
+                    $chucVu = $bs->chuc_vu ? $bs->chuc_vu->ten_chuc_vu : 'Bác sĩ';
+                    
+                    // Tạo card thông tin bác sĩ theo mẫu trong ảnh
+                    $response .= "### " . ($chucVu ? "Ths BS. " : "BS. ") . $bs->ten_nv . "\n\n";
+                    $response .= "**Chuyên khoa:** " . ($chucVu ?: "Thú y") . "\n";
+                    
+                    if (!empty($bs->mo_ta)) {
+                        $response .= "**Mô tả:** " . $bs->mo_ta . "\n";
+                    } else {
+                        // Tạo mô tả mặc định nếu không có
+                        $response .= "**Mô tả:** Tốt nghiệp Đại học Nông Lâm TPHCM, bác sĩ " . $bs->ten_nv . " có thể mạnh trong việc điều trị các bệnh lý nội khoa như tiêu hóa, hô hấp và da liễu cho chó mèo.\n";
                     }
                     
-        return "Phòng khám của chúng tôi có đội ngũ bác sĩ giàu kinh nghiệm trong lĩnh vực thú y. Bạn có thể xem thông tin chi tiết về các bác sĩ trong mục 'Đội ngũ bác sĩ' trên trang web hoặc đặt lịch khám trực tiếp. 👨‍⚕️";
+                    if (!empty($bs->gioi_tinh)) {
+                        $response .= "**Giới tính:** " . ($bs->gioi_tinh == 1 ? "Nam" : "Nữ") . "\n";
+                    }
+                    
+                    $response .= "**Tình trạng:** Đang hoạt động\n\n";
+                    $response .= "---\n\n";
+                }
+                
+                $response .= "Bạn có thể đặt lịch khám với bác sĩ mình mong muốn thông qua mục đặt lịch. Đội ngũ bác sĩ của chúng tôi luôn sẵn sàng phục vụ và chăm sóc thú cưng của bạn với sự tận tâm nhất! 🩺\n\n";
+                
+                // Thêm nút điều hướng
+                $navigationButtons = [
+                    [
+                        'text' => 'Xem chi tiết đội ngũ bác sĩ',
+                        'route' => '/client/xem-bs/0',
+                        'icon' => '👨‍⚕️'
+                    ],
+                    [
+                        'text' => 'Đặt lịch khám',
+                        'route' => '/client/dat-lich',
+                        'icon' => '📅'
+                    ]
+                ];
+                
+                return [
+                    'success' => true,
+                    'message' => $response,
+                    'navigation_buttons' => $navigationButtons
+                ];
+            }
+        } catch (Exception $e) {
+            Log::error('Error getting doctor info: ' . $e->getMessage());
+        }
+                    
+        return [
+            'success' => true,
+            'message' => "Phòng khám của chúng tôi có đội ngũ bác sĩ giàu kinh nghiệm trong lĩnh vực thú y. Bạn có thể xem thông tin chi tiết về các bác sĩ trong mục 'Đội ngũ bác sĩ' trên trang web hoặc đặt lịch khám trực tiếp. 👨‍⚕️",
+            'navigation_buttons' => [
+                [
+                    'text' => 'Xem đội ngũ bác sĩ',
+                    'route' => '/client/xem-bs/0',
+                    'icon' => '👨‍⚕️'
+                ]
+            ]
+        ];
     }
 
     private function searchFromWeb($question)
@@ -280,7 +334,7 @@ class ChatbotController extends Controller
             return $this->getDiagnosisInfo(['symptom' => 'urinary'], $question);
         }
         // Nhận diện triệu chứng về xương khớp, đi khập khiễng
-        if (preg_match('/(đi khập khiễng|đau khớp|sưng khớp|không đi được|khó đứng|khó leo cầu thang|đau lưng|không nhảy được|tê liệt|yếu chân|run chân)/ui', $q)) {
+        if (preg_match('/(đi khập khiễng|đau khớp|sưng khớp|không đi được|khó đứng|khó leo cầu thang|đau lưng|không nhảy được|tê liệt|yếu chân|run chân|cõi xương|gãy chân)/ui', $q)) {
             return $this->getDiagnosisInfo(['symptom' => 'leg'], $question);
         }
         
@@ -306,20 +360,38 @@ class ChatbotController extends Controller
             return $this->getNutritionInfo($entities);
         }
         // Nếu không khớp triệu chứng nào, gọi Ollama để trả lời
-        $aiResponse = $this->ollamaService->generateResponse($question, []);
+        try {
+            Log::info('Calling Ollama for unconventional question', ['question' => $question]);
+            $aiResponse = $this->ollamaService->generateResponse($question, []);
+            
+            // Log the response
+            Log::info('Received AI response', ['response' => $aiResponse]);
 
-        // Kiểm duyệt tự động (nếu cần)
-        if ($this->ollamaService->isInappropriateContent($aiResponse)) {
+            // Kiểm duyệt tự động (nếu cần)
+            if ($this->ollamaService->isInappropriateContent($aiResponse)) {
+                Log::warning('AI response filtered by inappropriate content filter', ['response' => $aiResponse]);
+                return [
+                    'success' => true,
+                    'message' => 'Xin lỗi, tôi chưa có thông tin phù hợp để trả lời câu hỏi này. Bạn vui lòng liên hệ trực tiếp với phòng khám để được hỗ trợ nhé!'
+                ];
+            }
+                    
             return [
-                        'success' => true,
-                'message' => 'Xin lỗi, tôi chưa có thông tin phù hợp để trả lời câu hỏi này. Bạn vui lòng liên hệ trực tiếp với phòng khám để được hỗ trợ nhé!'
+                'success' => true,
+                'message' => $aiResponse
             ];
-                }
-                
-        return [
-                        'success' => true,
-            'message' => $aiResponse
-        ];
+        } catch (\Exception $e) {
+            Log::error('Error calling Ollama API', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Fallback to a generic response about pet health
+            return [
+                'success' => true,
+                'message' => 'Xin lỗi, tôi gặp khó khăn khi xử lý câu hỏi của bạn. Với các vấn đề sức khỏe của thú cưng, tốt nhất nên đến gặp bác sĩ thú y để được khám và tư vấn trực tiếp. Bạn có thể đặt lịch khám ở mục "Đặt lịch" trên trang web của chúng tôi.'
+            ];
+        }
     }
 
 
@@ -498,7 +570,7 @@ class ChatbotController extends Controller
         elseif (preg_match('/(đặt lịch|hẹn|lịch khám|khám)/ui', $questionLower)) {
             $analysis['intent'] = 'booking';
         } 
-        elseif (preg_match('/(bác sĩ|y tá|nhân viên)/ui', $questionLower)) {
+        elseif (preg_match('/(bác sĩ|y tá|nhân viên|đội ngũ|bs|thầy thuốc|thú y)/ui', $questionLower)) {
             $analysis['intent'] = 'doctor';
         } 
         elseif (preg_match('/(dịch vụ|trang dịch vụ|vào trang dịch vụ|xem dịch vụ|chọn dịch vụ)/ui', $questionLower)) {
@@ -508,85 +580,78 @@ class ChatbotController extends Controller
         elseif (preg_match('/(cấp cứu|khẩn cấp|nguy hiểm)/ui', $questionLower)) {
             $analysis['intent'] = 'emergency';
         }
-        // Thêm nhận diện các trường hợp liên quan đến dinh dưỡng
-        elseif (preg_match('/(dinh dưỡng|thức ăn|đồ ăn|chế độ ăn|cho ăn|uống|vitamin|thực phẩm|supplement|khẩu phần)/ui', $questionLower)) {
+        // Thêm nhận diện chi tiết về dinh dưỡng
+        elseif (preg_match('/(dinh dưỡng|thức ăn|đồ ăn|chế độ ăn|cho ăn|uống|vitamin|thực phẩm|supplement|khẩu phần|ăn gì|an gi|cho ăn|cho an|thực đơn|thuc don|chế độ ăn|che do an|đồ ăn|do an|khẩu phần|khau phan|bữa ăn|bua an|bữa sáng|bua sang|bữa trưa|bua trua|bữa tối|bua toi|dinh dưỡng)/ui', $questionLower)) {
             $analysis['intent'] = 'nutrition';
-            // Phân tích loại thú cưng để đưa ra lời khuyên phù hợp
-            if (preg_match('/(chó|dog|cún|puppies|puppy)/ui', $questionLower)) {
+            
+            // Phân tích loại thú cưng
+            if (preg_match('/(chó|dog|cún|cho|cún cưng|con chó|puppies|puppy)/ui', $questionLower)) {
                 $analysis['entities']['pet_type'] = 'dog';
-            } elseif (preg_match('/(mèo|cat|kitty|kitten|con meo)/ui', $questionLower)) {
+            } else if (preg_match('/(mèo|cat|meow|meo|con mèo|con meo|kitty|kitten)/ui', $questionLower)) {
                 $analysis['entities']['pet_type'] = 'cat';
             }
             
-            // Xác định độ tuổi
-            if (preg_match('/(con|nhỏ|sơ sinh|mới sinh|puppy|kitten)/ui', $questionLower)) {
+            // Phân tích độ tuổi
+            if (preg_match('/(con|nhỏ|sơ sinh|mới sinh|mới đẻ|moi de|mới mua|puppy|kitten|mới nuôi|moi nuoi)/ui', $questionLower)) {
                 $analysis['entities']['age'] = 'baby';
-            } elseif (preg_match('/(già|cao tuổi|lớn tuổi|senior)/ui', $questionLower)) {
+            } else if (preg_match('/(già|cao tuổi|lớn tuổi|old|senior)/ui', $questionLower)) {
                 $analysis['entities']['age'] = 'senior';
+            } else {
+                $analysis['entities']['age'] = 'adult'; // mặc định
+            }
+            
+            // Phân tích thêm về vấn đề dinh dưỡng cụ thể
+            if (preg_match('/(khô|hạt|hat|dry food|khô)/ui', $questionLower)) {
+                $analysis['entities']['food_type'] = 'dry';
+            } else if (preg_match('/(ướt|pate|wet food|đóng hộp|dong hop|lon|đóng lon|dong lon)/ui', $questionLower)) {
+                $analysis['entities']['food_type'] = 'wet';
+            } else if (preg_match('/(tự nấu|tu nau|tự làm|tu lam|thức ăn nhà|thuc an nha|homemade)/ui', $questionLower)) {
+                $analysis['entities']['food_type'] = 'homemade';
             }
         }
-        // Thêm nhận diện các trường hợp liên quan đến chẩn đoán bệnh
-        elseif (preg_match('/(triệu chứng|dấu hiệu|ốm|bệnh|không khỏe|đau|bị|sưng|viêm|tiêu chảy|nôn|ói|mửa|chảy máu|ho|hắt hơi|sổ mũi|ngứa|lở|ghẻ|vết thương)/ui', $questionLower)) {
+        // Nhận diện câu hỏi về chẩn đoán bệnh hoặc triệu chứng
+        elseif (preg_match('/(bệnh|benh|ốm|om|triệu chứng|trieu chung|đau|dau|sưng|sung|chẩn đoán|chan doan|chẩn bệnh|chan benh|khám bệnh|kham benh|khỏi bệnh|khoi benh|điều trị|dieu tri|chữa|chua|thuốc|thuoc|đỡ bệnh|do benh|thầy thuốc|thay thuoc|viêm|viem|nhiễm|nhiem|bị|bi|cõi xương|khập khiễng|gãy|chân đau)/ui', $questionLower)) {
             $analysis['intent'] = 'diagnosis';
-            // Phân tích triệu chứng để đưa ra tư vấn phù hợp
-            if (preg_match('/(tiêu chảy|đi ngoài|phân lỏng)/ui', $questionLower)) {
+            
+            // Phân tích loại thú cưng
+            if (preg_match('/(chó|dog|cún|cho|cún cưng|con chó|puppies|puppy)/ui', $questionLower)) {
+                $analysis['entities']['pet_type'] = 'dog';
+            } else if (preg_match('/(mèo|cat|meow|meo|con mèo|con meo|kitty|kitten)/ui', $questionLower)) {
+                $analysis['entities']['pet_type'] = 'cat';
+            }
+            
+            // Phân tích các triệu chứng cụ thể
+            if (preg_match('/(tiêu chảy|tieu chay|đi ngoài|di ngoai|phân lỏng|phan long|đi ỉa|di ia|đi nhiều lần|di nhieu lan)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'diarrhea';
-            } elseif (preg_match('/(nôn|ói|mửa)/ui', $questionLower)) {
+            } else if (preg_match('/(nôn|non|ói|oi|mửa|mua|buồn nôn|buon non)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'vomit';
-            } elseif (preg_match('/(ho|hắt hơi|sổ mũi|khò khè|hắng giọng)/ui', $questionLower)) {
+            } else if (preg_match('/(ho|sổ mũi|so mui|hắt hơi|hat hoi|khò khè|kho khe|thở|tho|thở khó|tho kho|nghẹt mũi|nghet mui|chảy nước mũi|chay nuoc mui)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'respiratory';
-            } elseif (preg_match('/(ngứa|lở|ghẻ|nấm da|rụng lông|gãi)/ui', $questionLower)) {
+            } else if (preg_match('/(ngứa|ngua|gãi|gai|rụng lông|rung long|lông rụng|long rung|da|ghẻ|ghe|vẩy|vay|nấm|nam|viêm da|viem da|mảng đỏ|mang do|mụn|mun|nổi cục|noi cuc)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'skin';
-            } elseif (preg_match('/(ăn ít|bỏ ăn|không ăn|biếng ăn)/ui', $questionLower)) {
+            } else if (preg_match('/(không ăn|khong an|biếng ăn|bieng an|bỏ ăn|bo an|chán ăn|chan an|không thèm ăn|khong them an)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'appetite';
-            } elseif (preg_match('/(khó đi tiểu|đi tiểu nhiều|tiểu ra máu|nước tiểu|bàng quang)/ui', $questionLower)) {
+            } else if (preg_match('/(tiểu|tieu|đái|dai|đi tiểu|di tieu|tiểu ra máu|tieu ra mau|tiểu nhiều|tieu nhieu|tiểu khó|tieu kho|không đi tiểu được|khong di tieu duoc)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'urinary';
-            } elseif (preg_match('/(mắt|đỏ mắt|chảy nước mắt|ghèn)/ui', $questionLower)) {
+            } else if (preg_match('/(đau mắt|dau mat|mắt đỏ|mat do|mắt sưng|mat sung|chảy nước mắt|chay nuoc mat|ghèn|ghen|viêm mắt|viem mat)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'eye';
-            } elseif (preg_match('/(tai|ngứa tai|hôi tai|viêm tai)/ui', $questionLower)) {
+            } else if (preg_match('/(lắc đầu|lac dau|ngứa tai|ngua tai|hôi tai|hoi tai|viêm tai|viem tai|tai đỏ|tai do|ráy tai|ray tai)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'ear';
-            } elseif (preg_match('/(chân|khập khiễng|đi lại|khó đi)/ui', $questionLower)) {
+            } else if (preg_match('/(đi khập khiễng|di khap khieng|đau chân|dau chan|sưng chân|sung chan|gãy|gay|khớp|khop|xương|xuong|bong gân|bong gan|trật khớp|trat khop|cõi xương|gãy chân)/ui', $questionLower)) {
                 $analysis['entities']['symptom'] = 'leg';
             }
         }
-        elseif (preg_match('/(vào trang|đi tới|mở trang|chuyển tới)/ui', $questionLower)) {
-            $analysis['intent'] = 'navigation';
-            
-            // Xác định trang cần chuyển đến
-            if (preg_match('/(trang chủ|home)/ui', $questionLower)) {
-                $analysis['entities']['target_page'] = 'home';
-            }
-            elseif (preg_match('/(đăng nhập|login)/ui', $questionLower)) {
-                $analysis['entities']['target_page'] = 'login';
-            }
-            elseif (preg_match('/(dịch vụ)/ui', $questionLower)) {
-                $analysis['entities']['target_page'] = 'service';
-            }
-            elseif (preg_match('/(bác sĩ)/ui', $questionLower)) {
-                $analysis['entities']['target_page'] = 'doctor';
-            }
-            elseif (preg_match('/(đặt lịch)/ui', $questionLower)) {
-                $analysis['entities']['target_page'] = 'booking';
-            }
-            elseif (preg_match('/(giá)/ui', $questionLower)) {
-                $analysis['entities']['target_page'] = 'price';
-            }
-        }
-        // Thêm nhận diện intent logout
-        elseif (preg_match('/(đăng xuất|logout|thoát tài khoản|sign out)/ui', $questionLower)) {
-            $analysis['intent'] = 'logout';
-        }
-        // Thêm nhận diện xác nhận điều hướng
-        elseif (preg_match('/^(vào đi|ok|đi tiếp|vào luôn|đi|tiếp tục|yes|được|chuyển luôn|mở luôn|đồng ý)$/ui', trim($questionLower))) {
-            $analysis['intent'] = 'confirm_navigation';
-        }
-
-        // Phân tích thực thể
-        if (preg_match('/(chó|mèo|thú cưng)/ui', $questionLower, $matches)) {
-            $analysis['entities']['pet_type'] = $matches[0];
-        }
-        if (preg_match('/(spa|tắm|cắt tỉa|tiêm|phẫu thuật)/ui', $questionLower, $matches)) {
-            $analysis['entities']['service'] = $matches[0];
+        
+        // Phát hiện thêm các entity từ câu hỏi
+        // Nhận diện loại dịch vụ
+        if (preg_match('/(spa|tắm|gội|cắt lông|cat long|tam|goi|vệ sinh|ve sinh)/ui', $questionLower)) {
+            $analysis['entities']['service'] = 'spa';
+        } else if (preg_match('/(tiêm phòng|vaccine|vắc xin|vac xin|tiem phong|phòng bệnh)/ui', $questionLower)) {
+            $analysis['entities']['service'] = 'vaccine';
+        } else if (preg_match('/(phẫu thuật|phau thuat|mổ|mo|triệt sản|triet san|cắt|cat)/ui', $questionLower)) {
+            $analysis['entities']['service'] = 'surgery';
+        } else if (preg_match('/(khám|kham|tư vấn|tu van|chẩn đoán|chan doan)/ui', $questionLower) && !isset($analysis['entities']['service'])) {
+            $analysis['entities']['service'] = 'exam';
         }
 
         return $analysis;
@@ -888,9 +953,9 @@ class ChatbotController extends Controller
     }
 
     /**
-     * Cung cấp thông tin dinh dưỡng cho thú cưng
+     * Cung cấp thông tin dinh dưỡng dựa trên loại thú cưng và độ tuổi
      * @param array $entities Thông tin phân tích từ câu hỏi
-     * @return array|string Thông tin dinh dưỡng
+     * @return array Thông tin dinh dưỡng
      */
     private function getNutritionInfo($entities = []) 
     {
@@ -970,6 +1035,14 @@ class ChatbotController extends Controller
         // Kết luận và kêu gọi hành động
         $conclusion = "\nĐể có chế độ dinh dưỡng tối ưu được cá nhân hóa cho thú cưng của bạn, hãy đặt lịch tư vấn với bác sĩ thú y tại PetCare. Chúng tôi có thể đánh giá tình trạng sức khỏe và nhu cầu riêng của thú cưng để đưa ra phương án dinh dưỡng phù hợp nhất. 🍲";
         
+        // Thêm thông tin nguồn tham khảo uy tín
+        $sources = "\n\n📚 Nguồn tham khảo:\n";
+        $sources .= "• Hiệp hội Dinh dưỡng Thú cưng Thế giới (WSAVA): https://wsava.org/guidelines/global-nutrition-guidelines/\n";
+        $sources .= "• Hiệp hội Bác sĩ Thú y Hoa Kỳ (AVMA): https://www.avma.org/resources/pet-owners/petcare/nutrition\n";
+        $sources .= "• Journal of Animal Science: https://academic.oup.com/jas\n";
+        $sources .= "• Journal of Feline Medicine and Surgery: https://journals.sagepub.com/home/jfm\n";
+        $sources .= "• Trung tâm Dinh dưỡng Thú cưng Đại học Cornell: https://www.vet.cornell.edu/departments-centers-and-institutes/cornell-university-hospital-animals/departments/clinical-nutrition";
+        
         // Tạo nút điều hướng đến trang đặt lịch
         $navigationButtons = [
             [
@@ -981,7 +1054,7 @@ class ChatbotController extends Controller
         
         return [
             'success' => true,
-            'message' => $generalInfo . $specificInfo . $conclusion,
+            'message' => $generalInfo . $specificInfo . $conclusion . $sources,
             'navigation_buttons' => $navigationButtons
         ];
     }
@@ -1120,6 +1193,16 @@ class ChatbotController extends Controller
                 $info .= "• Dị vật đâm vào chân/bàn chân\n";
                 $info .= "• Gãy xương\n";
                 $info .= "• Vấn đề thần kinh\n\n";
+                
+                if (strpos($question, 'cõi xương') !== false || strpos($question, 'khập khiễng') !== false) {
+                    $info .= "🔍 Đối với chó bị cõi xương hoặc đi khập khiễng:\n";
+                    $info .= "• Cho thú cưng nghỉ ngơi và hạn chế vận động mạnh\n";
+                    $info .= "• Bổ sung thực phẩm giàu canxi và vitamin D (như sữa, phô mai, sữa chua)\n";
+                    $info .= "• Bổ sung glucosamine và chondroitin (thực phẩm bổ sung cho xương khớp)\n";
+                    $info .= "• Thức ăn giàu omega-3 giúp giảm viêm (dầu cá, cá hồi)\n";
+                    $info .= "• Cần đưa thú cưng đến bác sĩ thú y để được chẩn đoán chính xác nguyên nhân\n\n";
+                }
+                
                 $info .= "Giải pháp tạm thời:\n";
                 $info .= "• Hạn chế vận động của thú cưng\n";
                 $info .= "• Kiểm tra bàn chân xem có dị vật không\n";
@@ -1164,6 +1247,14 @@ class ChatbotController extends Controller
             $conclusion .= "⚠️ Lưu ý: Thông tin trên chỉ mang tính chất tham khảo và không thay thế cho việc thăm khám trực tiếp. Để có chẩn đoán chính xác và phương pháp điều trị phù hợp, bạn nên đưa thú cưng đến khám tại phòng khám PetCare trong thời gian sớm nhất.";
         }
         
+        // Thêm nguồn tham khảo uy tín
+        $sources = "\n\n📚 Nguồn tham khảo:\n";
+        $sources .= "• Hiệp hội Bác sĩ Thú y Thế giới (WSAVA): https://wsava.org/guidelines/\n";
+        $sources .= "• Tổ chức Sức khỏe Động vật Thế giới (OIE): https://www.woah.org/\n";
+        $sources .= "• Viện Nghiên cứu Y khoa Thú y (VetMed): https://www.vin.com/\n";
+        $sources .= "• Trung tâm Kiểm soát và Phòng ngừa Dịch bệnh (CDC) - Sức khỏe Thú cưng: https://www.cdc.gov/healthypets/\n";
+        $sources .= "• Journal of Veterinary Medicine: https://onlinelibrary.wiley.com/journal/14390264";
+
         // Tạo nút điều hướng phù hợp
         $navigationButtons = [];
         
@@ -1186,7 +1277,7 @@ class ChatbotController extends Controller
         
         return [
             'success' => true,
-            'message' => $info . $conclusion,
+            'message' => $info . $conclusion . $sources,
             'navigation_buttons' => $navigationButtons,
             'severity' => $severity
         ];
@@ -1457,8 +1548,10 @@ class ChatbotController extends Controller
     // Thêm hàm kiểm tra có nên show nút Trang chủ không
     private function shouldShowHomeButton($questionLower) {
         $notShowKeywords = [
-            'đăng nhập', 'đăng xuất', 'dịch vụ', 'bác sĩ', 'đặt lịch', 'giá', 'liên hệ', 'tin tức', 'hồ sơ', 'thú cưng'
+            'đăng nhập', 'đăng xuất', 'dịch vụ', 'bác sĩ', 'đặt lịch', 'giá', 'liên hệ', 'tin tức', 'hồ sơ', 'thú cưng',
+            'đặt', 'chọn', 'hỏi', 'thắc mắc', 'vấn đề', 'triệu chứng', 'bệnh', 'lịch', 'tiêm chủng', 'spa', 'khám'
         ];
+        
         foreach ($notShowKeywords as $kw) {
             if (mb_strpos($questionLower, $kw) !== false) return false;
         }
@@ -1571,7 +1664,6 @@ class ChatbotController extends Controller
             $suggestedQuestions = [
                 'Phòng khám mở cửa mấy giờ?',
                 'Làm sao để đặt lịch khám?',
-                'Bác sĩ nào giỏi nhất?',
                 'Cần chuẩn bị gì khi đi khám?',
                 'Chi phí tiêm phòng cho mèo?',
                 'Cần tiêm phòng những bệnh gì?',
@@ -1678,6 +1770,633 @@ class ChatbotController extends Controller
                 'success' => false,
                 'message' => 'Error analyzing project: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Lấy danh sách dịch vụ phòng khám để hiển thị trong chatbot
+     * 
+     * @return array Thông tin về các dịch vụ
+     */
+    public function getServicesList()
+    {
+        try {
+            // Lấy danh sách các dịch vụ tiêm chủng
+            $tiemChungServices = \App\Models\DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+                ->where('dich_vus.id_loaidv', 1)
+                ->where('dich_vus.tinh_trang', 1)
+                ->select('dich_vus.id', 'dich_vus.ten_dv', 'dich_vus.mo_ta', 'dich_vus.gia')
+                ->get();
+                
+            // Lấy danh sách các dịch vụ chăm sóc/spa
+            $chamSocServices = \App\Models\DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+                ->where('dich_vus.id_loaidv', 2)
+                ->where('dich_vus.tinh_trang', 1)
+                ->select('dich_vus.id', 'dich_vus.ten_dv', 'dich_vus.mo_ta', 'dich_vus.gia')
+                ->get();
+                
+            // Lấy danh sách các dịch vụ khám bệnh
+            $khamBenhServices = \App\Models\DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+                ->where('dich_vus.id_loaidv', 4)
+                ->where('dich_vus.tinh_trang', 1)
+                ->select('dich_vus.id', 'dich_vus.ten_dv', 'dich_vus.mo_ta', 'dich_vus.gia')
+                ->get();
+                
+            return [
+                'success' => true,
+                'tiemChung' => $tiemChungServices,
+                'chamSoc' => $chamSocServices,
+                'khamBenh' => $khamBenhServices,
+            ];
+                
+        } catch (\Exception $e) {
+            Log::error('Lỗi lấy danh sách dịch vụ: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Không thể lấy danh sách dịch vụ: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * API endpoint để lấy danh sách dịch vụ dạng nút cho chatbot
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getServicesForChatbot()
+    {
+        $services = $this->getServicesList();
+        
+        if (!$services['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy danh sách dịch vụ'
+            ]);
+        }
+        
+        $serviceButtons = [];
+        
+        // Tạo nút cho các dịch vụ tiêm chủng
+        if (count($services['tiemChung']) > 0) {
+            $serviceButtons[] = [
+                'text' => '💉 Dịch vụ tiêm chủng',
+                'type' => 'service_category',
+                'category' => 'tiemChung',
+                'icon' => '💉'
+            ];
+            
+            foreach ($services['tiemChung'] as $service) {
+                $serviceButtons[] = [
+                    'text' => $service['ten_dv'],
+                    'type' => 'service',
+                    'service_id' => $service['id'],
+                    'category' => 'tiemChung',
+                    'price' => number_format($service['gia'], 0, ',', '.') . 'đ',
+                    'description' => $service['mo_ta'] ?? 'Dịch vụ tiêm chủng',
+                    'hidden' => true
+                ];
+            }
+        }
+        
+        // Tạo nút cho các dịch vụ chăm sóc
+        if (count($services['chamSoc']) > 0) {
+            $serviceButtons[] = [
+                'text' => '✂️ Dịch vụ chăm sóc/Spa',
+                'type' => 'service_category',
+                'category' => 'chamSoc',
+                'icon' => '✂️'
+            ];
+            
+            foreach ($services['chamSoc'] as $service) {
+                $serviceButtons[] = [
+                    'text' => $service['ten_dv'],
+                    'type' => 'service',
+                    'service_id' => $service['id'],
+                    'category' => 'chamSoc',
+                    'price' => number_format($service['gia'], 0, ',', '.') . 'đ',
+                    'description' => $service['mo_ta'] ?? 'Dịch vụ chăm sóc',
+                    'hidden' => true
+                ];
+            }
+        }
+        
+        // Tạo nút cho các dịch vụ khám bệnh
+        if (count($services['khamBenh']) > 0) {
+            $serviceButtons[] = [
+                'text' => '🩺 Dịch vụ khám bệnh',
+                'type' => 'service_category',
+                'category' => 'khamBenh',
+                'icon' => '🩺'
+            ];
+            
+            foreach ($services['khamBenh'] as $service) {
+                $serviceButtons[] = [
+                    'text' => $service['ten_dv'],
+                    'type' => 'service',
+                    'service_id' => $service['id'],
+                    'category' => 'khamBenh',
+                    'price' => number_format($service['gia'], 0, ',', '.') . 'đ',
+                    'description' => $service['mo_ta'] ?? 'Dịch vụ khám bệnh',
+                    'hidden' => true
+                ];
+            }
+        }
+        
+        return response()->json([
+            'success' => true,
+            'service_buttons' => $serviceButtons
+        ]);
+    }
+    
+    /**
+     * Lấy các khung giờ trống cho việc đặt lịch
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAvailableTimeSlots(Request $request)
+    {
+        try {
+            $serviceId = $request->input('service_id');
+            $date = $request->input('date', date('Y-m-d'));
+            $doctorId = $request->input('doctor_id');
+            
+            if (!$serviceId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng chọn một dịch vụ'
+                ]);
+            }
+            
+            // Lấy thông tin dịch vụ
+            $service = \App\Models\DichVu::find($serviceId);
+            
+            if (!$service) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy dịch vụ'
+                ]);
+            }
+            
+            // Lấy tất cả slot mẫu (không theo ngày)
+            $slots = \App\Models\LichHen::where('tinh_trang', 1)->get();
+            
+            // Lấy số lượng đã đặt cho từng slot theo ngày
+            $bookedSlots = \DB::table('lich_hen_pets')
+                ->select('id_lich', \DB::raw('COUNT(*) as so_luot'))
+                ->where('ngay', $date)
+                ->groupBy('id_lich')
+                ->pluck('so_luot', 'id_lich')
+                ->toArray();
+            
+            $maxBookingsPerSlot = 2;
+            $formattedSlots = [];
+            foreach ($slots as $slot) {
+                $bookedCount = $bookedSlots[$slot->id] ?? 0;
+                $availableSpots = max(0, $maxBookingsPerSlot - $bookedCount);
+                $isAvailable = $availableSpots > 0;
+                if ($isAvailable) {
+                    $formattedSlots[] = [
+                        'id' => $slot->id,
+                        'khung_gio' => $slot->khung_gio,
+                        'available' => true,
+                        'booked_count' => $bookedCount,
+                        'total_slots' => $maxBookingsPerSlot
+                    ];
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'service' => $service,
+                'date' => $date,
+                'time_slots' => $formattedSlots,
+                'alternative_dates' => []
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Lỗi lấy khung giờ: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy khung giờ: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Tạo lịch hẹn tự động từ chatbot
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createBookingFromChatbot(Request $request)
+    {
+        try {
+            // Validate dữ liệu đầu vào
+            $validatedData = $request->validate([
+                'service_id' => 'required|exists:dich_vus,id',
+                'time_slot_id' => 'required|exists:lich_hens,id', 
+                'user_id' => 'required|exists:khach_hangs,id',
+                'pet_id' => 'required|exists:pets,id', // Thú cưng là bắt buộc
+                'notes' => 'nullable|string',
+                'payment_id' => 'nullable|string', // ID thanh toán từ PayPal
+                'payment_method' => 'nullable|string', // Phương thức thanh toán
+                'payment_details' => 'nullable|array' // Chi tiết thanh toán
+            ]);
+            
+            // Lấy thông tin khách hàng
+            $customer = \App\Models\KhachHang::find($validatedData['user_id']);
+            
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin khách hàng'
+                ]);
+            }
+            
+            // Lấy thông tin time slot
+            $timeSlot = \App\Models\LichHen::find($validatedData['time_slot_id']);
+            
+            // Lấy thông tin dịch vụ
+            $service = \App\Models\DichVu::find($validatedData['service_id']);
+            
+            if (!$service || !$timeSlot) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin dịch vụ hoặc khung giờ'
+                ]);
+            }
+            
+            // Kiểm tra thú cưng có thuộc về khách hàng này không
+            $pet = \App\Models\Pet::where('id', $validatedData['pet_id'])
+                ->where('id_khach_hang', $validatedData['user_id'])
+                ->first();
+                
+            if (!$pet) {
+                // Lấy danh sách thú cưng của khách hàng
+                $pets = \App\Models\Pet::where('id_khach_hang', $validatedData['user_id'])->get();
+                
+                if ($pets->isEmpty()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Bạn chưa có thú cưng nào. Vui lòng thêm thú cưng trước khi đặt lịch.',
+                        'requires_pet' => true,
+                        'redirect_url' => '/client/quan-ly-pet',
+                        'data' => $validatedData
+                    ]);
+                }
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Thú cưng không hợp lệ hoặc không thuộc về bạn. Vui lòng chọn thú cưng khác.',
+                    'requires_pet_selection' => true,
+                    'pets' => $pets,
+                    'data' => $validatedData
+                ]);
+            }
+            
+            // Kiểm tra cân nặng của thú cưng có phù hợp với dịch vụ không
+            if ($service->can_nang_min !== null && $service->can_nang_max !== null) {
+                if ($pet->can_nang < $service->can_nang_min || $pet->can_nang > $service->can_nang_max) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Thú cưng này không phù hợp với dịch vụ (cân nặng yêu cầu: {$service->can_nang_min}kg - {$service->can_nang_max}kg).",
+                        'requires_pet_selection' => true,
+                        'pets' => \App\Models\Pet::where('id_khach_hang', $validatedData['user_id'])->get(),
+                        'data' => $validatedData
+                    ]);
+                }
+            }
+            
+            // Kiểm tra slot đã đầy chưa
+            $bookedCount = \App\Models\LichHenPet::where('id_lich', $validatedData['time_slot_id'])
+                ->where('ngay', $timeSlot->ngay)
+                ->count();
+                
+            if ($bookedCount >= 2) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.'
+                ]);
+            }
+            
+            // Kiểm tra nếu là ngày hôm nay, không cho phép đặt lịch vào giờ đã qua
+            if ($timeSlot->ngay === date('Y-m-d')) {
+                $timeString = explode(' - ', $timeSlot->khung_gio)[0];
+                $slotTime = strtotime($timeSlot->ngay . ' ' . $timeString);
+                
+                if ($slotTime < time()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không thể đặt lịch vào khung giờ đã qua. Vui lòng chọn khung giờ khác.'
+                    ]);
+                }
+            }
+            
+            // Tính giá dịch vụ dựa trên cân nặng (nếu là dịch vụ spa)
+            $gia = $service->gia;
+            if ($service->id_loaidv === 2) { // Nếu là dịch vụ spa
+                $heSo = 1;
+                if ($pet->can_nang > 30) {
+                    $heSo = 1.6;
+                } else if ($pet->can_nang > 20) {
+                    $heSo = 1.4;
+                } else if ($pet->can_nang > 10) {
+                    $heSo = 1.2;
+                }
+                $gia = round($service->gia * $heSo);
+            }
+            
+            // Tính tiền cọc (25% giá dịch vụ)
+            $tienCoc = round($gia * 0.25);
+            
+            // Kiểm tra thanh toán
+            $paymentStatus = 0; // Chưa thanh toán
+            $paymentMethod = $validatedData['payment_method'] ?? 'online';
+            $paymentId = $validatedData['payment_id'] ?? null;
+            $paymentDetails = $validatedData['payment_details'] ?? null;
+            
+            // Nếu có thông tin thanh toán PayPal, đánh dấu là đã thanh toán
+            if ($paymentId && $paymentMethod === 'paypal') {
+                $paymentStatus = 1; // Đã thanh toán
+            }
+            
+            // Tạo lịch hẹn
+            $booking = new \App\Models\LichHenPet([
+                'id_dich_vu' => $validatedData['service_id'],
+                'id_kh' => $validatedData['user_id'],
+                'id_nhanvien' => $timeSlot->id_nhanvien,
+                'id_pet' => $validatedData['pet_id'],
+                'id_lich' => $validatedData['time_slot_id'],
+                'ngay' => $timeSlot->ngay,
+                'gio_bat_dau' => $timeSlot->gio_bat_dau,
+                'gio_ket_thuc' => $timeSlot->gio_ket_thuc,
+                'trang_thai' => $paymentStatus ? 2 : 1, // 2: Đã xác nhận (đã thanh toán), 1: Chờ xác nhận
+                'ghi_chu' => $validatedData['notes'] ?? '',
+                'is_deleted' => 0,
+                'gia' => $gia,
+                'tien_coc' => $tienCoc,
+                'payment_method' => $paymentMethod,
+                'payment_id' => $paymentId,
+                'payment_details' => $paymentDetails ? json_encode($paymentDetails) : null,
+                'payment_status' => $paymentStatus,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            $booking->save();
+            
+            // Lưu thông tin tương tác chatbot
+            $interaction = new \App\Models\ChatbotInteraction([
+                'user_id' => $validatedData['user_id'],
+                'message' => "Đặt lịch dịch vụ {$service->ten_dv} cho thú cưng {$pet->ten_pet}",
+                'response' => "Đặt lịch thành công! ID: {$booking->id}",
+                'booking_id' => $booking->id,
+                'created_at' => now()
+            ]);
+            $interaction->save();
+            
+            // Gửi email xác nhận đặt lịch (nếu có)
+            try {
+                if ($customer->email) {
+                    // Gửi email xác nhận đặt lịch
+                    \Mail::to($customer->email)->send(new \App\Mail\BookingConfirmation($booking, $customer, $pet, $service, $timeSlot));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Lỗi gửi email xác nhận đặt lịch: ' . $e->getMessage());
+                // Không trả về lỗi nếu gửi email thất bại, vẫn xem như đặt lịch thành công
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Đặt lịch thành công! Vui lòng kiểm tra email và đến đúng giờ.',
+                'booking_id' => $booking->id,
+                'redirect_url' => '/client/thong-tin-ca-nhan', // Trang xem lịch đã đặt
+                'navigation_buttons' => [
+                    [
+                        'text' => 'Xem lịch đã đặt',
+                        'route' => '/client/thong-tin-ca-nhan',
+                        'icon' => '📅'
+                    ]
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Lỗi đặt lịch từ chatbot: ' . $e->getMessage());
+            
+            // Nếu lỗi là do validation
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                // Kiểm tra nếu thiếu pet_id
+                if (isset($e->errors()['pet_id'])) {
+                    // Lấy user_id từ request
+                    $userId = $request->input('user_id');
+                    if ($userId) {
+                        // Lấy danh sách thú cưng của khách hàng
+                        $pets = \App\Models\Pet::where('id_khach_hang', $userId)->get();
+                        
+                        if ($pets->isEmpty()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Bạn chưa có thú cưng nào. Vui lòng thêm thú cưng trước khi đặt lịch.',
+                                'requires_pet' => true,
+                                'redirect_url' => '/client/quan-ly-pet',
+                                'data' => $request->all()
+                            ]);
+                        }
+                        
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Vui lòng chọn thú cưng cho cuộc hẹn',
+                            'requires_pet_selection' => true,
+                            'pets' => $pets,
+                            'data' => $request->all()
+                        ]);
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể đặt lịch: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Get available time slots for the chatbot
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTimeSlots(Request $request)
+    {
+        try {
+            $serviceId = $request->input('service_id');
+            $date = $request->input('date', date('Y-m-d'));
+            
+            if (!$serviceId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng chọn một dịch vụ'
+                ]);
+            }
+            
+            // Lấy thông tin dịch vụ
+            $service = \App\Models\DichVu::find($serviceId);
+            
+            if (!$service) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy dịch vụ'
+                ]);
+            }
+            
+            // Lấy tất cả slot mẫu (không theo ngày)
+            $slots = \App\Models\LichHen::where('tinh_trang', 1)->get();
+            
+            // Lấy số lượng đã đặt cho từng slot theo ngày
+            $bookedSlots = \DB::table('lich_hen_pets')
+                ->select('id_lich', \DB::raw('COUNT(*) as so_luot'))
+                ->where('ngay', $date)
+                ->groupBy('id_lich')
+                ->pluck('so_luot', 'id_lich')
+                ->toArray();
+            
+            $maxBookingsPerSlot = 2;
+            $formattedSlots = [];
+            foreach ($slots as $slot) {
+                $bookedCount = $bookedSlots[$slot->id] ?? 0;
+                $availableSpots = max(0, $maxBookingsPerSlot - $bookedCount);
+                
+                // Kiểm tra nếu là ngày hôm nay, lọc ra các khung giờ đã qua
+                $isAvailable = $availableSpots > 0;
+                if ($date === date('Y-m-d')) {
+                    $now = new \DateTime();
+                    $timeString = explode(' - ', $slot->khung_gio)[0];
+                    $slotTime = strtotime($date . ' ' . $timeString);
+                    
+                    if ($slotTime < time()) {
+                        $isAvailable = false;
+                    }
+                }
+                
+                if ($isAvailable) {
+                    $formattedSlots[] = [
+                        'id' => $slot->id,
+                        'khung_gio' => $slot->khung_gio,
+                        'available' => true,
+                        'booked_count' => $bookedCount,
+                        'total_slots' => $maxBookingsPerSlot
+                    ];
+                }
+            }
+            
+            // Tạo danh sách ngày trong khoảng 7 ngày (hôm nay + 6 ngày tiếp theo)
+            $today = new \DateTime();
+            $nextDates = [];
+            
+            for ($i = 0; $i < 7; $i++) {
+                $nextDate = clone $today;
+                $nextDate->modify("+$i days");
+                $nextDates[] = $nextDate->format('Y-m-d');
+            }
+            
+            return response()->json([
+                'success' => true,
+                'service' => $service,
+                'date' => $date,
+                'time_slots' => $formattedSlots,
+                'slotInfo' => $bookedSlots,
+                'nextDates' => $nextDates
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Lỗi lấy khung giờ: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy khung giờ: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Create booking from chatbot
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createBooking(Request $request)
+    {
+        try {
+            // Validate dữ liệu đầu vào
+            $validatedData = $request->validate([
+                'service_id' => 'required|exists:dich_vus,id',
+                'time_slot_id' => 'required|exists:lich_hens,id', 
+                'user_id' => 'required',
+                'pet_id' => 'required|exists:pets,id',
+                'notes' => 'nullable|string'
+            ]);
+            
+            // Lấy thông tin khách hàng
+            $customer = \App\Models\KhachHang::find($validatedData['user_id']);
+            
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin khách hàng'
+                ]);
+            }
+            
+            // Lấy thông tin time slot
+            $timeSlot = \App\Models\LichHen::find($validatedData['time_slot_id']);
+            
+            // Lấy thông tin dịch vụ
+            $service = \App\Models\DichVu::find($validatedData['service_id']);
+            
+            if (!$service || !$timeSlot) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin dịch vụ hoặc khung giờ'
+                ]);
+            }
+            
+            // Kiểm tra xem slot đã đầy chưa
+            $bookedCount = \App\Models\LichHenPet::where('id_lich', $validatedData['time_slot_id'])
+                ->where('ngay', date('Y-m-d'))
+                ->count();
+                
+            if ($bookedCount >= 2) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.'
+                ]);
+            }
+            
+            // Tạo lịch hẹn
+            $booking = new \App\Models\LichHenPet([
+                'id_dv' => $validatedData['service_id'],
+                'id_kh' => $validatedData['user_id'],
+                'id_pet' => $validatedData['pet_id'],
+                'id_lich' => $validatedData['time_slot_id'],
+                'ngay' => date('Y-m-d'),
+                'gio' => $timeSlot->khung_gio,
+                'tinh_trang' => 0, // Chờ xác nhận
+                'tien_coc' => $service->gia * 0.25 // 25% giá dịch vụ
+            ]);
+            
+            $booking->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Đặt lịch thành công! Vui lòng kiểm tra email và đến đúng giờ.',
+                'booking_id' => $booking->id,
+                'redirect_url' => '/client/lich-su-kham'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Lỗi đặt lịch từ chatbot: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể đặt lịch: ' . $e->getMessage()
+            ]);
         }
     }
 } 
