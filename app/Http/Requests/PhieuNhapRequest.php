@@ -58,4 +58,22 @@ class PhieuNhapRequest extends FormRequest
             'chi_tiet.*.han_su_dung' => 'Hạn sử dụng',
         ];
     }
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if ($this->has('chi_tiet')) {
+                foreach ($this->chi_tiet as $index => $item) {
+                    $gia_nhap = (int) $item['gia_nhap'] ?? 0;
+                    $gia_ban = (int) $item['gia_ban'] ?? 0;
+
+                    if ($gia_ban <= $gia_nhap) {
+                        $validator->errors()->add(
+                            "chi_tiet.$index.gia_ban",
+                            "Giá bán phải lớn hơn giá nhập (ở dòng thuốc thứ " . ($index + 1) . ")."
+                        );
+                    }
+                }
+            }
+        });
+    }
 }

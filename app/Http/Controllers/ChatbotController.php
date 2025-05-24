@@ -2445,6 +2445,7 @@ class ChatbotController extends Controller
                 'time_slot_id' => 'required|exists:lich_hens,id', 
                 'user_id' => 'required|exists:khach_hangs,id',
                 'pet_id' => 'required|exists:pets,id', // Thú cưng là bắt buộc
+                'date' => 'required|date', // Date is required and must be a valid date
                 'notes' => 'nullable|string',
                 'payment_id' => 'nullable|string', // ID thanh toán từ PayPal
                 'payment_method' => 'nullable|string', // Phương thức thanh toán
@@ -2575,7 +2576,7 @@ class ChatbotController extends Controller
                 'id_nhanvien' => $timeSlot->id_nhanvien,
                 'id_pet' => $validatedData['pet_id'],
                 'id_lich' => $validatedData['time_slot_id'],
-                'ngay' => $timeSlot->ngay,
+                'ngay' => $validatedData['date'],
                 'gio_bat_dau' => $timeSlot->gio_bat_dau,
                 'gio_ket_thuc' => $timeSlot->gio_ket_thuc,
                 'trang_thai' => $paymentStatus ? 2 : 1, // 2: Đã xác nhận (đã thanh toán), 1: Chờ xác nhận
@@ -2780,6 +2781,7 @@ class ChatbotController extends Controller
                 'time_slot_id' => 'required|exists:lich_hens,id', 
                 'user_id' => 'required',
                 'pet_id' => 'required|exists:pets,id',
+                'date' => 'required|date', // Require date parameter
                 'notes' => 'nullable|string'
             ]);
             
@@ -2808,7 +2810,7 @@ class ChatbotController extends Controller
             
             // Kiểm tra xem slot đã đầy chưa
             $bookedCount = \App\Models\LichHenPet::where('id_lich', $validatedData['time_slot_id'])
-                ->where('ngay', date('Y-m-d'))
+                ->where('ngay', $validatedData['date'])
                 ->count();
                 
             if ($bookedCount >= 2) {
@@ -2824,7 +2826,7 @@ class ChatbotController extends Controller
                 'id_kh' => $validatedData['user_id'],
                 'id_pet' => $validatedData['pet_id'],
                 'id_lich' => $validatedData['time_slot_id'],
-                'ngay' => date('Y-m-d'),
+                'ngay' => $validatedData['date'], // Use the date from the validated data
                 'gio' => $timeSlot->khung_gio,
                 'tinh_trang' => 0, // Chờ xác nhận
                 'tien_coc' => $service->gia * 0.25 // 25% giá dịch vụ

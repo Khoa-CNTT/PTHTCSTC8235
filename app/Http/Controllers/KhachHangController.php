@@ -371,28 +371,35 @@ class KhachHangController extends Controller
     public function getPets(Request $request)
     {
         try {
-            $user = Auth::user();
+            // Get authenticated user
+            $user = Auth::guard('sanctum')->user();
             if (!$user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Người dùng chưa đăng nhập'
-                ]);
+                ], 401);
             }
 
+            // Get all pets for this user, including newly added ones
             $pets = \App\Models\Pet::where('id_kh', $user->id)
-                ->where('tinh_trang', 1)
+                ->orderBy('created_at', 'desc') // Show newest pets first
                 ->get();
+
+            // Log for debugging
+            \Log::info('Retrieved ' . $pets->count() . ' pets for user #' . $user->id);
 
             return response()->json([
                 'success' => true,
-                'pets' => $pets
+                'pets' => $pets,
+                'count' => $pets->count(),
+                'timestamp' => now()->timestamp
             ]);
         } catch (\Exception $e) {
             \Log::error('Error getting pets: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể lấy danh sách thú cưng: ' . $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 }

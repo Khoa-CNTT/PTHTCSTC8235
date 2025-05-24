@@ -132,6 +132,7 @@ class HoSoBenhAnController extends Controller
     }
     public function update(Request $request)
     {
+        DB::beginTransaction();
         try {
             $ho_so_benh_an = HoSoBenhAn::find($request->id);
             if (!$ho_so_benh_an) {
@@ -158,60 +159,54 @@ class HoSoBenhAnController extends Controller
                     // Cập nhật lịch hẹn đã điều trị
                     $lich->tinh_trang = 1;
                     $lich->save();
+                    $idHoaDon = DB::table('hoa_dons')->insertGetId([
+                        'id_kh'              => $lich->id_kh,
+                        'id_nv'              => $lich->id_nv ?? 1,
+                        'phuong_thuc'        => 1,
+                        'tinh_trang'         => 0,
+                        'ngay_xuat_hoa_don'  => now(),
+                        'created_at'         => now(),
+                        'updated_at'         => now(),
+                    ]);
 
-                    // Nếu chưa có hóa đơn
-                    $daCoHoaDon = DB::table('hoa_dons')->where('id_lich_pet', $lich->id)->exists();
-                    if (!$daCoHoaDon) {
-                        $idHoaDon = DB::table('hoa_dons')->insertGetId([
-                            'id_kh'              => $lich->id_kh,
-                            'id_pet'             => $lich->id_pet,
-                            'id_nv'              => $lich->id_nv ?? 1,
-                            'id_lich_pet'        => $lich->id,
-                            'phuong_thuc'        => 1,
-                            'tinh_trang'         => 0,
-                            'ngay_xuat_hoa_don'  => now(),
-                            'created_at'         => now(),
-                            'updated_at'         => now(),
-                        ]);
+                    // Lấy đơn thuốc nếu có
+                    $idDonThuoc = $ho_so_benh_an->id_don_thuoc;
 
-                        // Lấy đơn thuốc nếu có
-                        $idDonThuoc = $ho_so_benh_an->id_don_thuoc;
+                    if ($idDonThuoc) {
+                        $chiTietThuocs = DB::table('don_thuoc_chi_tiets')
+                            ->where('id_don_thuoc', $idDonThuoc)
+                            ->get();
 
-                        if ($idDonThuoc) {
-                            $chiTietThuocs = DB::table('don_thuoc_chi_tiets')
-                                ->where('id_don_thuoc', $idDonThuoc)
-                                ->get();
-
-                            foreach ($chiTietThuocs as $thuoc) {
-                                DB::table('hoa_don_chi_tiets')->insert([
-                                    'id_hoadon'        => $idHoaDon,
-                                    'id_lich_hen_pet'  => $lich->id,
-                                    'id_ct_don_thuoc'  => $thuoc->id,
-                                    'tien_kham'        => 0,
-                                    'created_at'       => now(),
-                                    'updated_at'       => now(),
-                                ]);
-                            }
-                        } else {
-                            // Không có đơn thuốc cũng tạo dòng chi tiết để cập nhật tiền dịch vụ, tiền khám, cọc
+                        foreach ($chiTietThuocs as $thuoc) {
                             DB::table('hoa_don_chi_tiets')->insert([
                                 'id_hoadon'        => $idHoaDon,
                                 'id_lich_hen_pet'  => $lich->id,
-                                'id_ct_don_thuoc'  => null,
+                                'id_ct_don_thuoc'  => $thuoc->id,
                                 'tien_kham'        => 0,
                                 'created_at'       => now(),
                                 'updated_at'       => now(),
                             ]);
                         }
+                    } else {
+                        // Không có đơn thuốc cũng tạo dòng chi tiết để cập nhật tiền dịch vụ, tiền khám, cọc
+                        DB::table('hoa_don_chi_tiets')->insert([
+                            'id_hoadon'        => $idHoaDon,
+                            'id_lich_hen_pet'  => $lich->id,
+                            'id_ct_don_thuoc'  => null,
+                            'tien_kham'        => 0,
+                            'created_at'       => now(),
+                            'updated_at'       => now(),
+                        ]);
                     }
                 }
             }
-
+            DB::commit();
             return response()->json([
                 'status' => true,
-                'message' => 'Cập nhật hồ sơ bệnh án thành công'
+                'message' => 'Cập nhật hồ sơ bệnh án và tạo hóa đơn thành công'
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'status' => false,
                 'message' => 'Lỗi: ' . $e->getMessage()
