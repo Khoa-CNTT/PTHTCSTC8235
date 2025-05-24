@@ -189,15 +189,98 @@ class ChatbotController extends Controller
     private function getServiceInfo($service)
     {
         $serviceInfo = [
-            'spa' => "Dịch vụ spa tại PetCare bao gồm:\n• Tắm rửa\n• Cắt tỉa lông\n• Vệ sinh tai\n• Cắt móng\n• Massage\n\nGiá từ 200.000đ - 800.000đ tùy gói dịch vụ. ✨",
-            'khám' => "Dịch vụ khám bệnh tại PetCare:\n• Khám tổng quát\n• Khám chuyên khoa\n• Xét nghiệm\n• Siêu âm\n\nGiá từ 150.000đ - 500.000đ. 🩺",
-            'tiêm' => "Dịch vụ tiêm phòng tại PetCare:\n• Vaccine 7 bệnh\n• Vaccine dại\n• Vaccine viêm mũi truyền nhiễm\n\nGiá từ 150.000đ - 500.000đ/mũi. 💉",
-            'phẫu thuật' => "Dịch vụ phẫu thuật tại PetCare:\n• Triệt sản\n• Phẫu thuật chỉnh hình\n• Phẫu thuật nội tạng\n\nGiá từ 1.000.000đ - 5.000.000đ. 🏥"
+            'spa' => "🛁 **DỊCH VỤ SPA THÚ CƯNG TẠI PETCARE**\n\n".
+                "Dịch vụ spa của chúng tôi bao gồm:\n\n".
+                "• **Tắm rửa toàn diện**: Sử dụng sản phẩm organic, phù hợp với từng loại da và lông\n".
+                "• **Cắt tỉa lông**: Nhiều kiểu dáng thời trang, phù hợp với từng giống chó/mèo\n".
+                "• **Vệ sinh tai**: Làm sạch ráy tai, phòng ngừa viêm nhiễm\n".
+                "• **Cắt móng**: Cắt và mài móng an toàn, tránh gây đau cho thú cưng\n".
+                "• **Massage thư giãn**: Giúp thú cưng thoải mái và kích thích tuần hoàn máu\n".
+                "• **Dưỡng lông**: Đắp mặt nạ dưỡng lông, giúp lông bóng mượt và khỏe mạnh\n\n".
+                "**Bảng giá dịch vụ spa:**\n".
+                "• Gói cơ bản: 200.000đ - 350.000đ (tùy cân nặng)\n".
+                "• Gói cao cấp: 400.000đ - 800.000đ (bao gồm massage và dưỡng lông)\n\n".
+                "Thú cưng sẽ được chăm sóc bởi nhân viên có chuyên môn và kinh nghiệm, đảm bảo an toàn và thoải mái trong suốt quá trình làm đẹp. Chúng tôi cam kết sử dụng sản phẩm an toàn, thân thiện với môi trường và phù hợp với da của thú cưng. ✨\n\n".
+                "Hãy đặt lịch trước để được phục vụ tốt nhất!",
+                
+            'khám' => "🩺 **DỊCH VỤ KHÁM BỆNH TẠI PETCARE**\n\n".
+                "Dịch vụ khám bệnh chuyên nghiệp của chúng tôi bao gồm:\n\n".
+                "• **Khám tổng quát**: Kiểm tra toàn diện sức khỏe, bao gồm kiểm tra tim phổi, da, tai, mắt và hệ tiêu hóa\n".
+                "• **Khám chuyên khoa**: Khám chuyên sâu các vấn đề về da liễu, tiêu hóa, hô hấp, tim mạch...\n".
+                "• **Xét nghiệm**: Xét nghiệm máu, nước tiểu, phân, tìm ký sinh trùng, vi khuẩn...\n".
+                "• **Siêu âm**: Chẩn đoán hình ảnh các cơ quan nội tạng, phát hiện sớm bệnh lý\n".
+                "• **Chụp X-quang**: Kiểm tra xương khớp, phát hiện gãy xương, dị vật...\n".
+                "• **Nội soi**: Khám chuyên sâu đường tiêu hóa, hô hấp\n\n".
+                "**Bảng giá dịch vụ khám:**\n".
+                "• Khám tổng quát: 150.000đ - 300.000đ\n".
+                "• Xét nghiệm máu: 200.000đ - 500.000đ\n".
+                "• Siêu âm: 250.000đ - 400.000đ\n".
+                "• Chụp X-quang: 300.000đ - 600.000đ\n\n".
+                "Đội ngũ bác sĩ thú y của chúng tôi được đào tạo chuyên sâu và có nhiều năm kinh nghiệm trong chẩn đoán và điều trị các bệnh lý cho thú cưng. Chúng tôi sử dụng trang thiết bị hiện đại để đảm bảo kết quả chẩn đoán chính xác nhất.\n\n".
+                "Nên đưa thú cưng đi khám định kỳ 6 tháng/lần để phát hiện sớm các vấn đề sức khỏe.",
+                
+            'tiêm' => "💉 **DỊCH VỤ TIÊM PHÒNG TẠI PETCARE**\n\n".
+                "Dịch vụ tiêm phòng đầy đủ của chúng tôi bao gồm:\n\n".
+                "• **Vaccine 7 bệnh cho chó (DHPPiL)**: Phòng bệnh Distemper, Hepatitis, Parvovirus, Parainfluenza, Leptospirosis\n".
+                "• **Vaccine 5 bệnh cho mèo (FVRCP)**: Phòng bệnh Feline Viral Rhinotracheitis, Calicivirus, Panleukopenia\n".
+                "• **Vaccine dại**: Bắt buộc cho cả chó và mèo theo quy định\n".
+                "• **Vaccine viêm mũi truyền nhiễm (Kennel Cough)**: Khuyến nghị cho chó thường xuyên tiếp xúc với chó khác\n".
+                "• **Vaccine Leucemia cho mèo**: Phòng bệnh bạch cầu ở mèo\n\n".
+                "**Lịch tiêm phòng khuyến nghị cho chó:**\n".
+                "• 6-8 tuần tuổi: Mũi 1 vaccine 7 bệnh\n".
+                "• 10-12 tuần tuổi: Mũi 2 vaccine 7 bệnh\n".
+                "• 14-16 tuần tuổi: Mũi 3 vaccine 7 bệnh + vaccine dại\n".
+                "• Sau đó tiêm nhắc hàng năm\n\n".
+                "**Lịch tiêm phòng khuyến nghị cho mèo:**\n".
+                "• 6-8 tuần tuổi: Mũi 1 vaccine 5 bệnh\n".
+                "• 10-12 tuần tuổi: Mũi 2 vaccine 5 bệnh\n".
+                "• 14-16 tuần tuổi: Mũi 3 vaccine 5 bệnh + vaccine dại\n".
+                "• Sau đó tiêm nhắc hàng năm\n\n".
+                "**Bảng giá tiêm phòng:**\n".
+                "• Vaccine 7 bệnh cho chó: 300.000đ - 500.000đ/mũi\n".
+                "• Vaccine 5 bệnh cho mèo: 250.000đ - 400.000đ/mũi\n".
+                "• Vaccine dại: 150.000đ - 250.000đ/mũi\n\n".
+                "Khi đến tiêm, thú cưng cần khỏe mạnh, không đang mang thai hoặc cho con bú. Sau khi tiêm, có thể có phản ứng nhẹ như mệt mỏi hoặc giảm ăn trong 24-48 giờ, đây là phản ứng bình thường của cơ thể.",
+                
+            'phẫu thuật' => "🏥 **DỊCH VỤ PHẪU THUẬT TẠI PETCARE**\n\n".
+                "Dịch vụ phẫu thuật chuyên nghiệp của chúng tôi bao gồm:\n\n".
+                "• **Triệt sản**: Phẫu thuật triệt sản an toàn cho chó đực/cái, mèo đực/cái\n".
+                "• **Phẫu thuật chỉnh hình**: Điều trị gãy xương, khớp, dây chằng\n".
+                "• **Phẫu thuật nội tạng**: Can thiệp các vấn đề về đường tiêu hóa, bàng quang, gan...\n".
+                "• **Phẫu thuật nha khoa**: Nhổ răng, điều trị nha chu, lấy cao răng\n".
+                "• **Phẫu thuật thẩm mỹ**: Cắt tai, cắt đuôi theo yêu cầu (trong khuôn khổ pháp luật)\n".
+                "• **Phẫu thuật khẩn cấp**: Xử lý chấn thương, dị vật đường ruột, xoắn dạ dày...\n\n".
+                "**Quy trình phẫu thuật tiêu chuẩn:**\n".
+                "1. Khám và xét nghiệm tiền phẫu\n".
+                "2. Tư vấn chi tiết trước phẫu thuật\n".
+                "3. Gây mê an toàn theo cân nặng và tình trạng sức khỏe\n".
+                "4. Phẫu thuật trong phòng vô trùng với trang thiết bị hiện đại\n".
+                "5. Chăm sóc hậu phẫu và theo dõi sát sao\n".
+                "6. Hướng dẫn chăm sóc tại nhà và tái khám\n\n".
+                "**Bảng giá phẫu thuật:**\n".
+                "• Triệt sản mèo đực: 500.000đ - 800.000đ\n".
+                "• Triệt sản mèo cái: 800.000đ - 1.200.000đ\n".
+                "• Triệt sản chó đực: 800.000đ - 1.500.000đ (tùy cân nặng)\n".
+                "• Triệt sản chó cái: 1.200.000đ - 2.500.000đ (tùy cân nặng)\n".
+                "• Phẫu thuật chỉnh hình: 2.000.000đ - 5.000.000đ\n\n".
+                "Đội ngũ bác sĩ phẫu thuật của chúng tôi có kinh nghiệm và được đào tạo chuyên sâu, sử dụng các kỹ thuật phẫu thuật tiên tiến nhất. Chúng tôi cam kết tuân thủ nghiêm ngặt các quy trình vô trùng và kiểm soát đau sau phẫu thuật để đảm bảo thú cưng của bạn được thoải mái và hồi phục nhanh chóng."
         ];
 
         return [
-                    'success' => true,
-            'message' => $serviceInfo[$service] ?? "Xin lỗi, tôi chưa có thông tin chi tiết về dịch vụ này. Vui lòng liên hệ trực tiếp với phòng khám để được tư vấn."
+            'success' => true,
+            'message' => $serviceInfo[$service] ?? "Xin lỗi, tôi chưa có thông tin chi tiết về dịch vụ này. Vui lòng liên hệ trực tiếp với phòng khám qua số điện thoại 0123.456.789 để được tư vấn cụ thể nhất.",
+            'navigation_buttons' => [
+                [
+                    'text' => 'Đặt lịch dịch vụ',
+                    'route' => '/client/dat-lich',
+                    'icon' => '📅'
+                ],
+                [
+                    'text' => 'Xem tất cả dịch vụ',
+                    'route' => '/client/xem-dich-vu',
+                    'icon' => '🔍'
+                ]
+            ]
         ];
     }
 
@@ -670,6 +753,29 @@ class ChatbotController extends Controller
             }
         }
 
+        // Kiểm tra nếu là câu hỏi về thông tin cơ bản phòng khám
+        $questionLower = mb_strtolower($question, 'UTF-8');
+        
+        // Câu hỏi về chi phí khám tổng quát
+        if (preg_match('/(chi phí|giá|phí|bao nhiêu tiền|mất bao nhiêu|tốn bao nhiêu).*(khám|kham).*(tổng quát|tong quat|chó|cho|mèo|meo)/ui', $questionLower)) {
+            return $this->getGeneralExamCostInfo();
+        }
+        
+        // Câu hỏi về giờ mở cửa
+        if (preg_match('/(giờ mở cửa|giờ làm việc|mấy giờ mở cửa|mở cửa từ mấy giờ|đóng cửa lúc mấy giờ|thời gian làm việc)/ui', $questionLower)) {
+            return $this->getOpeningHoursInfo();
+        }
+        
+        // Câu hỏi về địa chỉ
+        if (preg_match('/(địa chỉ|ở đâu|chỗ nào|vị trí|tìm đường|bản đồ|map|nằm ở đâu|tọa độ)/ui', $questionLower)) {
+            return $this->getAddressInfo();
+        }
+        
+        // Câu hỏi về làm việc cuối tuần
+        if (preg_match('/(cuối tuần|thứ bảy|chủ nhật|ngày lễ|ngày nghỉ|cuối tuần có làm việc|chủ nhật có mở cửa)/ui', $questionLower)) {
+            return $this->getWeekendHoursInfo();
+        }
+
         // Xử lý các intent điều hướng đều trả về direct_navigation ngay lập tức
         switch ($analysis['intent']) {
             case 'navigation':
@@ -895,6 +1001,144 @@ class ChatbotController extends Controller
                 return null;
         }
     }
+    
+    /**
+     * Cung cấp thông tin về giờ mở cửa phòng khám
+     * @return array Thông tin giờ mở cửa
+     */
+    private function getOpeningHoursInfo() {
+        $message = "🕒 **GIỜ LÀM VIỆC TẠI PETCARE**\n\n";
+        $message .= "**Thứ Hai - Thứ Sáu:**\n";
+        $message .= "• Buổi sáng: 8:00 - 12:00\n";
+        $message .= "• Buổi chiều: 13:30 - 18:00\n\n";
+        
+        $message .= "**Thứ Bảy & Chủ Nhật:**\n";
+        $message .= "• 8:00 - 17:00 (không nghỉ trưa)\n\n";
+        
+        $message .= "**Ngày Lễ:**\n";
+        $message .= "• Các ngày lễ lớn (Tết Nguyên đán, 30/4-1/5, 2/9): Nghỉ hoặc làm việc theo lịch trực được thông báo trước\n";
+        $message .= "• Các ngày lễ khác: Hoạt động bình thường\n\n";
+        
+        $message .= "**Dịch Vụ Cấp Cứu 24/7:**\n";
+        $message .= "• Đường dây nóng cấp cứu: 0123.456.789\n";
+        $message .= "• Luôn có bác sĩ trực để xử lý các trường hợp khẩn cấp ngoài giờ làm việc\n\n";
+        
+        $message .= "**Lưu ý:**\n";
+        $message .= "• Để được phục vụ tốt nhất, vui lòng đặt lịch trước khi đến\n";
+        $message .= "• Đối với dịch vụ spa, lượt cuối cùng nhận khách trước giờ đóng cửa 2 tiếng\n";
+        $message .= "• Có thể có thay đổi vào dịp lễ, Tết - vui lòng kiểm tra trên trang web hoặc gọi điện xác nhận";
+        
+        return [
+            'success' => true,
+            'message' => $message,
+            'navigation_buttons' => [
+                [
+                    'text' => 'Đặt lịch ngay',
+                    'route' => '/client/dat-lich',
+                    'icon' => '📅'
+                ],
+                [
+                    'text' => 'Liên hệ',
+                    'route' => '/client/lien-he',
+                    'icon' => '📞'
+                ]
+            ]
+        ];
+    }
+    
+    /**
+     * Cung cấp thông tin về địa chỉ phòng khám
+     * @return array Thông tin địa chỉ
+     */
+    private function getAddressInfo() {
+        $message = "📍 **ĐỊA CHỈ PHÒNG KHÁM PETCARE**\n\n";
+        $message .= "**Địa chỉ chính xác:**\n";
+        $message .= "Số 123 Đường Nguyễn Văn Linh, Phường Tân Phong, Quận 7, TP. Hồ Chí Minh\n\n";
+        
+        $message .= "**Các mốc tham chiếu:**\n";
+        $message .= "• Gần Siêu thị Lotte Mart Quận 7\n";
+        $message .= "• Cách Phú Mỹ Hưng 2km về phía Bắc\n";
+        $message .= "• Đối diện Công viên Tân Phong\n\n";
+        
+        $message .= "**Hướng dẫn đi đến phòng khám:**\n";
+        $message .= "• **Bằng xe máy/ô tô:** Có bãi đậu xe rộng rãi, miễn phí cho khách hàng\n";
+        $message .= "• **Bằng xe buýt:** Các tuyến xe buýt 20, 53, 75 đều có điểm dừng gần phòng khám\n";
+        $message .= "• **Bằng taxi/grab:** Cung cấp địa chỉ \"Phòng khám thú y PetCare, 123 Nguyễn Văn Linh, Quận 7\"\n\n";
+        
+        $message .= "**Thông tin liên hệ:**\n";
+        $message .= "• Điện thoại: 028.1234.5678\n";
+        $message .= "• Hotline: 0123.456.789\n";
+        $message .= "• Email: info@petcare.com.vn\n";
+        $message .= "• Website: www.petcare.com.vn\n\n";
+        
+        $message .= "**Bạn có thể xem vị trí chính xác trên Google Maps bằng cách nhấn nút bên dưới.**";
+        
+        return [
+            'success' => true,
+            'message' => $message,
+            'navigation_buttons' => [
+                [
+                    'text' => 'Xem bản đồ',
+                    'route' => 'https://maps.google.com/?q=123+Nguyen+Van+Linh+Quan+7+Ho+Chi+Minh',
+                    'icon' => '🗺️',
+                    'external' => true
+                ],
+                [
+                    'text' => 'Liên hệ ngay',
+                    'route' => '/client/lien-he',
+                    'icon' => '📞'
+                ]
+            ]
+        ];
+    }
+    
+    /**
+     * Cung cấp thông tin về giờ làm việc cuối tuần và ngày lễ
+     * @return array Thông tin giờ làm việc cuối tuần
+     */
+    private function getWeekendHoursInfo() {
+        $message = "🗓️ **LỊCH LÀM VIỆC CUỐI TUẦN VÀ NGÀY LỄ**\n\n";
+        $message .= "**Thứ Bảy & Chủ Nhật:**\n";
+        $message .= "• Giờ mở cửa: 8:00 - 17:00\n";
+        $message .= "• Làm việc liên tục không nghỉ trưa\n";
+        $message .= "• Tất cả các dịch vụ đều hoạt động bình thường\n";
+        $message .= "• Lượt spa cuối cùng nhận khách: 15:00\n\n";
+        
+        $message .= "**Các ngày lễ trong năm:**\n";
+        $message .= "• **Tết Dương lịch (1/1):** Mở cửa 9:00 - 16:00\n";
+        $message .= "• **Tết Nguyên Đán:** Nghỉ từ 29 Tết đến mùng 3 (có bác sĩ trực cấp cứu)\n";
+        $message .= "• **Lễ 30/4 - 1/5:** Mở cửa 9:00 - 16:00\n";
+        $message .= "• **Lễ Quốc Khánh (2/9):** Mở cửa 9:00 - 16:00\n";
+        $message .= "• **Các ngày lễ khác:** Hoạt động bình thường\n\n";
+        
+        $message .= "**Dịch vụ cấp cứu:**\n";
+        $message .= "• Luôn có bác sĩ trực 24/7 kể cả ngày lễ, Tết\n";
+        $message .= "• Đường dây nóng cấp cứu: 0123.456.789\n\n";
+        
+        $message .= "**Đặt lịch cuối tuần và ngày lễ:**\n";
+        $message .= "• Khuyến khích đặt lịch trước ít nhất 24-48 giờ\n";
+        $message .= "• Cuối tuần thường đông khách hơn ngày thường\n";
+        $message .= "• Một số dịch vụ đặc biệt có thể cần đặt lịch sớm hơn\n\n";
+        
+        $message .= "Bạn có thể dễ dàng đặt lịch trực tuyến ngay cả vào cuối tuần hoặc ngày lễ thông qua website hoặc ứng dụng của chúng tôi.";
+        
+        return [
+            'success' => true,
+            'message' => $message,
+            'navigation_buttons' => [
+                [
+                    'text' => 'Đặt lịch cuối tuần',
+                    'route' => '/client/dat-lich',
+                    'icon' => '📅'
+                ],
+                [
+                    'text' => 'Liên hệ hỗ trợ',
+                    'route' => '/client/lien-he',
+                    'icon' => '📞'
+                ]
+            ]
+        ];
+    }
 
     private function findSimilarQuestion($question, $history) {
         $bestMatch = null;
@@ -918,36 +1162,197 @@ class ChatbotController extends Controller
         $petType = $entities['pet_type'] ?? '';
         $serviceType = $entities['service'] ?? '';
         
-        $message = "Bảng giá dịch vụ tại PetCare:\n";
-        $message .= "• Khám tổng quát: 150.000đ - 300.000đ\n";
-        $message .= "• Tiêm phòng: 150.000đ - 500.000đ/mũi\n";
-        $message .= "• Spa cơ bản: 200.000đ - 500.000đ\n";
-        $message .= "• Spa cao cấp: 400.000đ - 800.000đ\n";
-        $message .= "• Phẫu thuật: 1.000.000đ - 5.000.000đ\n\n";
-        $message .= "Giá có thể thay đổi tùy theo cân nặng, tình trạng và nhu cầu cụ thể của thú cưng. 💰";
+        $message = "💰 **BẢNG GIÁ DỊCH VỤ TẠI PETCARE**\n\n";
         
-        if (!empty($petType) || !empty($serviceType)) {
-            $message .= "\n\nBạn có thể xem chi tiết bảng giá đầy đủ tại trang Bảng giá của chúng tôi.";
+        // Bảng giá chi tiết hơn
+        $message .= "**DỊCH VỤ KHÁM BỆNH**\n";
+        $message .= "• Khám tổng quát cơ bản: 150.000đ - 200.000đ\n";
+        $message .= "• Khám tổng quát nâng cao (có kiểm tra máu): 250.000đ - 300.000đ\n";
+        $message .= "• Khám chuyên khoa (da liễu, tiêu hóa...): 200.000đ - 350.000đ\n";
+        $message .= "• Xét nghiệm máu: 200.000đ - 500.000đ\n";
+        $message .= "• Xét nghiệm nước tiểu: 150.000đ - 300.000đ\n";
+        $message .= "• Siêu âm: 250.000đ - 400.000đ\n";
+        $message .= "• Chụp X-quang: 300.000đ - 600.000đ\n\n";
+        
+        $message .= "**DỊCH VỤ TIÊM PHÒNG**\n";
+        $message .= "• Vaccine 7 bệnh cho chó: 300.000đ - 500.000đ/mũi\n";
+        $message .= "• Vaccine 5 bệnh cho mèo: 250.000đ - 400.000đ/mũi\n";
+        $message .= "• Vaccine dại: 150.000đ - 250.000đ/mũi\n";
+        $message .= "• Vaccine Leukemia (mèo): 300.000đ - 400.000đ/mũi\n";
+        $message .= "• Vaccine Kennel Cough (chó): 200.000đ - 300.000đ/mũi\n";
+        $message .= "• Gói tiêm đầy đủ cho chó con: 1.000.000đ - 1.500.000đ (3 mũi 7 bệnh + 1 mũi dại)\n";
+        $message .= "• Gói tiêm đầy đủ cho mèo con: 800.000đ - 1.200.000đ (3 mũi 5 bệnh + 1 mũi dại)\n\n";
+        
+        $message .= "**DỊCH VỤ SPA & CHĂM SÓC**\n";
+        $message .= "• Spa cơ bản (tắm, sấy, vệ sinh tai): 200.000đ - 350.000đ\n";
+        $message .= "• Spa toàn diện (tắm, sấy, vệ sinh tai, cắt móng): 250.000đ - 400.000đ\n";
+        $message .= "• Spa cao cấp (tắm, sấy, vệ sinh tai, cắt móng, massage): 400.000đ - 600.000đ\n";
+        $message .= "• Spa VIP (tắm, sấy, vệ sinh tai, cắt móng, massage, đắp mặt nạ dưỡng lông): 500.000đ - 800.000đ\n";
+        $message .= "• Cắt tỉa lông theo yêu cầu: 300.000đ - 800.000đ (tùy giống và kiểu lông)\n";
+        $message .= "• Vệ sinh răng miệng: 300.000đ - 500.000đ\n\n";
+        
+        $message .= "**DỊCH VỤ PHẪU THUẬT**\n";
+        $message .= "• Triệt sản mèo đực: 500.000đ - 800.000đ\n";
+        $message .= "• Triệt sản mèo cái: 800.000đ - 1.200.000đ\n";
+        $message .= "• Triệt sản chó đực: 800.000đ - 1.500.000đ (tùy cân nặng)\n";
+        $message .= "• Triệt sản chó cái: 1.200.000đ - 2.500.000đ (tùy cân nặng)\n";
+        $message .= "• Phẫu thuật chỉnh hình: 2.000.000đ - 5.000.000đ\n";
+        $message .= "• Phẫu thuật nội tạng: 2.500.000đ - 6.000.000đ\n";
+        $message .= "• Phẫu thuật nha khoa: 1.500.000đ - 4.000.000đ\n\n";
+        
+        // Thông tin về giá cụ thể cho pet type nếu được chỉ định
+        if (!empty($petType)) {
+            if ($petType == 'dog') {
+                $message .= "**CHI PHÍ DÀNH RIÊNG CHO CHÓ**\n";
+                $message .= "• Tỷ lệ phụ thu theo cân nặng:\n";
+                $message .= "  - Chó dưới 5kg: giá cơ bản\n";
+                $message .= "  - Chó 5-10kg: +20% giá cơ bản\n";
+                $message .= "  - Chó 10-20kg: +40% giá cơ bản\n";
+                $message .= "  - Chó 20-30kg: +60% giá cơ bản\n";
+                $message .= "  - Chó trên 30kg: +80% giá cơ bản\n\n";
+            } else if ($petType == 'cat') {
+                $message .= "**CHI PHÍ DÀNH RIÊNG CHO MÈO**\n";
+                $message .= "• Mèo con (dưới 6 tháng): Giảm 10% giá dịch vụ khám và tiêm phòng\n";
+                $message .= "• Gói triệt sản mèo hoang: 500.000đ (bao gồm triệt sản + tiêm phòng dại)\n";
+                $message .= "• Gói chăm sóc đặc biệt cho mèo lông dài: 600.000đ - 900.000đ\n\n";
+            }
         }
         
-        return $message;
+        // Thông tin về dịch vụ cụ thể nếu được chỉ định
+        if (!empty($serviceType)) {
+            if ($serviceType == 'spa') {
+                $message .= "**CHI TIẾT GÓI SPA**\n";
+                $message .= "• Gói SPA Cơ bản:\n";
+                $message .= "  - Tắm bằng sản phẩm organic\n";
+                $message .= "  - Sấy khô\n";
+                $message .= "  - Vệ sinh tai\n";
+                $message .= "  - Thời gian: 60-90 phút\n\n";
+                
+                $message .= "• Gói SPA Cao cấp (bổ sung):\n";
+                $message .= "  - Tất cả dịch vụ của gói cơ bản\n";
+                $message .= "  - Massage thư giãn\n";
+                $message .= "  - Dưỡng lông bằng tinh dầu\n";
+                $message .= "  - Nước hoa thú cưng\n";
+                $message .= "  - Thời gian: 90-120 phút\n\n";
+            }
+        }
+        
+        $message .= "Lưu ý: Giá có thể thay đổi tùy theo cân nặng, tình trạng và nhu cầu cụ thể của thú cưng. Vui lòng liên hệ trực tiếp để được tư vấn chi tiết.";
+        
+        // Tạo nút điều hướng
+        $navigationButtons = [
+            [
+                'text' => 'Đặt lịch ngay',
+                'route' => '/client/dat-lich',
+                'icon' => '📅'
+            ],
+            [
+                'text' => 'Liên hệ tư vấn',
+                'route' => '/client/lien-he',
+                'icon' => '📞'
+            ]
+        ];
+        
+        return [
+            'success' => true,
+            'message' => $message,
+            'navigation_buttons' => $navigationButtons
+        ];
     }
 
     private function getBookingInfo($entities = []) {
-        $message = "Để đặt lịch khám tại PetCare, bạn có thể:\n";
-        $message .= "• Đặt lịch trực tiếp qua trang web\n";
-        $message .= "• Đặt lịch theo bác sĩ yêu thích\n";
-        $message .= "• Đặt lịch dịch vụ tiêm chủng\n";
-        $message .= "• Đặt lịch dịch vụ spa/chăm sóc\n\n";
-        $message .= "Bạn muốn đặt lịch cho dịch vụ nào? 🐾";
+        $message = "📅 **HƯỚNG DẪN ĐẶT LỊCH TẠI PETCARE**\n\n";
+        $message .= "Bạn có thể đặt lịch khám và sử dụng dịch vụ tại PetCare qua các cách sau:\n\n";
         
-        return $message;
+        $message .= "**1. Đặt lịch trực tuyến thông qua website:**\n";
+        $message .= "• Chọn dịch vụ bạn cần\n";
+        $message .= "• Chọn ngày và khung giờ phù hợp\n";
+        $message .= "• Chọn thú cưng của bạn (yêu cầu đăng nhập)\n";
+        $message .= "• Thanh toán đặt cọc (nếu cần)\n";
+        $message .= "• Nhận xác nhận qua email/SMS\n\n";
+        
+        $message .= "**2. Đặt lịch theo bác sĩ yêu thích:**\n";
+        $message .= "• Xem thông tin và lịch làm việc của các bác sĩ\n";
+        $message .= "• Chọn bác sĩ phù hợp với nhu cầu của bạn\n";
+        $message .= "• Chọn khung giờ còn trống của bác sĩ đó\n";
+        $message .= "• Hoàn tất thông tin đặt lịch\n\n";
+        
+        $message .= "**3. Đặt lịch dịch vụ tiêm chủng:**\n";
+        $message .= "• Chọn gói vaccine phù hợp\n";
+        $message .= "• Chọn ngày và giờ\n";
+        $message .= "• Điền thông tin thú cưng (độ tuổi, cân nặng, tình trạng sức khỏe)\n";
+        $message .= "• Hoàn tất đặt lịch\n\n";
+        
+        $message .= "**4. Đặt lịch dịch vụ spa/chăm sóc:**\n";
+        $message .= "• Chọn gói spa phù hợp\n";
+        $message .= "• Chọn các dịch vụ bổ sung (nếu cần)\n";
+        $message .= "• Chọn ngày và giờ\n";
+        $message .= "• Hoàn tất đặt lịch\n\n";
+        
+        $message .= "**Thông tin quan trọng khi đặt lịch:**\n";
+        $message .= "• Nên đặt lịch trước ít nhất 24 giờ\n";
+        $message .= "• Đến trước giờ hẹn 10-15 phút\n";
+        $message .= "• Mang theo sổ theo dõi sức khỏe/tiêm chủng (nếu có)\n";
+        $message .= "• Cần hủy/đổi lịch? Vui lòng báo trước ít nhất 4 giờ\n";
+        $message .= "• Đối với dịch vụ spa, không cho thú cưng ăn trước 1-2 giờ\n\n";
+        
+        $message .= "Bạn muốn đặt lịch cho dịch vụ nào? Tôi có thể hướng dẫn chi tiết hoặc đặt lịch ngay cho bạn! 🐾";
+        
+        // Tạo nút điều hướng
+        $navigationButtons = [
+            [
+                'text' => 'Đặt lịch khám',
+                'route' => '/client/dat-lich',
+                'icon' => '🩺'
+            ],
+            [
+                'text' => 'Đặt lịch tiêm chủng',
+                'route' => '/client/dat-lich',
+                'icon' => '💉'
+            ],
+            [
+                'text' => 'Đặt lịch spa',
+                'route' => '/client/dat-lich',
+                'icon' => '✂️'
+            ]
+        ];
+        
+        return [
+            'success' => true,
+            'message' => $message,
+            'navigation_buttons' => $navigationButtons
+        ];
     }
 
     private function getEmergencyInfo() {
         $message = "🚨 TRƯỜNG HỢP KHẨN CẤP 🚨\n\n";
         $message .= "Vui lòng gọi ngay số điện thoại cấp cứu: 0123.456.789\n\n";
-        $message .= "Chúng tôi luôn sẵn sàng hỗ trợ 24/7!";
+        $message .= "Chúng tôi luôn sẵn sàng hỗ trợ 24/7!\n\n";
+        
+        $message .= "📋 Dấu hiệu khẩn cấp cần đưa thú cưng đi bác sĩ ngay lập tức:\n";
+        $message .= "• Khó thở, thở gấp hoặc há miệng thở\n";
+        $message .= "• Co giật hoặc ngất xỉu\n";
+        $message .= "• Nôn mửa hoặc tiêu chảy kéo dài (hơn 24 giờ)\n";
+        $message .= "• Bụng cứng hoặc phình to\n";
+        $message .= "• Không đi tiểu được hoặc đau khi đi tiểu\n";
+        $message .= "• Chấn thương rõ ràng: gãy xương, vết thương hở, chảy máu nhiều\n";
+        $message .= "• Nuốt phải vật lạ hoặc chất độc\n";
+        $message .= "• Nhiệt độ trên 39.5°C hoặc dưới 37.5°C\n\n";
+        
+        $message .= "🩹 Sơ cứu cơ bản trước khi đến phòng khám:\n";
+        $message .= "• Chảy máu: Áp dụng áp lực bằng gạc sạch hoặc vải sạch\n";
+        $message .= "• Gãy xương: Hạn chế cử động, đặt thú cưng trên bề mặt cứng khi vận chuyển\n";
+        $message .= "• Nuốt phải chất độc: KHÔNG gây nôn trừ khi được bác sĩ thú y hướng dẫn\n";
+        $message .= "• Sốc nhiệt: Làm mát từ từ bằng khăn ướt, KHÔNG dùng nước đá\n";
+        $message .= "• Co giật: Giữ khu vực xung quanh an toàn, không đặt tay vào miệng thú cưng\n\n";
+        
+        $message .= "🚗 Khi vận chuyển thú cưng trong trường hợp khẩn cấp:\n";
+        $message .= "• Đặt thú cưng trên bề mặt phẳng, cứng (như bìa cứng)\n";
+        $message .= "• Bọc nhẹ nhàng trong khăn để tránh cắn do đau/sợ hãi\n";
+        $message .= "• Giữ đầu cao hơn thân nếu thú cưng bị khó thở\n";
+        $message .= "• Vận chuyển nhẹ nhàng, tránh rung lắc\n\n";
+        
+        $message .= "💊 Đừng tự ý cho thú cưng dùng thuốc dành cho người khi chưa có chỉ định của bác sĩ thú y!";
         
         return $message;
     }
@@ -1662,25 +2067,68 @@ class ChatbotController extends Controller
     {
         try {
             $suggestedQuestions = [
-                'Phòng khám mở cửa mấy giờ?',
-                'Làm sao để đặt lịch khám?',
-                'Cần chuẩn bị gì khi đi khám?',
-                'Chi phí tiêm phòng cho mèo?',
-                'Cần tiêm phòng những bệnh gì?',
-                'Dịch vụ spa cho thú cưng gồm những gì?',
-                'Triệt sản cho thú cưng có tốt không?',
-                'Thú cưng tôi có vấn đề về da',
-                'Thú cưng tôi gặp vấn đề tiêu hóa',
-                'Tư vấn chăm sóc chó con',
-                'Tư vấn chăm sóc mèo con',
-                'Chó tôi bị tiêu chảy, tôi nên làm gì?',
-                'Mèo tôi không ăn uống, có nguy hiểm không?',
-                'Chế độ dinh dưỡng cho chó già',
-                'Mèo con cần ăn gì để khỏe mạnh?',
-                'Thức ăn tốt cho thú cưng là gì?',
-                'Lịch tiêm vaccine cho thú cưng',
-                'Có dịch vụ chăm sóc thú cưng tại nhà không?',
-                'Thú cưng tôi ho và hắt hơi, có nghiêm trọng không?'
+                // Thông tin cơ bản về phòng khám
+                'Phòng khám mở cửa từ mấy giờ đến mấy giờ?',
+                'Chi phí khám tổng quát cho chó/mèo là bao nhiêu?',
+                'Địa chỉ chính xác của phòng khám PetCare ở đâu?',
+                'Phòng khám có làm việc vào Chủ nhật và ngày lễ không?',
+                'Làm thế nào để đến phòng khám bằng phương tiện công cộng?',
+                
+                // Đặt lịch khám
+                'Tôi muốn đặt lịch khám cho thú cưng của mình',
+                'Làm sao để hủy hoặc thay đổi lịch hẹn đã đặt?',
+                'Có cần đặt lịch trước khi đến khám không?',
+                'Cần chuẩn bị những giấy tờ gì khi đến khám?',
+                'Tôi có thể đặt lịch khám khẩn cấp trong ngày được không?',
+                
+                // Dịch vụ tiêm chủng
+                'Lịch tiêm phòng chuẩn cho chó con từ 2 tháng tuổi?',
+                'Chi phí tiêm phòng đầy đủ cho mèo con là bao nhiêu?',
+                'Vaccine 7 bệnh cho chó bao gồm những bệnh gì?',
+                'Mèo cần tiêm phòng những bệnh gì?',
+                'Sau khi tiêm vaccine cần lưu ý những gì?',
+                
+                // Dịch vụ spa và chăm sóc
+                'Dịch vụ spa cho thú cưng bao gồm những gì?',
+                'Quy trình cắt tỉa lông cho chó Poodle như thế nào?',
+                'Chi phí tắm và vệ sinh tai cho mèo là bao nhiêu?',
+                'Có dịch vụ chăm sóc móng và răng cho thú cưng không?',
+                'Bao lâu nên tắm cho chó/mèo một lần?',
+                
+                // Phẫu thuật và triệt sản
+                'Quy trình triệt sản cho chó cái diễn ra như thế nào?',
+                'Chi phí triệt sản cho mèo đực là bao nhiêu?',
+                'Thời điểm thích hợp để triệt sản cho thú cưng?',
+                'Sau phẫu thuật triệt sản cần chăm sóc thú cưng thế nào?',
+                'Triệt sản có ảnh hưởng đến sức khỏe thú cưng không?',
+                
+                // Sức khỏe và bệnh lý
+                'Chó tôi bị tiêu chảy và nôn, tôi nên làm gì?',
+                'Mèo tôi không ăn uống 2 ngày nay, có nguy hiểm không?',
+                'Thú cưng tôi bị ho và hắt hơi liên tục, có cần đi khám không?',
+                'Dấu hiệu nhận biết chó/mèo bị sốt?',
+                'Triệu chứng của bệnh viêm da ở chó?',
+                
+                // Dinh dưỡng
+                'Thức ăn khô tốt nhất cho chó con dưới 6 tháng tuổi?',
+                'Chế độ dinh dưỡng cho mèo bị bệnh thận?',
+                'Nên cho chó/mèo ăn mấy bữa một ngày?',
+                'Thực phẩm nào tuyệt đối không được cho chó/mèo ăn?',
+                'Vitamin và thực phẩm bổ sung nào tốt cho thú cưng?',
+                
+                // Hành vi và huấn luyện
+                'Cách huấn luyện chó đi vệ sinh đúng chỗ?',
+                'Làm thế nào để mèo không cào đồ nội thất?',
+                'Cách khắc phục tình trạng chó sủa quá nhiều?',
+                'Mèo tôi hay căng thẳng khi có khách, phải làm sao?',
+                'Cách ngăn chặn chó cắn đồ đạc trong nhà?',
+                
+                // Trường hợp khẩn cấp
+                'Dấu hiệu khẩn cấp cần đưa thú cưng đi bác sĩ ngay lập tức?',
+                'Thú cưng tôi bị chấn thương, tôi nên làm gì trước khi đến bác sĩ?',
+                'Chó tôi nuốt phải vật lạ, tôi phải làm gì?',
+                'Số điện thoại cấp cứu thú cưng 24/7?',
+                'Cách sơ cứu khi thú cưng bị chảy máu?'
             ];
             
             return response()->json([
@@ -2398,5 +2846,69 @@ class ChatbotController extends Controller
                 'message' => 'Không thể đặt lịch: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Cung cấp thông tin chi tiết về chi phí khám tổng quát cho chó/mèo
+     * @return array Thông tin chi phí khám
+     */
+    private function getGeneralExamCostInfo() {
+        $message = "💰 **CHI PHÍ KHÁM TỔNG QUÁT CHO CHÓ/MÈO TẠI PETCARE**\n\n";
+        
+        $message .= "**Chi phí khám tổng quát cơ bản:**\n";
+        $message .= "• Chó: 150.000đ - 300.000đ (tùy cân nặng và tình trạng)\n";
+        $message .= "• Mèo: 150.000đ - 250.000đ\n\n";
+        
+        $message .= "**Chi tiết gói khám tổng quát cơ bản bao gồm:**\n";
+        $message .= "• Kiểm tra thể trạng và cân nặng\n";
+        $message .= "• Đo thân nhiệt\n";
+        $message .= "• Kiểm tra mắt, tai, miệng, da và lông\n";
+        $message .= "• Nghe tim và phổi\n";
+        $message .= "• Kiểm tra hệ tiêu hóa và cơ xương khớp\n";
+        $message .= "• Tư vấn về dinh dưỡng và chăm sóc\n\n";
+        
+        $message .= "**Gói khám tổng quát nâng cao (250.000đ - 500.000đ) bao gồm thêm:**\n";
+        $message .= "• Tất cả dịch vụ của gói cơ bản\n";
+        $message .= "• Xét nghiệm máu cơ bản\n";
+        $message .= "• Kiểm tra ký sinh trùng đường ruột\n";
+        $message .= "• Kiểm tra ngoại ký sinh\n\n";
+        
+        $message .= "**Gói khám tổng quát toàn diện (500.000đ - 800.000đ) bao gồm thêm:**\n";
+        $message .= "• Tất cả dịch vụ của gói nâng cao\n";
+        $message .= "• Xét nghiệm máu toàn diện\n";
+        $message .= "• Siêu âm bụng (nếu cần)\n";
+        $message .= "• Chụp X-quang (nếu cần)\n";
+        $message .= "• Đánh giá sức khỏe toàn diện với báo cáo chi tiết\n\n";
+        
+        $message .= "**Lưu ý về chi phí khám:**\n";
+        $message .= "• Các chi phí trên chưa bao gồm thuốc điều trị (nếu cần)\n";
+        $message .= "• Thú cưng lần đầu khám sẽ có phí lập hồ sơ: 50.000đ\n";
+        $message .= "• Chi phí có thể thay đổi theo cân nặng: Mỗi 10kg tăng thêm sẽ cộng thêm khoảng 50.000đ\n";
+        $message .= "• Khách hàng thành viên được giảm 10% chi phí khám\n";
+        $message .= "• Các dịch vụ bổ sung sẽ được báo giá riêng\n\n";
+        
+        $message .= "**Khuyến nghị:**\n";
+        $message .= "• Nên khám tổng quát cho thú cưng 6 tháng/lần\n";
+        $message .= "• Thú cưng dưới 1 tuổi hoặc trên 7 tuổi nên khám 3-4 tháng/lần\n";
+        $message .= "• Đặt lịch trước để được phục vụ tốt nhất\n\n";
+        
+        $message .= "Bạn có thể đặt lịch khám tổng quát ngay bây giờ hoặc liên hệ với chúng tôi để được tư vấn thêm về các gói khám phù hợp với thú cưng của bạn.";
+        
+        return [
+            'success' => true,
+            'message' => $message,
+            'navigation_buttons' => [
+                [
+                    'text' => 'Đặt lịch khám ngay',
+                    'route' => '/client/dat-lich',
+                    'icon' => '🩺'
+                ],
+                [
+                    'text' => 'Xem bảng giá đầy đủ',
+                    'route' => '/client/bang-gia',
+                    'icon' => '💰'
+                ]
+            ]
+        ];
     }
 } 
