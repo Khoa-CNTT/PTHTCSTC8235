@@ -17,6 +17,7 @@ class DoanhThuController extends Controller
         // Doanh thu dịch vụ (KHÔNG còn whereNull nữa)
         $queryDichVu = DB::table('hoa_dons')
             ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+            ->where('hoa_dons.tinh_trang', 1)
             ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year);
 
         if ($month && $month > 0) {
@@ -35,6 +36,7 @@ class DoanhThuController extends Controller
             ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
             ->join('don_thuoc_chi_tiets', 'hoa_don_chi_tiets.id_ct_don_thuoc', '=', 'don_thuoc_chi_tiets.id')
             ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+            ->where('hoa_dons.tinh_trang', 1)
             ->whereNotNull('hoa_don_chi_tiets.id_ct_don_thuoc')
             ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year);
 
@@ -64,6 +66,7 @@ class DoanhThuController extends Controller
             // Doanh thu dịch vụ trong tháng (tính theo tiền khám)
             $dataDichVu = DB::table('hoa_dons')
                 ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+                ->where('hoa_dons.tinh_trang', 1)
                 ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
                 ->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month)
                 ->selectRaw('
@@ -78,6 +81,7 @@ class DoanhThuController extends Controller
                 ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
                 ->join('don_thuoc_chi_tiets', 'hoa_don_chi_tiets.id_ct_don_thuoc', '=', 'don_thuoc_chi_tiets.id')
                 ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+                ->where('hoa_dons.tinh_trang', 1)
                 ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
                 ->whereMonth('hoa_dons.ngay_xuat_hoa_don', $month)
                 ->selectRaw('
@@ -88,6 +92,7 @@ class DoanhThuController extends Controller
                 ->first();
 
             $soHoaDon = DB::table('hoa_dons')
+                ->where('hoa_dons.tinh_trang', 1)
                 ->whereYear('ngay_xuat_hoa_don', $year)
                 ->whereMonth('ngay_xuat_hoa_don', $month)
                 ->count();
@@ -105,6 +110,7 @@ class DoanhThuController extends Controller
         // TRƯỜNG HỢP 2: THỐNG KÊ CẢ NĂM
         $dataDichVu = DB::table('hoa_dons')
             ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
+            ->where('hoa_dons.tinh_trang', 1)
             ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
             ->groupBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
             ->orderBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
@@ -118,6 +124,7 @@ class DoanhThuController extends Controller
             ->join('hoa_don_chi_tiets', 'hoa_dons.id', '=', 'hoa_don_chi_tiets.id_hoadon')
             ->join('don_thuoc_chi_tiets', 'hoa_don_chi_tiets.id_ct_don_thuoc', '=', 'don_thuoc_chi_tiets.id')
             ->join('thuocs', 'don_thuoc_chi_tiets.id_thuoc', '=', 'thuocs.id')
+            ->where('hoa_dons.tinh_trang', 1)
             ->whereYear('hoa_dons.ngay_xuat_hoa_don', $year)
             ->groupBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
             ->orderBy(DB::raw('MONTH(hoa_dons.ngay_xuat_hoa_don)'))
@@ -128,6 +135,7 @@ class DoanhThuController extends Controller
             ->get();
 
         $dataHoaDon = DB::table('hoa_dons')
+            ->where('hoa_dons.tinh_trang', 1)
             ->whereYear('ngay_xuat_hoa_don', $year)
             ->groupBy(DB::raw('MONTH(ngay_xuat_hoa_don)'))
             ->orderBy(DB::raw('MONTH(ngay_xuat_hoa_don)'))

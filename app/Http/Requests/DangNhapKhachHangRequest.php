@@ -14,7 +14,7 @@ class DangNhapKhachHangRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email'    => 'required|email',
+            'email'    => 'required|email|exists:khach_hangs,email',
             'pass' => 'required',
         ];
     }
@@ -24,6 +24,7 @@ class DangNhapKhachHangRequest extends FormRequest
         return [
             'email.required'    => 'Email không được để trống',
             'email.email'       => 'Email không đúng định dạng',
+            'email.exists' => 'Email chưa được đăng ký. Bạn cần đăng ký tài khoản',
             'pass.required' => 'Mật khẩu không được để trống',
         ];
     }

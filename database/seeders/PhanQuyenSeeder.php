@@ -81,11 +81,71 @@ class PhanQuyenSeeder extends Seeder
             ],
             [
                 'id_chuc_vu' => 3,
-                'id_chuc_nang' => 18, // Phân Quyền
+                'id_chuc_nang' => 18, // QL giờ
             ],
             [
                 'id_chuc_vu' => 1,
                 'id_chuc_nang' => 17, // Kê đơn thuốc
+            ],
+            [
+                'id_chuc_vu' => 2, // nhanvien
+                'id_chuc_nang' => 1, // Quản Lý Phiếu Nhập Thuốc
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 2, // Quản Lý Tồn Kho
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 3, // Quản Lý Lịch Hẹn
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 4, // Quản Lý Dịch Vụ
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 5, // Quản Lý Nhân Viên
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 6, // Quản Lý Khách Hàng
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 7, // Quản Lý Pet
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 8, // Quản Lý Thuốc
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 9, // Quản Lý Nhà Cung Cấp
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 10, // Quản Lý Lương
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 11, // Quản Lý Đánh Giá
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 12, // Quản Lý Kho
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 13, // Quản Lý Hóa Đơn
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 14, // Quản Lý Doanh Thu
+            ],
+            [
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => 18, // QL giờ
             ],
         ]);
     }

@@ -29,7 +29,7 @@ class CapNhatDichVuRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ten_dv.required'           => 'Tên dịch vụ không được để trống',
+            'ten_dv.required'           => 'Không được để trống tên dịch vụ',
             'ten_dv.max'                => 'Tên dịch vụ không được vượt quá 255 ký tự',
             'hinh_anh.max'              => 'Đường dẫn hình ảnh không được vượt quá 255 ký tự',
             'phan_loai_kg.required'     => 'Vui lòng chọn phân loại cân nặng',

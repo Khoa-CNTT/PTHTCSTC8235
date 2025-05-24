@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('chung_loai')->default(0);
             $table->integer('gioi_tinh')->default(0);
             $table->string('tuoi');
-            $table->string('hinh_anh');
+            $table->string('hinh_anh')->nullable();
             $table->integer('can_nang');
             $table->integer('tinh_trang')->default(0);
             $table->timestamps();

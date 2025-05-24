@@ -8,6 +8,7 @@ use App\Models\KhachHang;
 use App\Models\DonThuoc;
 use App\Models\DonThuocChiTiet;
 use App\Models\LichHenPet;
+use App\Models\pet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +21,7 @@ class HoSoBenhAnController extends Controller
             $pets = pet::where('id_kh', $id)
                 ->select('id', 'ten_pet', 'gioi_tinh', 'tuoi', 'can_nang', 'chung_loai')
                 ->get();
-                
+
             return response()->json([
                 'status' => true,
                 'data' => $pets
@@ -354,6 +355,7 @@ class HoSoBenhAnController extends Controller
 
                 // Create a new appointment record
                 $lichHenId = DB::table('lich_hen_pets')->insertGetId([
+                    'id_lich' => null,
                     'id_pet' => $request->id_pet,
                     'id_kh' => $request->id_kh,
                     'id_nv' => $request->id_bac_si,
@@ -388,6 +390,8 @@ class HoSoBenhAnController extends Controller
                 $khachHangId = DB::table('khach_hangs')->insertGetId([
                     'ho_va_ten' => $request->ten_khach,
                     'so_dien_thoai' => $request->sdt,
+                    'email' => $request->email,
+                    'password' => bcrypt(123456),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -398,6 +402,9 @@ class HoSoBenhAnController extends Controller
                     'ten_pet' => $request->ten_thu_cung,
                     'chung_loai' => $request->chung_loai,
                     'gioi_tinh' => $request->gioi_tinh_pet,
+                    'tuoi' => $request->tuoi,
+                    'can_nang' => $request->can_nang,
+                    'hinh_anh' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

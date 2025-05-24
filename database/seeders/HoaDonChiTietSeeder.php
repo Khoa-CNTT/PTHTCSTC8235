@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class HoSoBenhAnSeeder extends Seeder
+class HoaDonChiTietSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,157 +14,142 @@ class HoSoBenhAnSeeder extends Seeder
     public function run(): void
     {
         // Xóa dữ liệu cũ
-        DB::table('ho_so_benh_ans')->delete();
+        DB::table('hoa_don_chi_tiets')->delete();
 
-        // Thêm dữ liệu hồ sơ bệnh án trực tiếp
-        DB::table('ho_so_benh_ans')->insert([
+        // Thêm chi tiết hóa đơn trực tiếp
+        DB::table('hoa_don_chi_tiets')->insert([
             [
                 'id' => 1,
-                'id_nv' => 1,
+                'id_hoadon' => 1,
+                'id_ct_don_thuoc' => 1,
                 'id_lich_hen_pet' => 1,
-                'id_don_thuoc' => 1,
-                'chuan_doan' => 'Viêm phổi cấp tính',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 150000,
                 'created_at' => Carbon::now()->subDays(5),
                 'updated_at' => Carbon::now()->subDays(5),
             ],
             [
                 'id' => 2,
-                'id_nv' => 2,
+                'id_hoadon' => 2,
+                'id_ct_don_thuoc' => 2,
                 'id_lich_hen_pet' => 2,
-                'id_don_thuoc' => 2,
-                'chuan_doan' => 'Tiêu chảy cấp',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 200000,
                 'created_at' => Carbon::now()->subDays(7),
                 'updated_at' => Carbon::now()->subDays(7),
             ],
             [
                 'id' => 3,
-                'id_nv' => 3,
+                'id_hoadon' => 3,
+                'id_ct_don_thuoc' => 3,
                 'id_lich_hen_pet' => 3,
-                'id_don_thuoc' => 3,
-                'chuan_doan' => 'Viêm da dị ứng',
-                'tinh_trang' => 0, // Chưa hoàn thành
+                'tien_kham' => 180000,
                 'created_at' => Carbon::now()->subDays(10),
                 'updated_at' => Carbon::now()->subDays(10),
             ],
             [
                 'id' => 4,
-                'id_nv' => 4,
+                'id_hoadon' => 4,
+                'id_ct_don_thuoc' => 4,
                 'id_lich_hen_pet' => 4,
-                'id_don_thuoc' => 4,
-                'chuan_doan' => 'Cảm cúm thông thường',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 250000,
                 'created_at' => Carbon::now()->subDays(12),
                 'updated_at' => Carbon::now()->subDays(12),
             ],
             [
                 'id' => 5,
-                'id_nv' => 1,
+                'id_hoadon' => 5,
+                'id_ct_don_thuoc' => 5,
                 'id_lich_hen_pet' => 5,
-                'id_don_thuoc' => 5,
-                'chuan_doan' => 'Viêm tai giữa',
-                'tinh_trang' => 0, // Chưa hoàn thành
+                'tien_kham' => 300000,
                 'created_at' => Carbon::now()->subDays(14),
                 'updated_at' => Carbon::now()->subDays(14),
             ],
             [
                 'id' => 6,
-                'id_nv' => 2,
+                'id_hoadon' => 6,
+                'id_ct_don_thuoc' => 6,
                 'id_lich_hen_pet' => 6,
-                'id_don_thuoc' => 6,
-                'chuan_doan' => 'Viêm khớp mãn tính',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 220000,
                 'created_at' => Carbon::now()->subDays(16),
                 'updated_at' => Carbon::now()->subDays(16),
             ],
             [
                 'id' => 7,
-                'id_nv' => 3,
+                'id_hoadon' => 7,
+                'id_ct_don_thuoc' => 7,
                 'id_lich_hen_pet' => 7,
-                'id_don_thuoc' => 7,
-                'chuan_doan' => 'Suy dinh dưỡng',
-                'tinh_trang' => 0, // Chưa hoàn thành
+                'tien_kham' => 170000,
                 'created_at' => Carbon::now()->subDays(18),
                 'updated_at' => Carbon::now()->subDays(18),
             ],
             [
                 'id' => 8,
-                'id_nv' => 4,
+                'id_hoadon' => 8,
+                'id_ct_don_thuoc' => 8,
                 'id_lich_hen_pet' => 8,
-                'id_don_thuoc' => 8,
-                'chuan_doan' => 'Nhiễm trùng đường ruột',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 190000,
                 'created_at' => Carbon::now()->subDays(20),
                 'updated_at' => Carbon::now()->subDays(20),
             ],
             [
                 'id' => 9,
-                'id_nv' => 1,
+                'id_hoadon' => 9,
+                'id_ct_don_thuoc' => 9,
                 'id_lich_hen_pet' => 9,
-                'id_don_thuoc' => 9,
-                'chuan_doan' => 'Viêm phế quản mãn tính',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 210000,
                 'created_at' => Carbon::now()->subDays(22),
                 'updated_at' => Carbon::now()->subDays(22),
             ],
             [
                 'id' => 10,
-                'id_nv' => 2,
+                'id_hoadon' => 10,
+                'id_ct_don_thuoc' => 10,
                 'id_lich_hen_pet' => 10,
-                'id_don_thuoc' => 10,
-                'chuan_doan' => 'Viêm mắt đỏ',
-                'tinh_trang' => 0, // Chưa hoàn thành
+                'tien_kham' => 230000,
                 'created_at' => Carbon::now()->subDays(24),
                 'updated_at' => Carbon::now()->subDays(24),
             ],
             [
                 'id' => 11,
-                'id_nv' => 3,
+                'id_hoadon' => 11,
+                'id_ct_don_thuoc' => 11,
                 'id_lich_hen_pet' => 11,
-                'id_don_thuoc' => 1,
-                'chuan_doan' => 'Viêm phổi mãn tính',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 250000,
                 'created_at' => Carbon::now()->subDays(26),
                 'updated_at' => Carbon::now()->subDays(26),
             ],
             [
                 'id' => 12,
-                'id_nv' => 4,
+                'id_hoadon' => 12,
+                'id_ct_don_thuoc' => 12,
                 'id_lich_hen_pet' => 12,
-                'id_don_thuoc' => 2,
-                'chuan_doan' => 'Tiêu chảy mãn tính',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 270000,
                 'created_at' => Carbon::now()->subDays(28),
                 'updated_at' => Carbon::now()->subDays(28),
             ],
             [
                 'id' => 13,
-                'id_nv' => 1,
+                'id_hoadon' => 13,
+                'id_ct_don_thuoc' => 13,
                 'id_lich_hen_pet' => 13,
-                'id_don_thuoc' => 3,
-                'chuan_doan' => 'Viêm da mãn tính',
-                'tinh_trang' => 0, // Chưa hoàn thành
+                'tien_kham' => 290000,
                 'created_at' => Carbon::now()->subDays(30),
                 'updated_at' => Carbon::now()->subDays(30),
             ],
             [
                 'id' => 14,
-                'id_nv' => 2,
+                'id_hoadon' => 14,
+                'id_ct_don_thuoc' => 14,
                 'id_lich_hen_pet' => 14,
-                'id_don_thuoc' => 4,
-                'chuan_doan' => 'Cảm cúm mãn tính',
-                'tinh_trang' => 1, // Đã hoàn thành
+                'tien_kham' => 310000,
                 'created_at' => Carbon::now()->subDays(32),
                 'updated_at' => Carbon::now()->subDays(32),
             ],
             [
                 'id' => 15,
-                'id_nv' => 3,
+                'id_hoadon' => 15,
+                'id_ct_don_thuoc' => 15,
                 'id_lich_hen_pet' => 15,
-                'id_don_thuoc' => 5,
-                'chuan_doan' => 'Viêm tai mãn tính',
-                'tinh_trang' => 0, // Chưa hoàn thành
+                'tien_kham' => 330000,
                 'created_at' => Carbon::now()->subDays(34),
                 'updated_at' => Carbon::now()->subDays(34),
             ],

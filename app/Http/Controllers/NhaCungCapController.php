@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ThemNhaCungCapRequest;
 use App\Models\NhaCungCap;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class NhaCungCapController extends Controller
             'data' => $data
         ]);
     }
-    public function them(Request $request)
+    public function them(ThemNhaCungCapRequest $request)
     {
             $data = $request->all();
             NhaCungCap::create($data);
@@ -37,7 +38,7 @@ class NhaCungCapController extends Controller
             "data" => $data
         ]);
     }
-    public function update(Request $request)
+    public function update(ThemNhaCungCapRequest $request)
     {
 
             $data = $request->all();

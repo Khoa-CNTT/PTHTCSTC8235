@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('id_don_thuoc');
             $table->integer('so_luong');
             $table->string('lieu_luong')->nullable();
-            $table->string('tinh_trang')->nullable();
+            $table->integer('tinh_trang')->default(0);
             $table->timestamps();
 
         });

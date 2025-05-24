@@ -8,6 +8,7 @@ use App\Http\Requests\DoiMatKhauRequest;
 use App\Http\Requests\DangKyRequest;
 use App\Http\Requests\DangNhapKhachHangRequest;
 use App\Http\Requests\DangNhapRequest;
+use App\Http\Requests\SendMailRequest;
 use App\Http\Requests\ThemPetKhachHangRequest;
 use App\Models\KhachHang;
 use App\Models\pet;
@@ -74,7 +75,7 @@ class KhachHangController extends Controller
         $khach_hang = KhachHang::where('hash_active', $request->ma)
             ->first();
         if ($khach_hang) {
-            $khach_hang['password'] = bcrypt($request->pass);
+            $khach_hang['password'] = hash::make($request->pass);
             $khach_hang['hash_active'] = '';
             $khach_hang->save();
             return response()->json([
@@ -88,7 +89,7 @@ class KhachHangController extends Controller
             ]);
         }
     }
-    public function guiMail(Request $request){
+    public function guiMail(SendMailRequest $request){
         $hash_active = Str::uuid();
         $khach_hang = KhachHang::where('email',$request->email)->first();
         $khach_hang['hash_active']=$hash_active;

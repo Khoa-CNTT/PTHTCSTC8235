@@ -34,10 +34,12 @@ class DatabaseSeeder extends Seeder
             NhanVienSeeder::class,
             PetSeeder::class,
             DonThuocSeeder::class,
+            DonThuocChiTietSeeder::class,
             HoSoBenhAnSeeder::class,
             PhanQuyenSeeder::class,
             LichHenSeeder::class,
             HoaDonSeeder::class,
+            HoaDonChiTietSeeder::class,
         ]);
     }
 }

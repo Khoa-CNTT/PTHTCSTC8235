@@ -126,13 +126,55 @@ class DichVuController extends Controller
         DichVu::where('id', $request->id)->delete();
         return response()->json([
             "status" => '1',
-            "message" => "Xóa dịch vụ thành công"
+            "message" => "Xóa thành công"
         ]);
     }
     public function timkiem(Request $request)
     {
         $noi_dung = '%' . $request->noi_dung . '%';
         $data = DichVu::where('ten_dv', 'like', $noi_dung)
+            ->get();
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+    public function timkiemKhamBenh(Request $request)
+    {
+        $noi_dung = '%' . $request->noi_dung . '%';
+
+        $data = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+            ->where('dich_vus.id_loaidv', 4)
+            ->where('dich_vus.ten_dv', 'like', $noi_dung)
+            ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
+            ->get();
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+    public function timkiemTiemChung(Request $request)
+    {
+        $noi_dung = '%' . $request->noi_dung . '%';
+
+        $data = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+            ->where('dich_vus.id_loaidv', 1)
+            ->where('dich_vus.ten_dv', 'like', $noi_dung)
+            ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
+            ->get();
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+    public function timkiemChamSoc(Request $request)
+    {
+        $noi_dung = '%' . $request->noi_dung . '%';
+
+        $data = DichVu::join('loai_dich_vus', 'loai_dich_vus.id', '=', 'dich_vus.id_loaidv')
+            ->where('dich_vus.id_loaidv', 2)
+            ->where('dich_vus.ten_dv', 'like', $noi_dung)
+            ->select('dich_vus.*', 'loai_dich_vus.ten_loaidv')
             ->get();
 
         return response()->json([
