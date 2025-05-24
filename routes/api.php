@@ -224,7 +224,7 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:3'])->group(function () {
     Route::get("lich-hen-pet/load", [LichHenPetController::class, 'load']);
     Route::post('lich-hen/doi-tt-va-tao-hoa-don', [LichHenPetController::class, 'changeandCreateBill']);
     Route::post("lich-hen/update", [LichHenPetController::class, 'update']);
-    Route::post("lich-hen/del", [LichHenPetController::class, 'delete']);
+    Route::post("lich-hen/xoa", [LichHenPetController::class, 'delete']);
     Route::get("lich-hen/load", [LichHenController::class, 'load']);
     Route::post("lich-hen/tim-kiem", [LichHenPetController::class, 'timKiem']);
     Route::post("lich-hen/loc-theo-ngay", [LichHenPetController::class, 'locTheoNgay']);
