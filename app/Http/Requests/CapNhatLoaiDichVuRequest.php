@@ -22,7 +22,7 @@ class CapNhatLoaiDichVuRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ten_loaidv.required' => 'Vui lòng nhập tên loại dịch vụ.',
+            'ten_loaidv.required' => 'Tên không được bỏ trống',
             'ten_loaidv.string'   => 'Tên loại dịch vụ phải là chuỗi.',
             'ten_loaidv.max'      => 'Tên loại dịch vụ không vượt quá 255 ký tự.',
             'mo_ta.required'      => 'Vui lòng nhập mô tả cho loại dịch vụ.',

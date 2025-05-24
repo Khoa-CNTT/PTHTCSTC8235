@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ThemChucVuRequest;
 use App\Models\ChucVu;
 use Illuminate\Http\Request;
 
@@ -24,7 +25,7 @@ class ChucVuController extends Controller
             'data' => $data
         ]);
     }
-    public function them(Request $request)
+    public function them(ThemChucVuRequest $request)
     {
         $data = $request->all();
         ChucVu::create($data);
@@ -40,8 +41,8 @@ class ChucVuController extends Controller
             "data" => $data
         ]);
     }
-    
-    public function update(Request $request)
+
+    public function update(ThemChucVuRequest $request)
     {
         $data = $request->all();
         ChucVu::find($request->id)->update($data);

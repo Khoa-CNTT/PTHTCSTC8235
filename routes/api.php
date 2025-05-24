@@ -50,6 +50,9 @@ Route::middleware(['auth:sanctum', 'kiemtra.quyen:4'])->group(function () {
 Route::get("dich-vu/load-bac-si", [DichVuController::class, 'loadBacSi']);
 Route::get("dich-vu/load", [DichVuController::class, 'load']);
 Route::post('dich-vu/tim-kiem', [DichVuController::class, 'timkiem']);
+Route::post('dich-vu/tim-kiem-kham-benh', [DichVuController::class, 'timkiemKhamBenh']);
+Route::post('dich-vu/tim-kiem-tiem-chung', [DichVuController::class, 'timkiemTiemChung']);
+Route::post('dich-vu/tim-kiem-cham-soc', [DichVuController::class, 'timkiemChamSoc']);
 Route::get('/dich-vu/load-chi-tiet/{id}', [DichVuController::class, 'LoadDataChiTiet']);
 Route::get("dich-vu/load-tiem-chung", [DichVuController::class, 'loadTiemChung']);
 Route::get("dich-vu/load-cham-soc", [DichVuController::class, 'loadChamSoc']);

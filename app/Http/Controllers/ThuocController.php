@@ -27,7 +27,7 @@ class ThuocController extends Controller
         Thuoc::create($data);
         return response()->json([
             'status' => '1',
-            "message" => "Thêm mới thuốc thành công",
+            "message" => "Thuốc được thêm thành công",
         ]);
     }
     public function load()
@@ -57,7 +57,7 @@ class ThuocController extends Controller
 
         return response()->json([
             "status" => '1',
-            "message" => "Cập nhật thuốc thành công"
+            "message" => "Cập nhật thành công"
         ]);
     }
     public function doi(Request $request)
@@ -80,7 +80,7 @@ class ThuocController extends Controller
         Thuoc::where('id', $request->id)->delete();
         return response()->json([
             "status" => '1',
-            "message" => "Xóa thông tin thuốc thành công"
+            "message" => "Xóa thuốc thành công"
         ]);
     }
 }

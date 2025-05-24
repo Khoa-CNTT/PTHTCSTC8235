@@ -14,7 +14,7 @@ class ThemLoaiDichVuRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ten_loaidv' => 'required|string|max:255',
+            'ten_loaidv' => 'required|string|max:255|unique:loai_dich_vus,ten_loaidv',
             'mo_ta'      => 'required|string|max:1000',
         ];
     }
@@ -22,7 +22,8 @@ class ThemLoaiDichVuRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ten_loaidv.required' => 'Vui lòng nhập tên loại dịch vụ.',
+            'ten_loaidv.required' => 'Tên không được bỏ trống.',
+            'ten_loaidv.unique'   => 'Tên đã tồn tại',
             'ten_loaidv.string'   => 'Tên loại dịch vụ phải là chuỗi.',
             'ten_loaidv.max'      => 'Tên loại dịch vụ không vượt quá 255 ký tự.',
             'mo_ta.required'      => 'Vui lòng nhập mô tả cho loại dịch vụ.',

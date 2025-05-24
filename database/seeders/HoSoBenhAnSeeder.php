@@ -13,105 +13,161 @@ class HoSoBenhAnSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing records
+        // Xóa dữ liệu cũ
         DB::table('ho_so_benh_ans')->delete();
 
-        // Get available appointments
-        $appointments = DB::table('lich_hen_pets')
-            ->where('tinh_trang', 1) // Completed appointments
-            ->get();
-
-        // Get available doctors
-        $doctorIds = DB::table('nhan_viens')
-            ->where('id_chucvu', 2) // Doctor role
-            ->pluck('id')
-            ->toArray();
-
-        // Get available prescriptions
-        $prescriptionIds = DB::table('don_thuocs')
-            ->pluck('id')
-            ->toArray();
-
-        // Create medical records for some appointments
-        foreach ($appointments as $index => $appointment) {
-            // For demonstration purposes, create records for most appointments
-            if (rand(0, 10) <= 8) { // 80% chance to create a record
-                $doctorId = $doctorIds[array_rand($doctorIds)];
-
-                // 70% chance to link a prescription
-                $prescriptionId = null;
-                if (rand(0, 10) <= 7 && !empty($prescriptionIds)) {
-                    $prescriptionId = $prescriptionIds[array_rand($prescriptionIds)];
-                }
-
-                $diagnosis = $this->getDiagnosis();
-                $status = rand(0, 1); // 0: pending, 1: completed
-                $date = Carbon::parse($appointment->ngay)->addHours(rand(0, 8));
-
-                DB::table('ho_so_benh_ans')->insert([
-                    'id_lich_hen_pet' => $appointment->id,
-                    'id_nv' => $doctorId,
-                    'id_don_thuoc' => $prescriptionId,
-                    'chuan_doan' => $diagnosis,
-                    'tinh_trang' => $status,
-                    'created_at' => $date,
-                    'updated_at' => $date,
-                ]);
-            }
-        }
-
-        // Create additional records if there aren't many appointments
-        if (count($appointments) < 10) {
-            $additionalCount = 10 - count($appointments);
-
-            for ($i = 0; $i < $additionalCount; $i++) {
-                $doctorId = $doctorIds[array_rand($doctorIds)];
-             
-                // 70% chance to link a prescription
-                $prescriptionId = null;
-                if (rand(0, 10) <= 7 && !empty($prescriptionIds)) {
-                    $prescriptionId = $prescriptionIds[array_rand($prescriptionIds)];
-                }
-
-                $diagnosis = $this->getDiagnosis();
-                $status = rand(0, 1); // 0: pending, 1: completed
-                $date = Carbon::now()->subDays(rand(0, 30));
-            
-                DB::table('ho_so_benh_ans')->insert([
-                    'id_lich_hen_pet' => $appointments[array_rand($appointments->toArray())]->id ?? null,
-                    'id_nv' => $doctorId,
-                    'id_don_thuoc' => $prescriptionId,
-                    'chuan_doan' => $diagnosis,
-                    'tinh_trang' => $status,
-                    'created_at' => $date,
-                    'updated_at' => $date,
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Get a random diagnosis
-     */
-    private function getDiagnosis()
-    {
-        $diagnoses = [
-            'Viêm da dị ứng',
-            'Nhiễm trùng da',
-            'Viêm tai ngoài',
-            'Viêm kết mạc',
-            'Viêm đường hô hấp trên',
-            'Viêm phế quản',
-            'Viêm dạ dày ruột',
-            'Bệnh nấm da',
-            'Bệnh ký sinh trùng ngoài da',
-            'Tiêu chảy cấp tính',
-            'Viêm tuyến vú',
-            'Viêm miệng',
-            'Viêm niệu đạo',
-            'Rối loạn tiêu hóa',
-        ];
-
-        return $diagnoses[array_rand($diagnoses)];
+        // Thêm dữ liệu hồ sơ bệnh án trực tiếp
+        DB::table('ho_so_benh_ans')->insert([
+            [
+                'id' => 1,
+                'id_nv' => 1,
+                'id_lich_hen_pet' => 1,
+                'id_don_thuoc' => 1,
+                'chuan_doan' => 'Viêm phổi cấp tính',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(5),
+                'updated_at' => Carbon::now()->subDays(5),
+            ],
+            [
+                'id' => 2,
+                'id_nv' => 2,
+                'id_lich_hen_pet' => 2,
+                'id_don_thuoc' => 2,
+                'chuan_doan' => 'Tiêu chảy cấp',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(7),
+                'updated_at' => Carbon::now()->subDays(7),
+            ],
+            [
+                'id' => 3,
+                'id_nv' => 3,
+                'id_lich_hen_pet' => 3,
+                'id_don_thuoc' => 3,
+                'chuan_doan' => 'Viêm da dị ứng',
+                'tinh_trang' => 0, // Chưa hoàn thành
+                'created_at' => Carbon::now()->subDays(10),
+                'updated_at' => Carbon::now()->subDays(10),
+            ],
+            [
+                'id' => 4,
+                'id_nv' => 4,
+                'id_lich_hen_pet' => 4,
+                'id_don_thuoc' => 4,
+                'chuan_doan' => 'Cảm cúm thông thường',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(12),
+                'updated_at' => Carbon::now()->subDays(12),
+            ],
+            [
+                'id' => 5,
+                'id_nv' => 1,
+                'id_lich_hen_pet' => 5,
+                'id_don_thuoc' => 5,
+                'chuan_doan' => 'Viêm tai giữa',
+                'tinh_trang' => 0, // Chưa hoàn thành
+                'created_at' => Carbon::now()->subDays(14),
+                'updated_at' => Carbon::now()->subDays(14),
+            ],
+            [
+                'id' => 6,
+                'id_nv' => 2,
+                'id_lich_hen_pet' => 6,
+                'id_don_thuoc' => 6,
+                'chuan_doan' => 'Viêm khớp mãn tính',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(16),
+                'updated_at' => Carbon::now()->subDays(16),
+            ],
+            [
+                'id' => 7,
+                'id_nv' => 3,
+                'id_lich_hen_pet' => 7,
+                'id_don_thuoc' => 7,
+                'chuan_doan' => 'Suy dinh dưỡng',
+                'tinh_trang' => 0, // Chưa hoàn thành
+                'created_at' => Carbon::now()->subDays(18),
+                'updated_at' => Carbon::now()->subDays(18),
+            ],
+            [
+                'id' => 8,
+                'id_nv' => 4,
+                'id_lich_hen_pet' => 8,
+                'id_don_thuoc' => 8,
+                'chuan_doan' => 'Nhiễm trùng đường ruột',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(20),
+                'updated_at' => Carbon::now()->subDays(20),
+            ],
+            [
+                'id' => 9,
+                'id_nv' => 1,
+                'id_lich_hen_pet' => 9,
+                'id_don_thuoc' => 9,
+                'chuan_doan' => 'Viêm phế quản mãn tính',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(22),
+                'updated_at' => Carbon::now()->subDays(22),
+            ],
+            [
+                'id' => 10,
+                'id_nv' => 2,
+                'id_lich_hen_pet' => 10,
+                'id_don_thuoc' => 10,
+                'chuan_doan' => 'Viêm mắt đỏ',
+                'tinh_trang' => 0, // Chưa hoàn thành
+                'created_at' => Carbon::now()->subDays(24),
+                'updated_at' => Carbon::now()->subDays(24),
+            ],
+            [
+                'id' => 11,
+                'id_nv' => 3,
+                'id_lich_hen_pet' => 11,
+                'id_don_thuoc' => 1,
+                'chuan_doan' => 'Viêm phổi mãn tính',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(26),
+                'updated_at' => Carbon::now()->subDays(26),
+            ],
+            [
+                'id' => 12,
+                'id_nv' => 4,
+                'id_lich_hen_pet' => 12,
+                'id_don_thuoc' => 2,
+                'chuan_doan' => 'Tiêu chảy mãn tính',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(28),
+                'updated_at' => Carbon::now()->subDays(28),
+            ],
+            [
+                'id' => 13,
+                'id_nv' => 1,
+                'id_lich_hen_pet' => 13,
+                'id_don_thuoc' => 3,
+                'chuan_doan' => 'Viêm da mãn tính',
+                'tinh_trang' => 0, // Chưa hoàn thành
+                'created_at' => Carbon::now()->subDays(30),
+                'updated_at' => Carbon::now()->subDays(30),
+            ],
+            [
+                'id' => 14,
+                'id_nv' => 2,
+                'id_lich_hen_pet' => 14,
+                'id_don_thuoc' => 4,
+                'chuan_doan' => 'Cảm cúm mãn tính',
+                'tinh_trang' => 1, // Đã hoàn thành
+                'created_at' => Carbon::now()->subDays(32),
+                'updated_at' => Carbon::now()->subDays(32),
+            ],
+            [
+                'id' => 15,
+                'id_nv' => 3,
+                'id_lich_hen_pet' => 15,
+                'id_don_thuoc' => 5,
+                'chuan_doan' => 'Viêm tai mãn tính',
+                'tinh_trang' => 0, // Chưa hoàn thành
+                'created_at' => Carbon::now()->subDays(34),
+                'updated_at' => Carbon::now()->subDays(34),
+            ],
+        ]);
     }
 }
