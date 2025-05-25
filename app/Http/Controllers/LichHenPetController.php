@@ -57,14 +57,36 @@ class LichHenPetController extends Controller
 
         $ngay = $lich->ngay;
         $gio = $lich->gio;
+        $id_dv = $lich->id_dv;
 
-        // B1: Lấy danh sách bác sĩ (dựa vào id_chucvu = 1 là bác sĩ
-        $bac_si = DB::table('nhan_viens')
-            ->where('id_chucvu', 1)
+        // Lấy loại dịch vụ
+        $dich_vu = DB::table('dich_vus')->where('id', $id_dv)->first();
+        if (!$dich_vu) {
+            return response()->json(['status' => false, 'message' => 'Không tìm thấy dịch vụ']);
+        }
+
+        $id_loai_dv = $dich_vu->id_loaidv;
+        
+        // Xác định id_chucvu phù hợp với từng loại dịch vụ
+        $id_chucvu = 1; // Mặc định là bác sĩ (id=1)
+        
+        // Có thể thay đổi logic dựa trên loại dịch vụ
+        // Ví dụ: Nếu là dịch vụ spa, grooming thì gán cho nhân viên grooming
+        if ($id_loai_dv == 2) { // Nếu là dịch vụ làm đẹp
+            $id_chucvu = 2; // Gán cho nhân viên spa/grooming
+        } else if ($id_loai_dv == 3) { // Nếu là dịch vụ lưu trú
+            $id_chucvu = 3; // Gán cho nhân viên chăm sóc
+        }
+        // Các loại dịch vụ 1 (khám bệnh) và 4 (khác) vẫn gán cho bác sĩ (id=1)
+
+        // B1: Lấy danh sách nhân viên phù hợp với loại dịch vụ
+        $nhan_vien = DB::table('nhan_viens')
+            ->where('id_chucvu', $id_chucvu)
+            ->where('tinh_trang', 1) // Chỉ lấy nhân viên đang hoạt động
             ->get();
 
-        // B2: Lọc bác sĩ chưa có lịch trong cùng khung giờ
-        $bac_si_hop_le = $bac_si->filter(function ($b) use ($ngay, $gio) {
+        // B2: Lọc nhân viên chưa có lịch trong cùng khung giờ
+        $nhan_vien_hop_le = $nhan_vien->filter(function ($b) use ($ngay, $gio) {
             return DB::table('lich_hen_pets')
                 ->where('ngay', $ngay)
                 ->where('gio', $gio)
@@ -72,22 +94,22 @@ class LichHenPetController extends Controller
                 ->count() == 0;
         });
 
-        if ($bac_si_hop_le->isEmpty()) {
-            return response()->json(['status' => false, 'message' => 'Không còn bác sĩ nào trống khung giờ này']);
+        if ($nhan_vien_hop_le->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'Không còn nhân viên nào trống khung giờ này']);
         }
 
-        // B3: Ưu tiên bác sĩ ít lịch nhất
-        $bac_si_chon = $bac_si_hop_le->map(function ($b) {
+        // B3: Ưu tiên nhân viên ít lịch nhất
+        $nhan_vien_chon = $nhan_vien_hop_le->map(function ($b) {
             $so_luot = DB::table('lich_hen_pets')->where('id_nv', $b->id)->count();
             return ['id' => $b->id, 'so_luot' => $so_luot];
         })->sortBy('so_luot')->first();
 
-        // B4: Gán bác sĩ vào lịch hẹn
+        // B4: Gán nhân viên vào lịch hẹn
         DB::table('lich_hen_pets')->where('id', $id_lich)->update([
-            'id_nv' => $bac_si_chon['id']
+            'id_nv' => $nhan_vien_chon['id']
         ]);
 
-        return response()->json(['status' => true, 'message' => 'Đã gán bác sĩ thành công']);
+        return response()->json(['status' => true, 'message' => 'Đã gán nhân viên thành công']);
     }
 
 
@@ -156,16 +178,22 @@ class LichHenPetController extends Controller
             'id_kh' => $request->id_kh,
             'id_dv' => $request->id_dv,
             'id_pet' => $request->id_pet,
-            'tinh_trang' => $request->tinh_trang,
+            'tinh_trang' => 0, // 0: Chờ điều trị (luôn đặt thành chờ điều trị)
             'ngay' => $request->ngay,
             'gio' => $request->gio,
             'tien_coc' => $tienCoc,
             'payment_id' => $request->payment_id ?? null,
         ]);
 
-        // Gán bác sĩ tự động sau khi tạo lịch hẹn
-        if (in_array($dichVu->id_loaidv, [1, 4])) {
-            $this->ganBacSiTuDong($lichHen->id);
+        // Gán nhân viên tự động sau khi tạo lịch hẹn - áp dụng cho mọi loại dịch vụ
+        $result = $this->ganBacSiTuDong($lichHen->id);
+        $nhanVienAssigned = null;
+        
+        // Nếu gán thành công, lấy thông tin nhân viên để gửi email
+        if ($result->original['status']) {
+            $nhanVienAssigned = DB::table('nhan_viens')
+                ->where('id', DB::table('lich_hen_pets')->where('id', $lichHen->id)->value('id_nv'))
+                ->first();
         }
 
         // Lấy thông tin khách hàng và thú cưng để gửi email
@@ -173,8 +201,12 @@ class LichHenPetController extends Controller
             $khachHang = KhachHang::find($request->id_kh);
             $pet = Pet::find($request->id_pet);
 
-            // Chỉ gửi email nếu khách hàng có email và request có flag send_email và payment_method là PayPal
-            if ($khachHang && $khachHang->email && $request->has('send_email') && $request->send_email && $request->payment_method === 'paypal') {
+            // Chỉ gửi email nếu khách hàng có email và thanh toán thành công
+            if ($khachHang && $khachHang->email && 
+                ($request->has('send_email') && $request->send_email) || 
+                $request->payment_method === 'paypal' || 
+                $request->tinh_trang == 1) {
+                
                 // Chuẩn bị dữ liệu cho email
                 $emailData = [
                     'ten_khach_hang' => $khachHang->ho_va_ten,
@@ -188,6 +220,11 @@ class LichHenPetController extends Controller
                     'payment_id' => $request->payment_id ?? 'Không có',
                 ];
 
+                // Thêm thông tin nhân viên nếu có
+                if ($nhanVienAssigned) {
+                    $emailData['bac_si'] = $nhanVienAssigned->ten_nv;
+                }
+
                 // Thêm chi tiết thanh toán nếu có
                 if ($request->has('payment_details')) {
                     $emailData['payment_details'] = $request->payment_details;
@@ -198,9 +235,7 @@ class LichHenPetController extends Controller
             }
         } catch (\Exception $e) {
             // Log lỗi nhưng vẫn tiếp tục xử lý
-
         }
-
 
         return response()->json([
             'status' => 1,

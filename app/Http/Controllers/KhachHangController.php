@@ -133,7 +133,7 @@ class KhachHangController extends Controller
 
         if (!$user || !$user instanceof \App\Models\KhachHang) {
             return response()->json([
-                'status' => 0,
+                'status' => 1,
                 'message' => 'Bạn cần phải đăng nhập'
             ]);
         }        // Kiểm tra mật khẩu cũ

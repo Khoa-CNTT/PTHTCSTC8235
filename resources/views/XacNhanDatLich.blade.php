@@ -102,11 +102,11 @@
                 <h3>Thông tin lịch hẹn:</h3>
                 <ul>
                     <li><strong>Dịch vụ:</strong> {{ $lichHen['ten_dv'] }}</li>
-                    <li><strong>Ngày:</strong> {{ $lichHen['ngay'] }}</li>
+                    <li><strong>Ngày:</strong> {{ \Carbon\Carbon::parse($lichHen['ngay'])->format('d/m/Y') }}</li>
                     <li><strong>Giờ:</strong> {{ $lichHen['gio'] }}</li>
                     <li><strong>Thú cưng:</strong> {{ $lichHen['ten_pet'] }} (ID: {{ $lichHen['id_pet'] }})</li>
                     @if(isset($lichHen['bac_si']))
-                    <li><strong>Bác sĩ phụ trách:</strong> {{ $lichHen['bac_si'] }}</li>
+                    <li><strong>Nhân viên phụ trách:</strong> {{ $lichHen['bac_si'] }}</li>
                     @endif
                 </ul>
             </div>

@@ -203,7 +203,7 @@ class HoSoBenhAnController extends Controller
             DB::commit();
             return response()->json([
                 'status' => true,
-                'message' => 'Cập nhật hồ sơ bệnh án và tạo hóa đơn thành công'
+                'message' => 'Cập nhật hồ sơ bệnh án thành công'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

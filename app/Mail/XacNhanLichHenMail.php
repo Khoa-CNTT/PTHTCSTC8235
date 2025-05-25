@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 
 class XacNhanLichHenMail extends Mailable
 {
@@ -20,6 +21,12 @@ class XacNhanLichHenMail extends Mailable
      */
     public function __construct($data)
     {
+        // Định dạng ngày nếu có
+        if (isset($data['ngay'])) {
+            $data['ngay_goc'] = $data['ngay']; // Lưu lại giá trị gốc
+            // Không định dạng ở đây vì sẽ dùng Carbon trong view
+        }
+        
         $this->lichHen = $data;
     }
 

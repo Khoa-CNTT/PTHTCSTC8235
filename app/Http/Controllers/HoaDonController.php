@@ -21,7 +21,7 @@ class HoaDonController extends Controller
                 'hoa_dons.tinh_trang',
                 'hoa_dons.id_nv',
                 'ten_nv',
-                'khach_hangs.ho_va_ten',
+                DB::raw("CASE WHEN hoa_dons.id_kh = 0 THEN 'Khách lẻ' ELSE khach_hangs.ho_va_ten END as ho_va_ten")
             )
             ->groupBy(
                 'hoa_dons.id',
@@ -30,6 +30,7 @@ class HoaDonController extends Controller
                 'hoa_dons.tinh_trang',
                 'hoa_dons.id_nv',
                 'ten_nv',
+                'hoa_dons.id_kh',
                 'khach_hangs.ho_va_ten'
             )
             ->orderBy('hoa_dons.ngay_xuat_hoa_don', 'desc')
@@ -54,7 +55,7 @@ class HoaDonController extends Controller
                 'hoa_dons.ngay_xuat_hoa_don',
                 'hoa_dons.phuong_thuc',
                 'ten_nv',
-                'khach_hangs.ho_va_ten as ten_khach_hang',
+                DB::raw("CASE WHEN hoa_dons.id_kh = 0 THEN 'Khách lẻ' ELSE khach_hangs.ho_va_ten END as ten_khach_hang"),
                 'pets.ten_pet',
                 DB::raw('SUM(hoa_don_chi_tiets.tien_kham) as tong_kham')
             )
@@ -63,6 +64,7 @@ class HoaDonController extends Controller
                 'hoa_dons.ngay_xuat_hoa_don',
                 'hoa_dons.phuong_thuc',
                 'ten_nv',
+                'hoa_dons.id_kh',
                 'khach_hangs.ho_va_ten',
                 'pets.ten_pet'
             )
@@ -227,14 +229,18 @@ class HoaDonController extends Controller
         }
 
         // Set default value for medication if not found but needed
-        if ($tienDonThuoc == 0 && rand(0, 1) == 1) {
-            // Generate a random medication cost
-            $tienDonThuoc = rand(50000, 300000);
-        }
+        if ($tienDonThuoc == 0 && $idLichHen) {
+            $idDonThuoc = DB::table('ho_so_benh_ans')
+                ->where('id_lich_hen_pet', $idLichHen)
+                ->value('id_don_thuoc');
 
-        // Ensure examination fee is not zero
-        if ($tienKham == 0) {
-            $tienKham = rand(50000, 200000);
+            if ($idDonThuoc) {
+                $tienDonThuoc = DB::table('don_thuoc_chi_tiets as ct')
+                    ->join('thuocs as t', 'ct.id_thuoc', '=', 't.id')
+                    ->where('ct.id_don_thuoc', $idDonThuoc)
+                    ->selectRaw('SUM(ct.so_luong * t.gia_ban) as tong')
+                    ->value('tong') ?? 0;
+            }
         }
 
         return response()->json([
@@ -243,7 +249,7 @@ class HoaDonController extends Controller
                 'tien_don_thuoc'     => $tienDonThuoc,
                 'tien_dich_vu'       => $tienDichVu,
                 'tien_kham'          => $tienKham,
-                'tien_coc_dich_vu'   => $lichHenInfo->tien_coc ?? rand(30000, 100000),
+                'tien_coc_dich_vu' => $lichHenInfo->tien_coc ?? 0,
             ]
         ]);
     }
@@ -306,7 +312,7 @@ class HoaDonController extends Controller
         try {
             // Kiểm tra dữ liệu đầu vào
             $request->validate([
-                'id_kh' => 'required',
+                'id_kh' => 'nullable',
                 'tien_don_thuoc' => 'numeric|min:0',
                 'tien_dich_vu' => 'required|numeric|min:0',
                 'tien_kham' => 'numeric|min:0',

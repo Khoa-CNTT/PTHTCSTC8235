@@ -52,6 +52,10 @@ class DonThuocController extends Controller
                 $chi_tiet->lieu_luong = $item['lieu_luong'];
                 $chi_tiet->tinh_trang = '1';
                 $chi_tiet->save();
+
+                DB::table('thuoc_khos')
+                    ->where('id_thuoc', $item['id_thuoc'])
+                    ->decrement('so_luong_ton_kho', $item['so_luong']);
             }
 
             DB::commit();
@@ -118,6 +122,15 @@ class DonThuocController extends Controller
 
             $don_thuoc = DonThuoc::find($request->id);
             if ($don_thuoc) {
+                $chiTietThuocs = DonThuocChiTiet::where('id_don_thuoc', $don_thuoc->id)->get();
+
+                foreach ($chiTietThuocs as $ct) {
+                    DB::table('thuoc_khos')
+                        ->where('id_thuoc', $ct->id_thuoc)
+                        ->increment('so_luong_ton_kho', $ct->so_luong);
+                }
+
+                // Xoá chi tiết và đơn thuốc
                 DonThuocChiTiet::where('id_don_thuoc', $don_thuoc->id)->delete();
                 $don_thuoc->delete();
             }

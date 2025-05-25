@@ -328,7 +328,7 @@ class ChatbotController extends Controller
                 $navigationButtons = [
                     [
                         'text' => 'Xem chi tiết đội ngũ bác sĩ',
-                        'route' => '/client/xem-bs/0',
+                        'route' => '/client/xem-bs/1',
                         'icon' => '👨‍⚕️'
                     ],
                     [
@@ -354,7 +354,7 @@ class ChatbotController extends Controller
             'navigation_buttons' => [
                 [
                     'text' => 'Xem đội ngũ bác sĩ',
-                    'route' => '/client/xem-bs/0',
+                    'route' => '/client/xem-bs/1',
                     'icon' => '👨‍⚕️'
                 ]
             ]
@@ -2287,7 +2287,7 @@ class ChatbotController extends Controller
         // Tạo nút cho các dịch vụ tiêm chủng
         if (count($services['tiemChung']) > 0) {
             $serviceButtons[] = [
-                'text' => '💉 Dịch vụ tiêm chủng',
+                'text' => 'Dịch vụ tiêm chủng',
                 'type' => 'service_category',
                 'category' => 'tiemChung',
                 'icon' => '💉'
@@ -2309,7 +2309,7 @@ class ChatbotController extends Controller
         // Tạo nút cho các dịch vụ chăm sóc
         if (count($services['chamSoc']) > 0) {
             $serviceButtons[] = [
-                'text' => '✂️ Dịch vụ chăm sóc/Spa',
+                'text' => 'Dịch vụ chăm sóc/Spa',
                 'type' => 'service_category',
                 'category' => 'chamSoc',
                 'icon' => '✂️'
@@ -2331,7 +2331,7 @@ class ChatbotController extends Controller
         // Tạo nút cho các dịch vụ khám bệnh
         if (count($services['khamBenh']) > 0) {
             $serviceButtons[] = [
-                'text' => '🩺 Dịch vụ khám bệnh',
+                'text' => 'Dịch vụ khám bệnh',
                 'type' => 'service_category',
                 'category' => 'khamBenh',
                 'icon' => '🩺'
@@ -2518,7 +2518,7 @@ class ChatbotController extends Controller
             
             // Kiểm tra slot đã đầy chưa
             $bookedCount = \App\Models\LichHenPet::where('id_lich', $validatedData['time_slot_id'])
-                ->where('ngay', $timeSlot->ngay)
+                ->where('ngay', $validatedData['date'])
                 ->count();
                 
             if ($bookedCount >= 2) {
@@ -2529,9 +2529,9 @@ class ChatbotController extends Controller
             }
             
             // Kiểm tra nếu là ngày hôm nay, không cho phép đặt lịch vào giờ đã qua
-            if ($timeSlot->ngay === date('Y-m-d')) {
+            if (date('Y-m-d') === $validatedData['date']) {
                 $timeString = explode(' - ', $timeSlot->khung_gio)[0];
-                $slotTime = strtotime($timeSlot->ngay . ' ' . $timeString);
+                $slotTime = strtotime($validatedData['date'] . ' ' . $timeString);
                 
                 if ($slotTime < time()) {
                     return response()->json([
@@ -2558,41 +2558,40 @@ class ChatbotController extends Controller
             // Tính tiền cọc (25% giá dịch vụ)
             $tienCoc = round($gia * 0.25);
             
-            // Kiểm tra thanh toán
             $paymentStatus = 0; // Chưa thanh toán
             $paymentMethod = $validatedData['payment_method'] ?? 'online';
             $paymentId = $validatedData['payment_id'] ?? null;
             $paymentDetails = $validatedData['payment_details'] ?? null;
             
-            // Nếu có thông tin thanh toán PayPal, đánh dấu là đã thanh toán
-            if ($paymentId && $paymentMethod === 'paypal') {
-                $paymentStatus = 1; // Đã thanh toán
-            }
             
             // Tạo lịch hẹn
             $booking = new \App\Models\LichHenPet([
-                'id_dich_vu' => $validatedData['service_id'],
+                'id_dv' => $validatedData['service_id'],
                 'id_kh' => $validatedData['user_id'],
-                'id_nhanvien' => $timeSlot->id_nhanvien,
                 'id_pet' => $validatedData['pet_id'],
                 'id_lich' => $validatedData['time_slot_id'],
-                'ngay' => $validatedData['date'],
-                'gio_bat_dau' => $timeSlot->gio_bat_dau,
-                'gio_ket_thuc' => $timeSlot->gio_ket_thuc,
-                'trang_thai' => $paymentStatus ? 2 : 1, // 2: Đã xác nhận (đã thanh toán), 1: Chờ xác nhận
-                'ghi_chu' => $validatedData['notes'] ?? '',
-                'is_deleted' => 0,
-                'gia' => $gia,
+                'ngay' => $validatedData['date'], // Use the date from the validated data
+                'gio' => $timeSlot->khung_gio,
+                'tinh_trang' => $paymentStatus?1:0, // 0: Chờ điều trị (luôn đặt thành chờ điều trị)
                 'tien_coc' => $tienCoc,
-                'payment_method' => $paymentMethod,
                 'payment_id' => $paymentId,
-                'payment_details' => $paymentDetails ? json_encode($paymentDetails) : null,
-                'payment_status' => $paymentStatus,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
             
             $booking->save();
+            
+            // Gán nhân viên tự động dựa vào loại dịch vụ
+            $lichHenPetController = new \App\Http\Controllers\LichHenPetController();
+            $staffAssignResult = $lichHenPetController->ganBacSiTuDong($booking->id);
+            
+            // Lấy thông tin nhân viên được gán (nếu có)
+            $nhanVienAssigned = null;
+            if ($staffAssignResult->original['status']) {
+                $nhanVienAssigned = \DB::table('nhan_viens')
+                    ->where('id', \DB::table('lich_hen_pets')->where('id', $booking->id)->value('id_nv'))
+                    ->first();
+            }
             
             // Lưu thông tin tương tác chatbot
             $interaction = new \App\Models\ChatbotInteraction([
@@ -2607,8 +2606,31 @@ class ChatbotController extends Controller
             // Gửi email xác nhận đặt lịch (nếu có)
             try {
                 if ($customer->email) {
-                    // Gửi email xác nhận đặt lịch
-                    \Mail::to($customer->email)->send(new \App\Mail\BookingConfirmation($booking, $customer, $pet, $service, $timeSlot));
+                    // Chuẩn bị dữ liệu cho email
+                    $emailData = [
+                        'ten_khach_hang' => $customer->ho_va_ten,
+                        'ten_dv' => $service->ten_dv,
+                        'gio' => $timeSlot->khung_gio,
+                        'ngay' => $validatedData['date'],
+                        'id_pet' => $pet->id,
+                        'ten_pet' => $pet->ten_pet,
+                        'gia' => $gia,
+                        'tien_coc' => $tienCoc,
+                        'payment_id' => $paymentId ?? 'Không có',
+                    ];
+                    
+                    // Thêm thông tin nhân viên nếu có
+                    if ($nhanVienAssigned) {
+                        $emailData['bac_si'] = $nhanVienAssigned->ten_nv;
+                    }
+                    
+                    // Thêm chi tiết thanh toán nếu có
+                    if ($paymentDetails) {
+                        $emailData['payment_details'] = $paymentDetails;
+                    }
+                    
+                    // Gửi email
+                    \Mail::to($customer->email)->send(new \App\Mail\XacNhanLichHenMail($emailData));
                 }
             } catch (\Exception $e) {
                 \Log::error('Lỗi gửi email xác nhận đặt lịch: ' . $e->getMessage());
@@ -2632,40 +2654,9 @@ class ChatbotController extends Controller
         } catch (\Exception $e) {
             \Log::error('Lỗi đặt lịch từ chatbot: ' . $e->getMessage());
             
-            // Nếu lỗi là do validation
-            if ($e instanceof \Illuminate\Validation\ValidationException) {
-                // Kiểm tra nếu thiếu pet_id
-                if (isset($e->errors()['pet_id'])) {
-                    // Lấy user_id từ request
-                    $userId = $request->input('user_id');
-                    if ($userId) {
-                        // Lấy danh sách thú cưng của khách hàng
-                        $pets = \App\Models\Pet::where('id_khach_hang', $userId)->get();
-                        
-                        if ($pets->isEmpty()) {
-                            return response()->json([
-                                'success' => false,
-                                'message' => 'Bạn chưa có thú cưng nào. Vui lòng thêm thú cưng trước khi đặt lịch.',
-                                'requires_pet' => true,
-                                'redirect_url' => '/client/quan-ly-pet',
-                                'data' => $request->all()
-                            ]);
-                        }
-                        
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Vui lòng chọn thú cưng cho cuộc hẹn',
-                            'requires_pet_selection' => true,
-                            'pets' => $pets,
-                            'data' => $request->all()
-                        ]);
-                    }
-                }
-            }
-            
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể đặt lịch: ' . $e->getMessage()
+                'message' => 'Có lỗi xảy ra khi đặt lịch: ' . $e->getMessage()
             ]);
         }
     }
@@ -2782,7 +2773,10 @@ class ChatbotController extends Controller
                 'user_id' => 'required',
                 'pet_id' => 'required|exists:pets,id',
                 'date' => 'required|date', // Require date parameter
-                'notes' => 'nullable|string'
+                'notes' => 'nullable|string',
+                'payment_id' => 'nullable|string', // ID thanh toán từ PayPal
+                'payment_method' => 'nullable|string', // Phương thức thanh toán
+                'payment_details' => 'nullable|array' // Chi tiết thanh toán
             ]);
             
             // Lấy thông tin khách hàng
@@ -2808,6 +2802,15 @@ class ChatbotController extends Controller
                 ]);
             }
             
+            // Lấy thông tin pet
+            $pet = \App\Models\Pet::find($validatedData['pet_id']);
+            if (!$pet) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin thú cưng'
+                ]);
+            }
+            
             // Kiểm tra xem slot đã đầy chưa
             $bookedCount = \App\Models\LichHenPet::where('id_lich', $validatedData['time_slot_id'])
                 ->where('ngay', $validatedData['date'])
@@ -2820,6 +2823,15 @@ class ChatbotController extends Controller
                 ]);
             }
             
+            $paymentStatus = 0;
+            $paymentMethod = $validatedData['payment_method'] ?? null;
+            $paymentId = $validatedData['payment_id'] ?? null;
+            $paymentDetails = $validatedData['payment_details'] ?? null;
+            
+            
+            // Tính tiền cọc (25% giá dịch vụ)
+            $tienCoc = round($service->gia * 0.25);
+            
             // Tạo lịch hẹn
             $booking = new \App\Models\LichHenPet([
                 'id_dv' => $validatedData['service_id'],
@@ -2828,11 +2840,58 @@ class ChatbotController extends Controller
                 'id_lich' => $validatedData['time_slot_id'],
                 'ngay' => $validatedData['date'], // Use the date from the validated data
                 'gio' => $timeSlot->khung_gio,
-                'tinh_trang' => 0, // Chờ xác nhận
-                'tien_coc' => $service->gia * 0.25 // 25% giá dịch vụ
+                'tinh_trang' => $paymentStatus, // 0: Chưa thanh toán, 1: Đã thanh toán
+                'tien_coc' => $tienCoc,
+                'payment_id' => $paymentId
             ]);
             
             $booking->save();
+            
+            // Gán nhân viên tự động dựa vào loại dịch vụ
+            $lichHenPetController = new \App\Http\Controllers\LichHenPetController();
+            $staffAssignResult = $lichHenPetController->ganBacSiTuDong($booking->id);
+            
+            // Lấy thông tin nhân viên được gán (nếu có)
+            $nhanVienAssigned = null;
+            if ($staffAssignResult->original['status']) {
+                $nhanVienAssigned = \DB::table('nhan_viens')
+                    ->where('id', \DB::table('lich_hen_pets')->where('id', $booking->id)->value('id_nv'))
+                    ->first();
+            }
+            
+            // Gửi email xác nhận đặt lịch (nếu có)
+            try {
+                if ($customer->email) {
+                    // Chuẩn bị dữ liệu cho email
+                    $emailData = [
+                        'ten_khach_hang' => $customer->ho_va_ten,
+                        'ten_dv' => $service->ten_dv,
+                        'gio' => $timeSlot->khung_gio,
+                        'ngay' => $validatedData['date'],
+                        'id_pet' => $pet->id,
+                        'ten_pet' => $pet->ten_pet,
+                        'gia' => $service->gia,
+                        'tien_coc' => $tienCoc,
+                        'payment_id' => $paymentId ?? 'Không có',
+                    ];
+                    
+                    // Thêm thông tin nhân viên nếu có
+                    if ($nhanVienAssigned) {
+                        $emailData['bac_si'] = $nhanVienAssigned->ten_nv;
+                    }
+                    
+                    // Thêm chi tiết thanh toán nếu có
+                    if ($paymentDetails) {
+                        $emailData['payment_details'] = $paymentDetails;
+                    }
+                    
+                    // Gửi email
+                    \Mail::to($customer->email)->send(new \App\Mail\XacNhanLichHenMail($emailData));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Lỗi gửi email xác nhận đặt lịch: ' . $e->getMessage());
+                // Không trả về lỗi nếu gửi email thất bại, vẫn xem như đặt lịch thành công
+            }
             
             return response()->json([
                 'success' => true,
